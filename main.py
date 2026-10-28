@@ -5,12 +5,14 @@ from core.handlers import ExcepcionesGlobales as eg
 from database.almacen import abrir_puerta_bd
 from backend.Empresas import router as routerempresas
 from backend.Categorias import router as routercategorias
+from backend.Productos import router as routerproductos
 
 app = FastAPI()
 
 
 app.include_router(routerempresas.router)
 app.include_router(routercategorias.router)
+app.include_router(routerproductos.router)
 
 @app.get("/salud")
 def salud(db: Session = Depends(abrir_puerta_bd)):

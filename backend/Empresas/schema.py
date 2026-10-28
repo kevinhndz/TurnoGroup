@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional
 
 
 
@@ -24,3 +25,10 @@ class NuevaEmpresaRespuesta (Revisar_Json_Nueva_Empresa):
        model_config = ConfigDict(from_attributes=True)
        
 
+class Revisar_Json_Editar_Empresa(BaseModel):
+
+   nombre : Optional[str] = Field(default=None, min_length= 4, max_length= 45)
+   tipo_negocio : Optional[str]= Field(default=None, min_length= 5, max_length=35)
+   codigo_pais : Optional[str]= Field(default=None, min_length=2, max_length= 5)
+   zona_horaria : Optional[str]= Field(default=None, min_length= 4, max_length= 45)
+   codigo_moneda: Optional[str] = Field(default=None, min_length=2, max_length= 5)

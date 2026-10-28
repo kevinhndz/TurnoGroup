@@ -14,11 +14,10 @@ class miclaseBase (DeclarativeBase):
 
 def abrir_puerta_bd():
 
+    db = llaves()
     try:
-        db = llaves()
         yield db
     finally:
         db.close()
-
 
 

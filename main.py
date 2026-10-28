@@ -1,11 +1,9 @@
 from fastapi import FastAPI, APIRouter
+from core.handlers import ExcepcionesGlobales as eg
+from backend.Empresas import router as routerempresas
 
 app = FastAPI()
 
-router = APIRouter()
 
-@router.get("/")
-def test ():
-    return {"Hello from: " : "FASTAPI"}
-
-app.include_router(router)
+app.include_router(routerempresas.router)
+eg.directorio(app) # Registra los manejadores de tus excepciones de dominio.

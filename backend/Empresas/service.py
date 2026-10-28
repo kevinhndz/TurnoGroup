@@ -39,6 +39,24 @@ class EmpresaService():
         "data": lista_empresas
       }
 
+    @staticmethod
+    def ver_empresa_actual_service(db: Session):
+      look_up = repo.buscar_empresa_actual(db)
+
+      if look_up is None:
+        raise RecursoNoEncontradoError("No hay una empresa de demostracion registrada")
+
+      return look_up
+
+    @staticmethod
+    def editar_empresa_actual_service(json: Revisar_Json_Editar_Empresa, db: Session):
+      look_up = repo.buscar_empresa_actual(db)
+
+      if look_up is None:
+        raise RecursoNoEncontradoError("No hay una empresa de demostracion registrada")
+
+      return EmpresaService.editar_empresa_service(json, look_up.id, db)
+
 
     @staticmethod
     def editar_empresa_service(json: Revisar_Json_Editar_Empresa, id: int, db: Session):

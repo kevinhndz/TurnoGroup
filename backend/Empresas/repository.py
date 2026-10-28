@@ -34,4 +34,8 @@ class EmpresaRepository():
     def buscar_empresa_por_id(db: Session, id: int) -> Empresas | None:
         return db.query(Empresas).filter(Empresas.id == id).first()
 
+    @staticmethod
+    def buscar_empresa_actual(db: Session) -> Empresas | None:
+        return db.query(Empresas).order_by(Empresas.id.asc()).first()
+
     

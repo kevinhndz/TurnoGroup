@@ -4,11 +4,13 @@ from sqlalchemy.orm import Session
 from core.handlers import ExcepcionesGlobales as eg
 from database.almacen import abrir_puerta_bd
 from backend.Empresas import router as routerempresas
+from backend.Categorias import router as routercategorias
 
 app = FastAPI()
 
 
 app.include_router(routerempresas.router)
+app.include_router(routercategorias.router)
 
 @app.get("/salud")
 def salud(db: Session = Depends(abrir_puerta_bd)):

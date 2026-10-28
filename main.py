@@ -1,9 +1,20 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 from core.handlers import ExcepcionesGlobales as eg
+from database.almacen import abrir_puerta_bd
 from backend.Empresas import router as routerempresas
+from backend.Categorias import router as routercategorias
 
 app = FastAPI()
 
 
 app.include_router(routerempresas.router)
-eg.directorio(app) # Registra los manejadores de tus excepciones de dominio.
+app.include_router(routercategorias.router)
+
+@app.get("/salud")
+def salud(db: Session = Depends(abrir_puerta_bd)):
+    db.execute(text("SELECT 1"))
+    return {"servicio": "disponible", "base_datos": "conectada"}
+
+eg.directorio(app)

@@ -13,6 +13,7 @@ from database.almacen import miclaseBase
 
 # 3. IMPORTAR MANUALMENTE Los MODELOS/TABLAS A MEDIDA QUE SE VAYA CREANDO CADA ENTIDAD
 from backend.Empresas.tabla import Empresas  # Registra la tabla en metadata.
+from backend.Categorias.tabla import Categorias
 
 #EJEMPLOS  FUTUROS:
 # from backend.empresas.model import Empresa

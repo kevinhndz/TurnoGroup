@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import OperationalError
 from core.exceptions import (
     RecursoNoEncontradoError, 
     RecursoDuplicadoError,
@@ -10,6 +11,13 @@ from core.exceptions import (
 
 
 class ExcepcionesGlobales:
+
+    @staticmethod
+    def base_datos_no_disponible(request: Request, exc: OperationalError):
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": "No se puede acceder a la base de datos"}
+        )
 
     @staticmethod
     def recurso_no_encontrado(request: Request, exc: RecursoNoEncontradoError):
@@ -43,7 +51,7 @@ class ExcepcionesGlobales:
 
     @classmethod
     def directorio(cls, app: FastAPI) -> None:
-      
+        app.add_exception_handler(OperationalError, cls.base_datos_no_disponible)
         app.add_exception_handler(RecursoNoEncontradoError, cls.recurso_no_encontrado)
         app.add_exception_handler(RecursoDuplicadoError, cls.recurso_duplicado)
         app.add_exception_handler(CredencialesInvalidasError, cls.credenciales_invalidas)

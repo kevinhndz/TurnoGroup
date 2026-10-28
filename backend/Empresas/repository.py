@@ -24,4 +24,11 @@ class EmpresaRepository():
             raise
         return nueva_empresa
 
+    @staticmethod
+    def listar_empresas(db: Session, pagina_actual: int, limite: int):
+        salto = (pagina_actual - 1) * limite
+        total = db.query(Empresas).count()
+        lista_empresas = db.query(Empresas).offset(salto).limit(limite).all()
+        return total, lista_empresas
+
     

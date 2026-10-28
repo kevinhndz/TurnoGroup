@@ -24,4 +24,18 @@ class EmpresaService():
         codigo_moneda=json.codigo_moneda
      )
      return repo.guardar_nueva_empresa(db, nueva_empresa)
+
+
+    @staticmethod
+    def listar_empresas_service(pagina_actual: int, limite: int, db: Session):
+      total, lista_empresas = repo.listar_empresas(db, pagina_actual, limite)
+      total_paginas = (total + limite - 1) // limite
+
+      return {
+        "total": total,
+        "pagina_actual": pagina_actual,
+        "limite": limite,
+        "total_paginas": total_paginas,
+        "data": lista_empresas
+      }
    

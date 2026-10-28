@@ -23,23 +23,24 @@ def crear_categoria(json: Revisar_Json_Nueva_Categoria, db: Session = Depends(ab
 
 @router.get("/", response_model=RespuestaPaginada[NuevaCategoriaRespuesta])
 def ver_categorias(
+    id_empresa: int = Query(..., gt=0),
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     db: Session = Depends(abrir_puerta_bd)
 ):
-    return service.listar_categorias_service(pagina_actual, limite, db)
+    return service.listar_categorias_service(id_empresa, pagina_actual, limite, db)
 
 
 @router.get("/{id}", response_model=NuevaCategoriaRespuesta)
-def ver_categoria(id: int, db: Session = Depends(abrir_puerta_bd)):
-    return service.ver_categoria_service(id, db)
+def ver_categoria(id: int, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
+    return service.ver_categoria_service(id, id_empresa, db)
 
 
 @router.patch("/{id}", response_model=NuevaCategoriaRespuesta)
-def editar_categoria(id: int, json: Revisar_Json_Editar_Categoria, db: Session = Depends(abrir_puerta_bd)):
-    return service.editar_categoria_service(json, id, db)
+def editar_categoria(id: int, json: Revisar_Json_Editar_Categoria, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
+    return service.editar_categoria_service(json, id, id_empresa, db)
 
 
 @router.post("/{id}/desactivar", response_model=NuevaCategoriaRespuesta)
-def desactivar_categoria(id: int, db: Session = Depends(abrir_puerta_bd)):
-    return service.desactivar_categoria_service(id, db)
+def desactivar_categoria(id: int, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
+    return service.desactivar_categoria_service(id, id_empresa, db)

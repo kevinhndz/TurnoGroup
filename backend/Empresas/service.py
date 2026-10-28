@@ -40,25 +40,6 @@ class EmpresaService():
       }
 
     @staticmethod
-    def ver_empresa_actual_service(db: Session):
-      look_up = repo.buscar_empresa_actual(db)
-
-      if look_up is None:
-        raise RecursoNoEncontradoError("No hay una empresa de demostracion registrada")
-
-      return look_up
-
-    @staticmethod
-    def editar_empresa_actual_service(json: Revisar_Json_Editar_Empresa, db: Session):
-      look_up = repo.buscar_empresa_actual(db)
-
-      if look_up is None:
-        raise RecursoNoEncontradoError("No hay una empresa de demostracion registrada")
-
-      return EmpresaService.editar_empresa_service(json, look_up.id, db)
-
-
-    @staticmethod
     def editar_empresa_service(json: Revisar_Json_Editar_Empresa, id: int, db: Session):
 
       look_up = repo.buscar_empresa_por_id(db, id)
@@ -66,21 +47,17 @@ class EmpresaService():
       if look_up is None:
         raise RecursoNoEncontradoError("No se encontro la empresa")
 
-      if json.nombre is not None and json.nombre != look_up.nombre:
-        empresa_existente = repo.buscar_empresa(db, json.nombre)
+      # Guarda en un diccionario solo los campos que llegaron en la peticion.
+      cambios = json.model_dump(exclude_unset=True, exclude_none=True)
+
+      if "nombre" in cambios and cambios["nombre"] != look_up.nombre:
+        empresa_existente = repo.buscar_empresa(db, cambios["nombre"])
         if empresa_existente is not None:
           raise RecursoDuplicadoError("Ya existe una empresa con ese nombre")
 
-      if json.nombre is not None:
-        look_up.nombre = json.nombre
-      if json.codigo_moneda is not None:
-        look_up.codigo_moneda = json.codigo_moneda
-      if json.codigo_pais is not None:
-        look_up.codigo_pais = json.codigo_pais
-      if json.tipo_negocio is not None:
-        look_up.tipo_negocio = json.tipo_negocio
-      if json.zona_horaria is not None:
-        look_up.zona_horaria = json.zona_horaria
+      # Recorre el diccionario y actualiza cada campo enviado.
+      for campo, valor in cambios.items():
+        setattr(look_up, campo, valor)
 
       db.commit()
       db.refresh(look_up)

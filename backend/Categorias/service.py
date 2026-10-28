@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from backend.Empresas.repository import EmpresaRepository as repo_empresa
 from backend.Categorias.repository import CategoriaRepository as repo
 from backend.Categorias.schema import Revisar_Json_Nueva_Categoria, Revisar_Json_Editar_Categoria
 from backend.Categorias.tabla import Categorias
@@ -10,32 +9,22 @@ class CategoriaService():
 
     @staticmethod
     def crear_categoria_service(json: Revisar_Json_Nueva_Categoria, db: Session):
-        empresa_actual = repo_empresa.buscar_empresa_actual(db)
-
-        if empresa_actual is None:
-            raise RecursoNoEncontradoError("No hay una empresa de demostracion registrada")
-
-        look_up = repo.buscar_categoria_por_nombre(db, empresa_actual.id, json.nombre)
+        look_up = repo.buscar_categoria_por_nombre(db, json.id_empresa, json.nombre)
 
         if look_up is not None:
             raise RecursoDuplicadoError("Ya existe una categoria activa con ese nombre")
 
         nueva_categoria = Categorias(
-            id_empresa=empresa_actual.id,
+            id_empresa=json.id_empresa,
             nombre=json.nombre,
             orden_presentacion=json.orden_presentacion
         )
         return repo.guardar_nueva_categoria(db, nueva_categoria)
 
     @staticmethod
-    def listar_categorias_service(pagina_actual: int, limite: int, db: Session):
-        empresa_actual = repo_empresa.buscar_empresa_actual(db)
-
-        if empresa_actual is None:
-            raise RecursoNoEncontradoError("No hay una empresa de demostracion registrada")
-
+    def listar_categorias_service(id_empresa: int, pagina_actual: int, limite: int, db: Session):
         total, lista_categorias = repo.listar_categorias(
-            db, empresa_actual.id, pagina_actual, limite
+            db, id_empresa, pagina_actual, limite
         )
         total_paginas = (total + limite - 1) // limite
 
@@ -48,13 +37,8 @@ class CategoriaService():
         }
 
     @staticmethod
-    def ver_categoria_service(id: int, db: Session):
-        empresa_actual = repo_empresa.buscar_empresa_actual(db)
-
-        if empresa_actual is None:
-            raise RecursoNoEncontradoError("No hay una empresa de demostracion registrada")
-
-        look_up = repo.buscar_categoria_por_id(db, id, empresa_actual.id)
+    def ver_categoria_service(id: int, id_empresa: int, db: Session):
+        look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
 
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro la categoria activa")
@@ -62,28 +46,37 @@ class CategoriaService():
         return look_up
 
     @staticmethod
-    def editar_categoria_service(json: Revisar_Json_Editar_Categoria, id: int, db: Session):
-        look_up = CategoriaService.ver_categoria_service(id, db)
+    def editar_categoria_service(json: Revisar_Json_Editar_Categoria, id: int, id_empresa: int, db: Session):
+        look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
 
-        if json.nombre is not None and json.nombre != look_up.nombre:
+        if look_up is None:
+            raise RecursoNoEncontradoError("No se encontro la categoria activa")
+
+        # Guarda en un diccionario solo los campos que llegaron en la peticion.
+        cambios = json.model_dump(exclude_unset=True, exclude_none=True)
+
+        if "nombre" in cambios and cambios["nombre"] != look_up.nombre:
             categoria_existente = repo.buscar_categoria_por_nombre(
-                db, look_up.id_empresa, json.nombre
+                db, look_up.id_empresa, cambios["nombre"]
             )
             if categoria_existente is not None:
                 raise RecursoDuplicadoError("Ya existe una categoria activa con ese nombre")
 
-        if json.nombre is not None:
-            look_up.nombre = json.nombre
-        if json.orden_presentacion is not None:
-            look_up.orden_presentacion = json.orden_presentacion
+        # Recorre el diccionario y actualiza cada campo enviado.
+        for campo, valor in cambios.items():
+            setattr(look_up, campo, valor)
 
         db.commit()
         db.refresh(look_up)
         return look_up
 
     @staticmethod
-    def desactivar_categoria_service(id: int, db: Session):
-        look_up = CategoriaService.ver_categoria_service(id, db)
+    def desactivar_categoria_service(id: int, id_empresa: int, db: Session):
+        look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
+
+        if look_up is None:
+            raise RecursoNoEncontradoError("No se encontro la categoria activa")
+
         look_up.activo = False
         db.commit()
         db.refresh(look_up)

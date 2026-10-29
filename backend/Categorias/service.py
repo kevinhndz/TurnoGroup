@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from backend.Categorias.repository import CategoriaRepository as repo
 from backend.Categorias.schema import Revisar_Json_Nueva_Categoria, Revisar_Json_Editar_Categoria
 from backend.Categorias.tabla import Categorias
+from backend.Empresas.repository import EmpresaRepository as repo_empresa
 from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 
 
@@ -9,6 +10,10 @@ class CategoriaService():
 
     @staticmethod
     def crear_categoria_service(json: Revisar_Json_Nueva_Categoria, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, json.id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         look_up = repo.buscar_categoria_por_nombre(db, json.id_empresa, json.nombre)
 
         if look_up is not None:
@@ -23,6 +28,10 @@ class CategoriaService():
 
     @staticmethod
     def listar_categorias_service(id_empresa: int, pagina_actual: int, limite: int, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         total, lista_categorias = repo.listar_categorias(
             db, id_empresa, pagina_actual, limite
         )
@@ -38,6 +47,10 @@ class CategoriaService():
 
     @staticmethod
     def ver_categoria_service(id: int, id_empresa: int, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
 
         if look_up is None:
@@ -47,6 +60,10 @@ class CategoriaService():
 
     @staticmethod
     def editar_categoria_service(json: Revisar_Json_Editar_Categoria, id: int, id_empresa: int, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
 
         if look_up is None:
@@ -72,6 +89,10 @@ class CategoriaService():
 
     @staticmethod
     def desactivar_categoria_service(id: int, id_empresa: int, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
 
         if look_up is None:

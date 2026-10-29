@@ -1,0 +1,50 @@
+from typing import Annotated
+from fastapi import APIRouter, Depends, Path, Query
+from sqlalchemy.orm import Session
+from database.almacen import abrir_puerta_bd
+from backend.Usuarios.schema import (
+    NuevoUsuarioRespuesta,
+    Revisar_Json_Editar_Usuario,
+    Revisar_Json_Nuevo_Usuario,
+)
+from backend.Usuarios.service import UsuarioService as service
+from core.schema import RespuestaPaginada
+
+
+router = APIRouter(
+    prefix="/usuarios",
+    tags=["Usuarios"]
+)
+
+
+@router.post("/", response_model=NuevoUsuarioRespuesta, status_code=201)
+def crear_usuario(json: Revisar_Json_Nuevo_Usuario, db: Session = Depends(abrir_puerta_bd)):
+    return service.crear_usuario_service(json, db)
+
+
+@router.get("/", response_model=RespuestaPaginada[NuevoUsuarioRespuesta])
+def ver_usuarios(
+    pagina_actual: int = Query(1, ge=1),
+    limite: int = Query(10, ge=1, le=100),
+    db: Session = Depends(abrir_puerta_bd)
+):
+    return service.listar_usuarios_service(pagina_actual, limite, db)
+
+
+@router.get("/{id}", response_model=NuevoUsuarioRespuesta)
+def ver_usuario(id: Annotated[int, Path(gt=0)], db: Session = Depends(abrir_puerta_bd)):
+    return service.ver_usuario_service(id, db)
+
+
+@router.patch("/{id}", response_model=NuevoUsuarioRespuesta)
+def editar_usuario(
+    id: Annotated[int, Path(gt=0)],
+    json: Revisar_Json_Editar_Usuario,
+    db: Session = Depends(abrir_puerta_bd)
+):
+    return service.editar_usuario_service(json, id, db)
+
+
+@router.post("/{id}/desactivar", response_model=NuevoUsuarioRespuesta)
+def desactivar_usuario(id: Annotated[int, Path(gt=0)], db: Session = Depends(abrir_puerta_bd)):
+    return service.desactivar_usuario_service(id, db)

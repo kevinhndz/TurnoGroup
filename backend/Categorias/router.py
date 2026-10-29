@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
+from typing import Annotated
 from database.almacen import abrir_puerta_bd
 from backend.Categorias.schema import (
     NuevaCategoriaRespuesta,
@@ -32,15 +33,15 @@ def ver_categorias(
 
 
 @router.get("/{id}", response_model=NuevaCategoriaRespuesta)
-def ver_categoria(id: int, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
+def ver_categoria(id: Annotated[int, Path(gt=0)], id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
     return service.ver_categoria_service(id, id_empresa, db)
 
 
 @router.patch("/{id}", response_model=NuevaCategoriaRespuesta)
-def editar_categoria(id: int, json: Revisar_Json_Editar_Categoria, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
+def editar_categoria(id: Annotated[int, Path(gt=0)], json: Revisar_Json_Editar_Categoria, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
     return service.editar_categoria_service(json, id, id_empresa, db)
 
 
 @router.post("/{id}/desactivar", response_model=NuevaCategoriaRespuesta)
-def desactivar_categoria(id: int, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
+def desactivar_categoria(id: Annotated[int, Path(gt=0)], id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
     return service.desactivar_categoria_service(id, id_empresa, db)

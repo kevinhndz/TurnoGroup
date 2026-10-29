@@ -23,6 +23,10 @@ def ver_empresas(
 ):
     return service.listar_empresas_service(pagina_actual, limite, db)
 
+@router.get("/{id}", response_model=NuevaEmpresaRespuesta)
+def ver_empresa(id: int, db: Session = Depends(abrir_puerta_bd)):
+    return service.ver_empresa_service(id, db)
+
 @router.patch("/{id}", response_model=NuevaEmpresaRespuesta)
 def editar_empresa(id: int, json: Revisar_Json_Editar_Empresa, db: Session = Depends(abrir_puerta_bd)):
     return service.editar_empresa_service(json, id, db)

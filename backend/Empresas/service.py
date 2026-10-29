@@ -1,7 +1,5 @@
-from fastapi import Depends
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
-from backend.Empresas.schema import Revisar_Json_Nueva_Empresa, NuevaEmpresaRespuesta, Revisar_Json_Editar_Empresa
+from backend.Empresas.schema import Revisar_Json_Nueva_Empresa, Revisar_Json_Editar_Empresa
 from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 from backend.Empresas.repository import EmpresaRepository as repo
 from backend.Empresas.tabla import Empresas
@@ -38,6 +36,15 @@ class EmpresaService():
         "total_paginas": total_paginas,
         "data": lista_empresas
       }
+
+    @staticmethod
+    def ver_empresa_service(id: int, db: Session):
+      look_up = repo.buscar_empresa_por_id(db, id)
+
+      if look_up is None:
+        raise RecursoNoEncontradoError("No se encontro la empresa")
+
+      return look_up
 
     @staticmethod
     def editar_empresa_service(json: Revisar_Json_Editar_Empresa, id: int, db: Session):

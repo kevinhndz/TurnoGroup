@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
+from typing import Annotated
 from database.almacen import abrir_puerta_bd
 from backend.Productos.schema import (
     NuevoProductoRespuesta,
@@ -26,13 +27,13 @@ def ver_productos(id_empresa: int = Query(..., gt=0), db: Session = Depends(abri
 
 
 @router.get("/{id}", response_model=NuevoProductoRespuesta)
-def ver_producto(id: int, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
+def ver_producto(id: Annotated[int, Path(gt=0)], id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
     return service.ver_producto_service(id, id_empresa, db)
 
 
 @router.patch("/{id}", response_model=NuevoProductoRespuesta)
 def editar_producto(
-    id: int,
+    id: Annotated[int, Path(gt=0)],
     json: Revisar_Json_Editar_Producto,
     id_empresa: int = Query(..., gt=0),
     db: Session = Depends(abrir_puerta_bd)
@@ -41,5 +42,5 @@ def editar_producto(
 
 
 @router.post("/{id}/desactivar", response_model=NuevoProductoRespuesta)
-def desactivar_producto(id: int, id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
+def desactivar_producto(id: Annotated[int, Path(gt=0)], id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
     return service.desactivar_producto_service(id, id_empresa, db)

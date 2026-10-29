@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from backend.Categorias.repository import CategoriaRepository as repo_categoria
+from backend.Empresas.repository import EmpresaRepository as repo_empresa
 from backend.Productos.repository import ProductoRepository as repo
 from backend.Productos.schema import Revisar_Json_Nuevo_Producto, Revisar_Json_Editar_Producto
 from backend.Productos.tabla import Productos
@@ -10,6 +11,10 @@ class ProductoService():
 
     @staticmethod
     def crear_producto_service(json: Revisar_Json_Nuevo_Producto, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, json.id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         if json.id_categoria is not None:
             categoria = repo_categoria.buscar_categoria_por_id(
                 db, json.id_categoria, json.id_empresa
@@ -28,10 +33,18 @@ class ProductoService():
 
     @staticmethod
     def listar_productos_service(id_empresa: int, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         return repo.listar_productos(db, id_empresa)
 
     @staticmethod
     def ver_producto_service(id: int, id_empresa: int, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         look_up = repo.buscar_producto_por_id(db, id, id_empresa)
 
         if look_up is None:
@@ -41,6 +54,10 @@ class ProductoService():
 
     @staticmethod
     def editar_producto_service(json: Revisar_Json_Editar_Producto, id: int, id_empresa: int, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         look_up = repo.buscar_producto_por_id(db, id, id_empresa)
 
         if look_up is None:
@@ -68,6 +85,10 @@ class ProductoService():
 
     @staticmethod
     def desactivar_producto_service(id: int, id_empresa: int, db: Session):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        if empresa is None:
+            raise RecursoNoEncontradoError("No se encontro la empresa")
+
         look_up = repo.buscar_producto_por_id(db, id, id_empresa)
 
         if look_up is None:

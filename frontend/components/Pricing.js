@@ -1,4 +1,5 @@
 import Icon from './Icon';
+import PlanCalculator from './PlanCalculator';
 import ActionButton from './ActionButton';
 
 const included = [
@@ -98,6 +99,7 @@ export default function Pricing() {
             </a>
           </article>
         </div>
+        <PlanCalculator />
         <p className="pricing-transparency">
           Puedes añadir o pausar sucursales según las necesidades de tu negocio.
           <br />

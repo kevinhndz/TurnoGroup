@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -d frontend ]; then
-    echo "Encontre la carpeta frontend"
+    echo "Compilando..."
     cd frontend
     npm run dev
 else

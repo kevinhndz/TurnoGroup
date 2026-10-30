@@ -17,6 +17,7 @@ from backend.Categorias.tabla import Categorias
 from backend.Productos.tabla import Productos
 from backend.Usuarios.tabla import Usuarios
 from backend.Sucursales.tabla import Sucursales
+from backend.VinculosLaborales.tabla import VinculosLaborales, AsignacionesSucursales
 
 #EJEMPLOS  FUTUROS:
 # from backend.empresas.model import Empresa

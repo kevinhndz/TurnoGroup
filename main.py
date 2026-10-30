@@ -9,6 +9,7 @@ from backend.Productos import router as routerproductos
 from backend.Usuarios import router as routerusuarios
 from backend.Sucursales import router as routersucursales
 from backend.VinculosLaborales import router as routervinculoslaborales
+from backend.Mesas import router as routermesas
 
 app = FastAPI()
 
@@ -19,6 +20,7 @@ app.include_router(routerproductos.router)
 app.include_router(routerusuarios.router)
 app.include_router(routersucursales.router)
 app.include_router(routervinculoslaborales.router)
+app.include_router(routermesas.router)
 
 @app.get("/salud")
 def salud(db: Session = Depends(abrir_puerta_bd)):

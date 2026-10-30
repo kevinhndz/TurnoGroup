@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from database.almacen import abrir_puerta_bd
-from backend.Sucursales.schema import Revisar_Json_Crear_Sucursal, RespuestaSucursalCreada
+from backend.Sucursales.schema import (
+    Revisar_Json_Crear_Sucursal,
+    Revisar_Json_Editar_Sucursal,
+    RespuestaSucursalCreada,
+    RespuestaSucursalEditada,
+)
 from backend.Sucursales.service import SucursalService as service
 from core.schema import RespuestaPaginada
 
@@ -35,3 +40,22 @@ def ver_sucursal(
     db: Session = Depends(abrir_puerta_bd)
 ):
     return service.ver_sucursal_service(id, id_empresa, db)
+
+
+@router.patch("/{id}", response_model=RespuestaSucursalEditada)
+def editar_sucursal(
+    id: int,
+    json: Revisar_Json_Editar_Sucursal,
+    id_empresa: int = Query(..., gt=0),
+    db: Session = Depends(abrir_puerta_bd)
+):
+    return service.editar_sucursal_service(json, id, id_empresa, db)
+
+
+@router.post("/{id}/desactivar", response_model=RespuestaSucursalEditada)
+def desactivar_sucursal(
+    id: int,
+    id_empresa: int = Query(..., gt=0),
+    db: Session = Depends(abrir_puerta_bd)
+):
+    return service.desactivar_sucursal_service(id, id_empresa, db)

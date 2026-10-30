@@ -12,7 +12,12 @@ const links = [
 export default function Header() {
   const [open, setOpen] = useState(false);
   return (
-    <header className="site-header">
+    <header
+      className="site-header"
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') setOpen(false);
+      }}
+    >
       <div className="container header-inner">
         <a className="brand" href="#inicio" aria-label="Turno Group, inicio">
           Turno Group

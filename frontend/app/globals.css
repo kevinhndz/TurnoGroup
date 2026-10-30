@@ -1682,3 +1682,51 @@ svg {
     font-size: 32px;
   }
 }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--clay);
+  outline-offset: 5px;
+}
+.number-stepper input:focus-visible {
+  outline-offset: -3px;
+}
+main:focus {
+  outline: none;
+}
+.skip-link {
+  position: fixed;
+  left: 20px;
+  top: 12px;
+  z-index: 100;
+  padding: 12px 20px;
+  border-radius: 4px;
+  background: var(--clay);
+  color: #fff;
+  transform: translateY(-150%);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+.mobile-nav {
+  display: none;
+}
+@media (max-width: 800px) {
+  .mobile-nav {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *:before,
+  *:after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .button:hover {
+    transform: none;
+  }
+}

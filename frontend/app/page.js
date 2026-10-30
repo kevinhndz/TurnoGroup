@@ -8,7 +8,8 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main id="inicio">
+      <div id="inicio" />
+      <main id="contenido" tabIndex={-1}>
         <Hero />
         <Features />
         <Pricing />

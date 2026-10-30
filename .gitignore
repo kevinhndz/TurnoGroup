@@ -5,3 +5,9 @@ venv/
 __pycache__/
 
 explication.md
+
+# Archivos generados del frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*

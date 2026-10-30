@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [ -d frontend ]; then
     echo "Compilando..."
     cd frontend

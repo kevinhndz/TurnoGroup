@@ -76,12 +76,13 @@ class VinculoLaboralService():
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro el vinculo laboral")
 
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal)
+        sucursal = repo_sucursal.buscar_sucursal_por_id(
+            db, id_sucursal, look_up.id_empresa
+        )
         if sucursal is None:
-            raise RecursoNoEncontradoError("No se encontro la sucursal")
-
-        if sucursal.id_empresa != look_up.id_empresa:
-            raise RecursoNoEncontradoError("La sucursal no pertenece a la empresa del vinculo")
+            raise RecursoNoEncontradoError(
+                "La sucursal no existe o no pertenece a la empresa del vinculo"
+            )
 
         asignacion_existente = repo.buscar_asignacion_sucursal(db, look_up.id, id_sucursal)
         if asignacion_existente is not None:

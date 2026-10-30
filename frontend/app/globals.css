@@ -1,13 +1,13 @@
 @font-face {
   font-family: Newsreader;
-  src: url('/fonts/newsreader.woff2') format('woff2');
+  src: url('/fonts/newsreader.ttf') format('truetype');
   font-weight: 400 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: Jakarta;
-  src: url('/fonts/jakarta.woff2') format('woff2');
+  src: url('/fonts/jakarta.ttf') format('truetype');
   font-weight: 400 700;
   font-style: normal;
   font-display: swap;
@@ -1174,4 +1174,511 @@ svg {
   color: var(--clay);
   max-width: 120px;
   margin-top: 5px;
+}
+@media (min-width: 1600px) {
+  .container {
+    width: min(1280px, calc(100% - 120px));
+  }
+  .hero-grid {
+    gap: 90px;
+  }
+  .hero {
+    padding-top: 94px;
+  }
+  .hero-photo img {
+    height: 390px;
+  }
+}
+@media (max-width: 1100px) {
+  .brand-description {
+    display: none;
+  }
+  .hero-grid {
+    gap: 42px;
+  }
+  .hero h1 {
+    font-size: 48px;
+  }
+  .hero-photo img {
+    height: 330px;
+  }
+  .hero-actions {
+    gap: 9px;
+  }
+  .hero-actions .button {
+    padding-inline: 16px;
+    font-size: 11px;
+  }
+  .ticket {
+    left: -20px;
+    width: 275px;
+  }
+  .feature-main {
+    gap: 20px;
+  }
+  .feature-card {
+    padding: 24px;
+  }
+  .feature-main h3 {
+    font-size: 26px;
+  }
+  .plan-calculator {
+    gap: 20px;
+  }
+  .calculator-controls {
+    gap: 15px;
+  }
+  .calculator-heading h3 {
+    font-size: 20px;
+  }
+  .closing-card {
+    padding: 48px;
+    gap: 40px;
+  }
+  .footer-links {
+    gap: 40px;
+  }
+}
+@media (max-width: 800px) {
+  .container {
+    width: calc(100% - 40px);
+  }
+  .section {
+    padding-block: 64px;
+  }
+  .header-inner {
+    height: 68px;
+    gap: 14px;
+  }
+  .brand {
+    font-size: 24px;
+  }
+  .desktop-nav,
+  .header-actions {
+    display: none;
+  }
+  .menu-toggle {
+    display: flex;
+    margin-left: auto;
+  }
+  .hero {
+    padding-top: 44px;
+  }
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 7.5vw, 58px);
+    max-width: 600px;
+  }
+  .hero-copy > p {
+    max-width: 520px;
+  }
+  .hero-visual {
+    max-width: 560px;
+    margin: 0 auto;
+    width: 100%;
+    padding-bottom: 130px;
+    padding-top: 0;
+  }
+  .hero-photo img {
+    height: 350px;
+  }
+  .ticket {
+    left: 20px;
+    bottom: 40px;
+    width: 300px;
+  }
+  .hero-annotation {
+    bottom: 3px;
+  }
+  .hero-bottom {
+    margin-top: 22px;
+    flex-direction: column;
+    gap: 10px;
+    padding-block: 22px;
+  }
+  .features-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .feature-main {
+    grid-column: span 2;
+  }
+  .feature-import {
+    grid-column: span 1;
+    display: block;
+  }
+  .import-file {
+    margin-top: 22px;
+    max-width: none;
+    padding: 14px;
+  }
+  .import-file .file-extension {
+    display: none;
+  }
+  .feature-card {
+    padding: 26px;
+  }
+  .feature-card h3 {
+    font-size: 25px;
+  }
+  .pricing-grid {
+    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .price-card {
+    padding: 26px;
+  }
+  .plan-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .finance-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .finance-title h3 {
+    font-size: 24px;
+  }
+  .finance-price > span {
+    font-size: 44px;
+  }
+  .price > span {
+    font-size: 52px;
+  }
+  .price {
+    gap: 9px;
+  }
+  .price > div {
+    font-size: 8px;
+  }
+  .plan-list li {
+    font-size: 11px;
+  }
+  .plan-button {
+    padding-inline: 12px;
+    font-size: 11px;
+  }
+  .plan-calculator {
+    flex-wrap: wrap;
+    gap: 24px;
+    padding: 24px;
+  }
+  .calculator-heading {
+    flex-basis: 100%;
+  }
+  .calculator-controls {
+    flex: 1;
+    gap: 30px;
+  }
+  .calculator-total {
+    min-width: 110px;
+  }
+  .closing-card {
+    padding: 36px;
+    grid-template-columns: 1fr 0.5fr;
+    gap: 30px;
+  }
+  .closing-circle {
+    height: 120px;
+    width: 120px;
+  }
+  .closing-circle svg {
+    width: 55px;
+    height: 55px;
+  }
+  .closing-small-note {
+    top: 98px;
+    right: -10px;
+    white-space: nowrap;
+  }
+  .closing-illustration {
+    font-size: 17px;
+  }
+  .closing-note {
+    line-height: 1.9;
+  }
+  .site-footer {
+    padding-top: 40px;
+  }
+  .footer-top {
+    gap: 35px;
+  }
+  .footer-links {
+    gap: 30px;
+  }
+  .footer-brand > p {
+    max-width: 230px;
+  }
+}
+@media (max-width: 540px) {
+  .container {
+    width: calc(100% - 36px);
+  }
+  h2 {
+    font-size: 36px;
+  }
+  .hero {
+    padding-top: 32px;
+  }
+  .hero h1 {
+    font-size: 43px;
+    line-height: 1.08;
+    margin-top: 20px;
+  }
+  .hero-copy > p {
+    font-size: 12px;
+  }
+  .hero .pill {
+    font-size: 7px;
+    padding: 6px 10px;
+  }
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 25px;
+  }
+  .hero-actions .button {
+    padding-block: 15px;
+    font-size: 12px;
+  }
+  .hero-note {
+    font-size: 9px;
+  }
+  .hero-grid {
+    gap: 32px;
+  }
+  .hero-visual {
+    padding-bottom: 140px;
+  }
+  .hero-photo img {
+    height: 280px;
+  }
+  .photo-caption {
+    font-size: 7px;
+    left: 13px;
+    right: 13px;
+    bottom: 14px;
+  }
+  .ticket {
+    width: 275px;
+    left: 12px;
+    bottom: 37px;
+    padding: 16px;
+  }
+  .hero-annotation {
+    font-size: 13px;
+  }
+  .hero-bottom > span {
+    font-size: 7px;
+  }
+  .hero-bottom > div {
+    gap: 7px;
+    font-size: 9px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .separator-dot {
+    margin: 0 3px;
+  }
+  .hero-bottom svg {
+    width: 13px;
+    height: 13px;
+  }
+  .section {
+    padding-block: 54px;
+  }
+  .section-intro h2 {
+    font-size: 36px;
+  }
+  .section-intro p {
+    font-size: 12px;
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .feature-main {
+    grid-column: auto;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .feature-main .feature-description {
+    max-width: none;
+  }
+  .feature-icon {
+    margin-bottom: 17px;
+  }
+  .feature-card {
+    padding: 25px;
+  }
+  .feature-card h3 {
+    font-size: 27px;
+  }
+  .feature-description {
+    font-size: 12px;
+    max-width: none;
+  }
+  .mini-orders {
+    transform: none;
+    max-width: none;
+  }
+  .feature-import {
+    grid-column: auto;
+  }
+  .import-file {
+    max-width: none;
+  }
+  .features-note {
+    font-size: 9px;
+    text-align: center;
+    align-items: flex-start;
+  }
+  .features-note .dot {
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .pricing-intro {
+    margin-bottom: 28px;
+  }
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .price-card {
+    padding: 28px;
+  }
+  .plan-heading {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .price > span {
+    font-size: 66px;
+  }
+  .price > div {
+    font-size: 10px;
+  }
+  .plan-list li {
+    font-size: 12px;
+  }
+  .plan-button {
+    font-size: 12px;
+    padding-block: 15px;
+  }
+  .finance-title {
+    flex-direction: row;
+    align-items: center;
+  }
+  .finance-title h3 {
+    font-size: 27px;
+  }
+  .finance-price > span {
+    font-size: 52px;
+  }
+  .plan-calculator {
+    padding: 24px;
+    margin-top: 20px;
+    gap: 22px;
+  }
+  .calculator-heading h3 {
+    font-size: 25px;
+  }
+  .calculator-controls {
+    width: 100%;
+    flex-basis: 100%;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .calculator-total {
+    padding: 18px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+  .calculator-total strong {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    font-size: 40px;
+    margin: 0;
+  }
+  .calculator-total > span {
+    font-size: 10px;
+  }
+  .finance-control {
+    font-size: 10px;
+  }
+  .calculator-heading .eyebrow {
+    font-size: 8px;
+  }
+  .calculator-heading > p:last-child {
+    font-size: 10px;
+  }
+  .pricing-transparency {
+    font-size: 9px;
+  }
+  .closing-section {
+    padding-block: 30px;
+  }
+  .closing-card {
+    padding: 32px 25px;
+    grid-template-columns: 1fr;
+    border-radius: 8px;
+  }
+  .closing-card h2 {
+    font-size: 37px;
+  }
+  .closing-card .eyebrow {
+    font-size: 7px;
+  }
+  .closing-card .button {
+    width: 100%;
+    font-size: 11px;
+    padding-inline: 14px;
+  }
+  .closing-illustration {
+    display: none;
+  }
+  .closing-note {
+    font-size: 8px;
+  }
+  .footer-top {
+    flex-direction: column;
+    gap: 30px;
+    padding-bottom: 30px;
+  }
+  .footer-brand > p {
+    max-width: 300px;
+  }
+  .footer-links {
+    justify-content: space-between;
+    gap: 25px;
+  }
+  .footer-links > div {
+    font-size: 11px;
+  }
+  .footer-link {
+    font-size: 11px;
+  }
+  .footer-links .eyebrow {
+    font-size: 7px;
+  }
+  .footer-bottom {
+    align-items: flex-start;
+    font-size: 8px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .access-dialog {
+    padding: 40px 25px 30px;
+  }
+  .access-dialog h2 {
+    font-size: 32px;
+  }
 }

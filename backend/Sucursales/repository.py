@@ -43,3 +43,7 @@ class SucursalRespository():
             Sucursales.id == id,
             Sucursales.id_empresa == id_empresa
         ).first()
+
+    @staticmethod
+    def buscar_sucursal_por_id_sin_empresa(db: Session, id: int) -> Sucursales | None:
+        return db.query(Sucursales).filter(Sucursales.id == id).first()

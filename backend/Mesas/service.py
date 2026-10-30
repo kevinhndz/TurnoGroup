@@ -10,7 +10,7 @@ class MesaService():
 
     @staticmethod
     def crear_mesa_service(json: Revisar_Json_Crear_Mesa, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, json.id_sucursal, json.id_sucursal)
+        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, json.id_sucursal)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
@@ -28,7 +28,7 @@ class MesaService():
 
     @staticmethod
     def listar_mesas_service(id_sucursal: int, pagina_actual: int, limite: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_sucursal)
+        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, id_sucursal)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
@@ -46,7 +46,7 @@ class MesaService():
 
     @staticmethod
     def ver_mesa_service(id: int, id_sucursal: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_sucursal)
+        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, id_sucursal)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
@@ -59,7 +59,7 @@ class MesaService():
 
     @staticmethod
     def editar_mesa_service(json: Revisar_Json_Editar_Mesa, id: int, id_sucursal: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_sucursal)
+        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, id_sucursal)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
@@ -86,7 +86,7 @@ class MesaService():
 
     @staticmethod
     def desactivar_mesa_service(id: int, id_sucursal: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_sucursal)
+        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, id_sucursal)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")

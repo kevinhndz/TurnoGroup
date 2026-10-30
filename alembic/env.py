@@ -19,6 +19,8 @@ from backend.Usuarios.tabla import Usuarios
 from backend.Sucursales.tabla import Sucursales
 from backend.VinculosLaborales.tabla import VinculosLaborales, AsignacionesSucursales
 from backend.Mesas.tabla import Mesas
+from backend.ConfiguracionImpuestos.tabla import ConfiguracionImpuestos
+from backend.Descuentos.tabla import Descuentos
 
 #EJEMPLOS  FUTUROS:
 # from backend.empresas.model import Empresa

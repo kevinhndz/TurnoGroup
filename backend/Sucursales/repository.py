@@ -25,3 +25,21 @@ class SucursalRespository():
         db.commit()
         db.refresh(nueva_sucursal)
         return nueva_sucursal
+
+    @staticmethod
+    def listar_sucursales(db: Session, id_empresa: int, pagina_actual: int, limite: int):
+        salto = (pagina_actual - 1) * limite
+        total = db.query(Sucursales).filter(
+            Sucursales.id_empresa == id_empresa
+        ).count()
+        lista_sucursales = db.query(Sucursales).filter(
+            Sucursales.id_empresa == id_empresa
+        ).offset(salto).limit(limite).all()
+        return total, lista_sucursales
+
+    @staticmethod
+    def buscar_sucursal_por_id(db: Session, id: int, id_empresa: int) -> Sucursales | None:
+        return db.query(Sucursales).filter(
+            Sucursales.id == id,
+            Sucursales.id_empresa == id_empresa
+        ).first()

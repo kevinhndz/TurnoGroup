@@ -1,4 +1,5 @@
 import Header from '../components/Header';
+import Hero from '../components/Hero';
 export default function Home() {
-  return <><Header /><main id="inicio"><h1 className="container">Turno Group</h1></main></>;
+  return <><Header /><main id="inicio"><Hero /></main></>;
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useId, useRef } from 'react';
+import Link from 'next/link';
 import Icon from './Icon';
 
 export default function ActionButton({
@@ -12,16 +13,6 @@ export default function ActionButton({
   const dialog = useRef(null);
   const titleId = useId();
   const content = {
-    acceso: {
-      title: 'Tu espacio de trabajo, muy pronto.',
-      description:
-        'El acceso a tu cuenta estará disponible próximamente. Por ahora puedes conocer cómo Turno Group organiza la operación de tu negocio.',
-    },
-    registro: {
-      title: 'Tu próximo turno empieza aquí.',
-      description:
-        'Estamos preparando el registro de empresas. Pronto podrás configurar tu negocio y comenzar tu primer mes de prueba gratis.',
-    },
     contacto: {
       title: 'Hablemos de tu negocio.',
       description:
@@ -29,15 +20,21 @@ export default function ActionButton({
     },
     terminos: {
       title: 'Términos de servicio.',
-      description:
-        'Los términos de servicio estarán disponibles antes de la apertura del registro de empresas.',
+      description: 'Los términos de servicio están pendientes de publicación.',
     },
     privacidad: {
       title: 'Política de privacidad.',
-      description:
-        'La política de privacidad estará disponible antes de la apertura del registro. Esta página no solicita ni guarda datos personales.',
+      description: 'La política de privacidad está pendiente de publicación.',
     },
   }[intent];
+  if (intent === 'acceso' || intent === 'registro') {
+    return (
+      <Link className={className} href={intent === 'acceso' ? '/login' : '/registro'}>
+        {children}
+        {arrow && <Icon name="arrow" size={17} />}
+      </Link>
+    );
+  }
   return (
     <>
       <button className={className} onClick={() => dialog.current.showModal()}>

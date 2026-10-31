@@ -1,4 +1,6 @@
 import './globals.css';
+import './sistema.css';
+import { ProveedorSesion } from '../components/sistema/Sesion';
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -38,12 +40,12 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
+    <html lang="es" data-scroll-behavior="smooth">
       <body>
         <a className="skip-link" href="#contenido">
           Saltar al contenido
         </a>
-        {children}
+        <ProveedorSesion>{children}</ProveedorSesion>
       </body>
     </html>
   );

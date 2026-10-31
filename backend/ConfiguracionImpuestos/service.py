@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from backend.ConfiguracionImpuestos.repository import ConfiguracionImpuestosRepository as repo
 from backend.ConfiguracionImpuestos.schema import (
@@ -73,6 +74,11 @@ class ConfiguracionImpuestosService():
             raise RecursoNoEncontradoError("No se encontro la configuracion de impuestos")
 
         cambios = json.model_dump(exclude_unset=True)
+        if not cambios:
+            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+        for campo, valor in cambios.items():
+            if valor is None and campo not in ('nombre',):
+                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
 
         for campo, valor in cambios.items():
             if valor is not None or campo == "nombre":

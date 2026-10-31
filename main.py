@@ -18,7 +18,15 @@ from backend.MetodosPago import router as routermetodospago
 from backend.ServiciosSucursales import router as routerserviciossucursales
 from backend.PagosSucursales import router as routerpagossucursales
 
-app = FastAPI()
+from backend.DisponibilidadProductos import router as routerdisponibilidadproductos
+
+from core.schema import RespuestaError
+
+app = FastAPI(responses={
+    404: {"model": RespuestaError, "description": "Registro no encontrado"},
+    409: {"model": RespuestaError, "description": "Registro duplicado"},
+    422: {"model": RespuestaError, "description": "Datos invalidos"},
+})
 
 
 app.include_router(routerempresas.router)
@@ -35,6 +43,8 @@ app.include_router(routertiposservicio.router)
 app.include_router(routermetodospago.router)
 app.include_router(routerserviciossucursales.router)
 app.include_router(routerpagossucursales.router)
+
+app.include_router(routerdisponibilidadproductos.router)
 
 @app.get("/salud")
 def salud(db: Session = Depends(abrir_puerta_bd)):

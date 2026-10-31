@@ -19,7 +19,7 @@ class UsuarioRepository():
     def listar_usuarios(db: Session, pagina_actual: int, limite: int):
         salto = (pagina_actual - 1) * limite
         total = db.query(Usuarios).count()
-        lista_usuarios = db.query(Usuarios).offset(salto).limit(limite).all()
+        lista_usuarios = db.query(Usuarios).order_by(Usuarios.id).offset(salto).limit(limite).all()
         return total, lista_usuarios
 
     @staticmethod

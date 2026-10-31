@@ -34,7 +34,7 @@ class SucursalRespository():
         ).count()
         lista_sucursales = db.query(Sucursales).filter(
             Sucursales.id_empresa == id_empresa
-        ).offset(salto).limit(limite).all()
+        ).order_by(Sucursales.id).offset(salto).limit(limite).all()
         return total, lista_sucursales
 
     @staticmethod

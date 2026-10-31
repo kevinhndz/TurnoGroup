@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy.orm import Session
+from typing import Annotated
 from database.almacen import abrir_puerta_bd
 from backend.Empresas.schema import Revisar_Json_Nueva_Empresa, NuevaEmpresaRespuesta, Revisar_Json_Editar_Empresa
 from backend.Empresas.service import EmpresaService as service
@@ -24,9 +25,14 @@ def ver_empresas(
     return service.listar_empresas_service(pagina_actual, limite, db)
 
 @router.get("/{id}", response_model=NuevaEmpresaRespuesta)
-def ver_empresa(id: int, db: Session = Depends(abrir_puerta_bd)):
+def ver_empresa(id: Annotated[int, Path(gt=0)], db: Session = Depends(abrir_puerta_bd)):
     return service.ver_empresa_service(id, db)
 
 @router.patch("/{id}", response_model=NuevaEmpresaRespuesta)
-def editar_empresa(id: int, json: Revisar_Json_Editar_Empresa, db: Session = Depends(abrir_puerta_bd)):
+def editar_empresa(id: Annotated[int, Path(gt=0)], json: Revisar_Json_Editar_Empresa, db: Session = Depends(abrir_puerta_bd)):
     return service.editar_empresa_service(json, id, db)
+
+
+@router.post("/{id}/desactivar", response_model=NuevaEmpresaRespuesta)
+def desactivar_empresa(id: Annotated[int, Path(gt=0)], db: Session = Depends(abrir_puerta_bd)):
+    return service.desactivar_empresa_service(id, db)

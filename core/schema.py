@@ -12,3 +12,7 @@ class RespuestaPaginada(BaseModel, Generic[Caja]):
     total_paginas: int
     
     data: List[Caja]
+
+class RespuestaError(BaseModel):
+    detail: str
+    errores: List[dict] | None = None

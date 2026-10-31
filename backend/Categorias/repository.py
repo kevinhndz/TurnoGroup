@@ -9,7 +9,6 @@ class CategoriaRepository():
         return db.query(Categorias).filter(
             Categorias.id_empresa == id_empresa,
             Categorias.nombre == nombre,
-            Categorias.activo.is_(True)
         ).first()
 
     @staticmethod
@@ -24,12 +23,10 @@ class CategoriaRepository():
         salto = (pagina_actual - 1) * limite
         total = db.query(Categorias).filter(
             Categorias.id_empresa == id_empresa,
-            Categorias.activo.is_(True)
         ).count()
         lista_categorias = db.query(Categorias).filter(
             Categorias.id_empresa == id_empresa,
-            Categorias.activo.is_(True)
-        ).offset(salto).limit(limite).all()
+        ).order_by(Categorias.id).offset(salto).limit(limite).all()
         return total, lista_categorias
 
     @staticmethod
@@ -37,5 +34,4 @@ class CategoriaRepository():
         return db.query(Categorias).filter(
             Categorias.id == id,
             Categorias.id_empresa == id_empresa,
-            Categorias.activo.is_(True)
         ).first()

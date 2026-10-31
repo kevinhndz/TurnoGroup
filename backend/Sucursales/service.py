@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from backend.Sucursales.repository import SucursalRespository as repo
 from backend.Sucursales.schema import Revisar_Json_Crear_Sucursal, Revisar_Json_Editar_Sucursal
@@ -82,15 +83,22 @@ class SucursalService():
             raise RecursoNoEncontradoError("No se encontro la sucursal")
 
         cambios = json.model_dump(exclude_unset=True)
+        if not cambios:
+            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+        for campo, valor in cambios.items():
+            if valor is None and campo not in ('telefono',):
+                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
 
         if "nombre" in cambios and cambios["nombre"] != look_up.nombre:
             sucursal_existente = repo.buscar_sucursal(db, id_empresa, cambios["nombre"])
             if sucursal_existente is not None:
                 raise RecursoDuplicadoError("Ya existe esta sucursal")
 
-        if cambios.get("es_principal") is True and look_up.es_principal is False:
+        es_principal = cambios.get("es_principal", look_up.es_principal)
+        activo = cambios.get("activo", look_up.activo)
+        if es_principal and activo:
             sucursal_principal = repo.buscar_sucursal_principal(db, id_empresa)
-            if sucursal_principal is not None:
+            if sucursal_principal is not None and sucursal_principal.id != look_up.id:
                 raise RecursoDuplicadoError("La empresa ya tiene una sucursal principal")
 
         for campo, valor in cambios.items():

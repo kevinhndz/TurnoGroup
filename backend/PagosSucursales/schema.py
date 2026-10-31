@@ -7,9 +7,13 @@ class Revisar_Json_Crear_Pago_Sucursal(BaseModel):
     id_metodo_pago: int = Field(gt=0)
     habilitado: bool = False
 
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
 
 class Revisar_Json_Editar_Pago_Sucursal(BaseModel):
     habilitado: Optional[bool] = None
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class RespuestaPagoSucursal(BaseModel):

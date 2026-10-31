@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from backend.PagosSucursales.repository import PagoSucursalRepository as repo
 from backend.PagosSucursales.schema import (
@@ -79,7 +80,12 @@ class PagoSucursalService():
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro la configuracion de esta sucursal")
 
-        cambios = json.model_dump(exclude_unset=True, exclude_none=True)
+        cambios = json.model_dump(exclude_unset=True)
+        if not cambios:
+            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+        for campo, valor in cambios.items():
+            if valor is None:
+                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
         opcion = repo_opcion.buscar_metodo_pago_por_id(db, id_metodo_pago)
         if opcion is None:
             raise RecursoNoEncontradoError("No se encontro la opcion del sistema")

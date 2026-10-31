@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from backend.Mesas.repository import MesaRepository as repo
 from backend.Mesas.schema import Revisar_Json_Crear_Mesa, Revisar_Json_Editar_Mesa
@@ -9,8 +10,8 @@ from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 class MesaService():
 
     @staticmethod
-    def crear_mesa_service(json: Revisar_Json_Crear_Mesa, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, json.id_sucursal)
+    def crear_mesa_service(json: Revisar_Json_Crear_Mesa, id_empresa: int, db: Session):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, json.id_sucursal, id_empresa)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
@@ -27,8 +28,8 @@ class MesaService():
         return repo.guardar_nueva_mesa(db, nueva_mesa)
 
     @staticmethod
-    def listar_mesas_service(id_sucursal: int, pagina_actual: int, limite: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, id_sucursal)
+    def listar_mesas_service(id_sucursal: int, pagina_actual: int, limite: int, id_empresa: int, db: Session):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
@@ -45,8 +46,8 @@ class MesaService():
         }
 
     @staticmethod
-    def ver_mesa_service(id: int, id_sucursal: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, id_sucursal)
+    def ver_mesa_service(id: int, id_sucursal: int, id_empresa: int, db: Session):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
@@ -58,8 +59,8 @@ class MesaService():
         return look_up
 
     @staticmethod
-    def editar_mesa_service(json: Revisar_Json_Editar_Mesa, id: int, id_sucursal: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, id_sucursal)
+    def editar_mesa_service(json: Revisar_Json_Editar_Mesa, id: int, id_sucursal: int, id_empresa: int, db: Session):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
@@ -68,7 +69,12 @@ class MesaService():
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro la mesa")
 
-        cambios = json.model_dump(exclude_unset=True, exclude_none=True)
+        cambios = json.model_dump(exclude_unset=True)
+        if not cambios:
+            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+        for campo, valor in cambios.items():
+            if valor is None and campo not in ('capacidad',):
+                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
 
         if "nombre" in cambios and cambios["nombre"] != look_up.nombre:
             mesa_existente = repo.buscar_mesa_por_nombre(
@@ -85,8 +91,8 @@ class MesaService():
         return look_up
 
     @staticmethod
-    def desactivar_mesa_service(id: int, id_sucursal: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id_sin_empresa(db, id_sucursal)
+    def desactivar_mesa_service(id: int, id_sucursal: int, id_empresa: int, db: Session):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")

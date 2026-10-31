@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Depends, Path, Query, HTTPException, Response
 from utils.autorizacion import obtener_sesion, revisar_solicitud_sesion
 from sqlalchemy.orm import Session
 from database.almacen import abrir_puerta_bd
@@ -10,6 +10,8 @@ from backend.Usuarios.schema import (
     Revisar_Json_Nuevo_Usuario,
 )
 from backend.Usuarios.service import UsuarioService as service
+from backend.Usuarios.schema import Revisar_Json_Registro_Negocio
+from backend.Sesiones.schema import RespuestaSesion
 from core.schema import RespuestaPaginada
 
 
@@ -67,3 +69,13 @@ def desactivar_usuario(
 def cambiar_rol_plataforma(id: Annotated[int, Path(gt=0)], json: Revisar_Json_Rol_Plataforma,
                            db: Session = Depends(abrir_puerta_bd)):
     return service.cambiar_rol_plataforma_service(json, id, db)
+
+
+@router.post("/registro-negocio", status_code=201, response_model=RespuestaSesion)
+def completar_registro_negocio(json: Revisar_Json_Registro_Negocio,
+                               response: Response,
+                               db: Session = Depends(abrir_puerta_bd)):
+    from backend.Sesiones.router import poner_cookie
+    respuesta, token, vencimiento = service.registrar_negocio_service(json, db)
+    poner_cookie(response, token, vencimiento)
+    return respuesta

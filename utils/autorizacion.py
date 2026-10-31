@@ -8,6 +8,33 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero", "Cajero")
 
 
 RUTAS_CON_PERMISO = {
+    ('GET', '/pedidos/catalogo'),
+    ('POST', '/invitaciones-laborales/registrar'),
+    ('POST', '/productos/importar'),
+    ('POST', '/productos/{id}/imagen'),
+    ('GET', '/productos/{id}/imagen'),
+    ('GET', '/pedidos/'),
+    ('POST', '/pedidos/'),
+    ('POST', '/pedidos/cotizar'),
+    ('GET', '/pedidos/{id}'),
+    ('PATCH', '/pedidos/{id}'),
+    ('POST', '/pedidos/{id}/cobrar'),
+    ('POST', '/pedidos/{id}/entregar'),
+    ('POST', '/pedidos/{id}/cancelar'),
+    ('GET', '/reservas/'),
+    ('POST', '/reservas/'),
+    ('GET', '/reservas/{id}'),
+    ('PATCH', '/reservas/{id}'),
+    ('POST', '/reservas/{id}/atender'),
+    ('POST', '/reservas/{id}/cancelar'),
+    ('GET', '/cajas/'),
+    ('POST', '/cajas/'),
+    ('GET', '/cajas/actual'),
+    ('POST', '/cajas/{id}/cerrar'),
+    ('GET', '/finanzas/ventas'),
+    ('GET', '/suscripciones/actual'),
+    ('PATCH', '/suscripciones/plan'),
+    ('POST', '/usuarios/registro-negocio'),
     ('DELETE', '/disponibilidad-productos/{id_producto}/{id_sucursal}'),
     ('DELETE', '/vinculos-laborales/{id}/sucursales/{id_sucursal}'),
     ('GET', '/categorias-gastos/'),
@@ -113,9 +140,10 @@ def revisar_solicitud_sesion(request: Request):
 
 
 def obtener_sesion(request: Request, db: Session = Depends(abrir_puerta_bd)):
-    sesion = SesionService.consultar_sesion_service(request.cookies.get("sesion_turnogroup"), db)
     revisar_solicitud_sesion(request)
-    return sesion
+    if not hasattr(request.state, "sesion_validada"):
+        request.state.sesion_validada = SesionService.consultar_sesion_service(request.cookies.get("sesion_turnogroup"), db)
+    return request.state.sesion_validada
 
 
 def obtener_contexto(request: Request, db: Session = Depends(abrir_puerta_bd)):
@@ -170,12 +198,12 @@ def autorizar_ruta(request: Request, db: Session = Depends(abrir_puerta_bd)):
     if ruta == "/salud" and metodo == "GET":
         return
     if (ruta, metodo) in {
-        ("/sesiones/iniciar", "POST"), ("/recuperaciones-clave/solicitar", "POST"),
+        ("/sesiones/iniciar", "POST"), ("/invitaciones-laborales/registrar", "POST"), ("/recuperaciones-clave/solicitar", "POST"),
         ("/recuperaciones-clave/restablecer", "POST")
     }:
         revisar_solicitud_sesion(request)
         return
-    if ruta == "/usuarios/" and metodo == "POST" and revision.ALTA_PUBLICA_HABILITADA:
+    if ruta == "/usuarios/registro-negocio" and metodo == "POST" and revision.ALTA_PUBLICA_HABILITADA:
         revisar_solicitud_sesion(request)
         return
 
@@ -215,7 +243,25 @@ def autorizar_ruta(request: Request, db: Session = Depends(abrir_puerta_bd)):
         raise HTTPException(404, "No se encontro el recurso")
 
     modulo = ruta.split("/")[1]
-    if modulo == "empresas":
+    if empresa is not None and modulo != "suscripciones":
+        from backend.Suscripciones.repository import SuscripcionRepository
+        from backend.Suscripciones.service import SuscripcionService
+        suscripcion = SuscripcionRepository.buscar_suscripcion(db, empresa)
+        if not SuscripcionService.vigente(suscripcion):
+            raise HTTPException(403, "La suscripcion no esta vigente. El gerente debe revisar la facturacion")
+
+    if modulo in ("pedidos", "reservas"):
+        obtener_sucursal(contexto)
+        if rol in ROLES_EMPRESA:
+            return
+    elif modulo == "cajas":
+        obtener_sucursal(contexto)
+        if rol == "Cajero" or (metodo == "GET" and rol == "Gerente"):
+            return
+    elif modulo in ("finanzas", "suscripciones"):
+        if rol == "Gerente":
+            return
+    elif modulo == "empresas":
         if "id" in request.path_params and str(request.path_params["id"]) != str(empresa):
             raise HTTPException(404, "No se encontro la empresa")
         if metodo == "GET" or rol == "Gerente":

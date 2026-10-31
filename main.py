@@ -26,6 +26,12 @@ from backend.InvitacionesLaborales import router as routerinvitaciones
 from core.schema import RespuestaError
 from utils.autorizacion import autorizar_ruta, obtener_sesion
 
+from backend.Pedidos.router import router as routerpedidos
+from backend.Cajas.router import router as routercajas
+from backend.Reservas.router import router as routerreservas
+from backend.Finanzas.router import router as routerfinanzas
+from backend.Suscripciones.router import router as routersuscripciones
+
 app = FastAPI(dependencies=[Depends(autorizar_ruta)], docs_url=None, redoc_url=None, openapi_url=None, responses={
     404: {"model": RespuestaError, "description": "Registro no encontrado"},
     409: {"model": RespuestaError, "description": "Registro duplicado"},
@@ -33,6 +39,11 @@ app = FastAPI(dependencies=[Depends(autorizar_ruta)], docs_url=None, redoc_url=N
 })
 
 
+app.include_router(routerpedidos)
+app.include_router(routercajas)
+app.include_router(routerreservas)
+app.include_router(routerfinanzas)
+app.include_router(routersuscripciones)
 app.include_router(routerinvitaciones.router)
 app.include_router(routersesiones.router)
 app.include_router(routerrecuperaciones.router)

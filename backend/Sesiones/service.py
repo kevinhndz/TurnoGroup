@@ -43,15 +43,14 @@ class SesionService():
         if not token or len(token) > 128:
             raise HTTPException(401, "Debes iniciar sesion")
 
-        look_up = repo.buscar_sesion(db, proteger_token_sesion(token))
+        look_up = repo.buscar_sesion_con_usuario(db, proteger_token_sesion(token))
         ahora = datetime.now(timezone.utc).replace(tzinfo=None)
-        if not look_up or look_up.fecha_revocacion or look_up.vencimiento <= ahora:
+        if not look_up:
             raise HTTPException(401, "La sesion no esta vigente")
-
-        usuario = repo_usuario.buscar_usuario_por_id(db, look_up.id_usuario)
-        if not usuario or not usuario.estado:
+        sesion, usuario = look_up
+        if sesion.fecha_revocacion or sesion.vencimiento <= ahora or not usuario.estado:
             raise HTTPException(401, "La sesion no esta vigente")
-        return look_up, usuario
+        return sesion, usuario
 
     @staticmethod
     def renovar_sesion_service(sesion, db):
@@ -121,6 +120,13 @@ class SesionService():
     @staticmethod
     def respuesta_sesion_service(sesion, usuario, db):
         contexto = SesionService.obtener_contexto_service(sesion, usuario, db)
+        from backend.ServiciosSucursales.tabla import ServiciosSucursales
+        from backend.Suscripciones.repository import SuscripcionRepository
+        from backend.Suscripciones.service import SuscripcionService
+        servicio = db.query(ServiciosSucursales).filter(ServiciosSucursales.id_sucursal == contexto['id_sucursal'], ServiciosSucursales.habilitado.is_(True), ServiciosSucursales.mesas_habilitadas.is_(True)).first() if contexto['id_sucursal'] else None
+        suscripcion = SuscripcionRepository.buscar_suscripcion(db, contexto['id_empresa']) if contexto['id_empresa'] else None
         return {"usuario": usuario, "vencimiento": sesion.vencimiento,
                 "id_empresa": contexto["id_empresa"], "id_sucursal": contexto["id_sucursal"],
-                "rol_empresa": contexto["rol"]}
+                "rol_empresa": contexto["rol"], "mesas_habilitadas": bool(servicio),
+                "reservas_habilitadas": bool(servicio and servicio.reservas_habilitadas),
+                "finanzas_habilitadas": bool(suscripcion and suscripcion.finanzas_habilitadas and SuscripcionService.vigente(suscripcion))}

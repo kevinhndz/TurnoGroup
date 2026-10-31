@@ -202,7 +202,10 @@ def test_descuento_valida_tipo_y_valor_al_editar(client,datos):
     assert client.patch(detalle,params=scope,json={'valor':101}).status_code==422
 
 
-def test_usuario_normaliza_correo(client,datos):
+def test_usuario_normaliza_correo(client,datos,db):
+    from backend.Usuarios.tabla import Usuarios
+    db.get(Usuarios, datos['usuario_autorizado']).rol_plataforma = 'Superadministrador'
+    db.commit()
     respuesta=client.post('/usuarios/',json={'nombre':'Otra persona','correo':'NUEVO@EXAMPLE.COM','clave':'Clave-de-prueba-123'})
     assert respuesta.status_code==201
     assert respuesta.json()['correo']=='nuevo@example.com'

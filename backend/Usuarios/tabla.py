@@ -9,6 +9,7 @@ class Usuarios(miclaseBase, PoderAuditor):
 
     id = Column(Integer, primary_key=True)
     correo = Column(String(255), unique=True, nullable=False)
+    clave_protegida = Column(String(255), nullable=True)
     nombre = Column(String(100), nullable=False)
     estado = Column(Boolean, default=True, nullable=False)
     fecha_registro = Column(DateTime, default=datetime.utcnow, nullable=False)

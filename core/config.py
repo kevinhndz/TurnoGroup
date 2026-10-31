@@ -1,8 +1,10 @@
+from typing import Literal
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class GuardiaSeguridad(BaseSettings):
 
     DATABASE_URL: str
+    ALGORITHM: Literal["HS256"] = "HS256"
     SECRET_KEY : str
 
 

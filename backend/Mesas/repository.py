@@ -24,7 +24,7 @@ class MesaRepository():
         total = db.query(Mesas).filter(Mesas.id_sucursal == id_sucursal).count()
         lista_mesas = db.query(Mesas).filter(
             Mesas.id_sucursal == id_sucursal
-        ).offset(salto).limit(limite).all()
+        ).order_by(Mesas.id).offset(salto).limit(limite).all()
         return total, lista_mesas
 
     @staticmethod

@@ -18,27 +18,33 @@ router = APIRouter(
 
 
 @router.post("/", response_model=RespuestaMesa, status_code=201)
-def crear_mesa(json: Revisar_Json_Crear_Mesa, db: Session = Depends(abrir_puerta_bd)):
-    return service.crear_mesa_service(json, db)
+def crear_mesa(
+    json: Revisar_Json_Crear_Mesa,
+    id_empresa: int = Query(..., gt=0),
+    db: Session = Depends(abrir_puerta_bd)
+):
+    return service.crear_mesa_service(json, id_empresa, db)
 
 
 @router.get("/", response_model=RespuestaPaginada[RespuestaMesa])
 def ver_mesas(
     id_sucursal: int = Query(..., gt=0),
+    id_empresa: int = Query(..., gt=0),
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     db: Session = Depends(abrir_puerta_bd)
 ):
-    return service.listar_mesas_service(id_sucursal, pagina_actual, limite, db)
+    return service.listar_mesas_service(id_sucursal, pagina_actual, limite, id_empresa, db)
 
 
 @router.get("/{id}", response_model=RespuestaMesa)
 def ver_mesa(
     id: Annotated[int, Path(gt=0)],
     id_sucursal: int = Query(..., gt=0),
+    id_empresa: int = Query(..., gt=0),
     db: Session = Depends(abrir_puerta_bd)
 ):
-    return service.ver_mesa_service(id, id_sucursal, db)
+    return service.ver_mesa_service(id, id_sucursal, id_empresa, db)
 
 
 @router.patch("/{id}", response_model=RespuestaMesa)
@@ -46,15 +52,17 @@ def editar_mesa(
     id: Annotated[int, Path(gt=0)],
     json: Revisar_Json_Editar_Mesa,
     id_sucursal: int = Query(..., gt=0),
+    id_empresa: int = Query(..., gt=0),
     db: Session = Depends(abrir_puerta_bd)
 ):
-    return service.editar_mesa_service(json, id, id_sucursal, db)
+    return service.editar_mesa_service(json, id, id_sucursal, id_empresa, db)
 
 
 @router.post("/{id}/desactivar", response_model=RespuestaMesa)
 def desactivar_mesa(
     id: Annotated[int, Path(gt=0)],
     id_sucursal: int = Query(..., gt=0),
+    id_empresa: int = Query(..., gt=0),
     db: Session = Depends(abrir_puerta_bd)
 ):
-    return service.desactivar_mesa_service(id, id_sucursal, db)
+    return service.desactivar_mesa_service(id, id_sucursal, id_empresa, db)

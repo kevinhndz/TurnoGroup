@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from backend.Usuarios.repository import UsuarioRepository as repo
 from backend.Usuarios.schema import Revisar_Json_Nuevo_Usuario, Revisar_Json_Editar_Usuario
@@ -50,7 +51,12 @@ class UsuarioService():
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro el usuario")
 
-        cambios = json.model_dump(exclude_unset=True, exclude_none=True)
+        cambios = json.model_dump(exclude_unset=True)
+        if not cambios:
+            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+        for campo, valor in cambios.items():
+            if valor is None:
+                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
 
         if "correo" in cambios:
             cambios["correo"] = str(cambios["correo"]).lower()

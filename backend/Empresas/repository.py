@@ -27,7 +27,7 @@ class EmpresaRepository():
     def listar_empresas(db: Session, pagina_actual: int, limite: int):
         salto = (pagina_actual - 1) * limite
         total = db.query(Empresas).count()
-        lista_empresas = db.query(Empresas).offset(salto).limit(limite).all()
+        lista_empresas = db.query(Empresas).order_by(Empresas.id).offset(salto).limit(limite).all()
         return total, lista_empresas
 
     @staticmethod

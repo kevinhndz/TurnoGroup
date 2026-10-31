@@ -31,6 +31,11 @@ from backend.InvitacionesLaborales.tabla import InvitacionesLaborales, Sucursale
 from backend.Sesiones.tabla import Sesiones
 from backend.RecuperacionesClave.tabla import RecuperacionesClave
 
+from backend.Pedidos.tabla import Pedidos, DetallesPedidos
+from backend.Cajas.tabla import Cajas
+from backend.Reservas.tabla import Reservas
+from backend.Suscripciones.tabla import Suscripciones
+
 #EJEMPLOS  FUTUROS:
 # from backend.empresas.model import Empresa
 # from backend.productos.model import Producto

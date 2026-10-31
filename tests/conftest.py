@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-os.environ.setdefault("DATABASE_URL", "sqlite://")
+os.environ["DATABASE_URL"] = "sqlite://"
 os.environ.setdefault("SECRET_KEY", "clave-solo-para-pruebas")
 
 from database.almacen import miclaseBase, abrir_puerta_bd
@@ -23,6 +23,10 @@ from backend.MetodosPago.tabla import MetodosPago
 @pytest.fixture
 def db():
     url = os.environ.get("TEST_DATABASE_URL", "sqlite://")
+    from sqlalchemy.engine import make_url
+    destino = make_url(url)
+    if not url.startswith("sqlite") and (destino.host not in ("127.0.0.1", "localhost") or not (destino.database or "").endswith("_pytest")):
+        raise RuntimeError("Las pruebas solo pueden usar una base local terminada en _pytest")
     opciones = {}
     if url.startswith("sqlite"):
         opciones = {"connect_args": {"check_same_thread": False}, "poolclass": StaticPool}
@@ -107,6 +111,8 @@ def datos(db):
                       token_protegido=proteger_token_sesion("token-local-pruebas-autorizacion"),
                       fecha_inicio=datetime.utcnow(), vencimiento=datetime.utcnow()+timedelta(hours=8))
     db.add(sesion)
+    from backend.Suscripciones.tabla import Suscripciones
+    db.add_all([Suscripciones(id_empresa=empresa.id) for empresa in empresas])
     db.commit()
     return {"usuario_autorizado": autorizado.id, "vinculo": vinculo.id, "sesion": sesion.id, "empresa": empresas[0].id, "otra_empresa": empresas[1].id,
             "sucursal": sucursales[0].id, "otra_sucursal": sucursales[1].id,

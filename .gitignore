@@ -14,3 +14,7 @@ frontend/.env*
 
 # Archivos de las pruebas
 .pytest_cache/
+
+.env.pruebas
+
+.archivos/

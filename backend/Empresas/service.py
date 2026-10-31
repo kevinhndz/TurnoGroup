@@ -24,6 +24,8 @@ class EmpresaService():
         from backend.VinculosLaborales.tabla import VinculosLaborales
         db.add(nueva_empresa)
         db.flush()
+        from backend.Suscripciones.tabla import Suscripciones
+        db.add(Suscripciones(id_empresa=nueva_empresa.id))
         if usuario.rol_plataforma != "Superadministrador":
             vinculo = VinculosLaborales(id_usuario=usuario.id, id_empresa=nueva_empresa.id, rol="Gerente")
             db.add(vinculo)

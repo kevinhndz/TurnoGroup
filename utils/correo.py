@@ -31,7 +31,7 @@ def enviar_invitacion(correo: str, codigo: str) -> bool:
     mensaje["From"] = revision.SMTP_REMITENTE
     mensaje["To"] = correo
     mensaje["Subject"] = "Invitacion laboral de Turno Group"
-    mensaje.set_content("Inicia sesion con este correo y acepta la invitacion con este codigo: " + codigo +
+    mensaje.set_content("Abre la pagina de invitacion de Turno Group. Si no tienes cuenta, crea tu acceso alli; si ya tienes cuenta, inicia sesion. Usa este codigo: " + codigo +
                         "\nVence en 48 horas y solo puede usarse una vez. Si no la esperabas, ignorala.")
     try:
         with smtplib.SMTP(revision.SMTP_SERVIDOR, revision.SMTP_PUERTO, timeout=10) as servidor:

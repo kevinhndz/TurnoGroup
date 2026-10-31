@@ -1,6 +1,9 @@
+import os
+from pathlib import Path
 from typing import Literal
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class GuardiaSeguridad(BaseSettings):
 
@@ -15,14 +18,39 @@ class GuardiaSeguridad(BaseSettings):
     SMTP_USUARIO: str = ""
     SMTP_CLAVE: str = ""
     SMTP_REMITENTE: str = ""
-    SECRET_KEY : str
-
-
+    SECRET_KEY: str
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
-revision = GuardiaSeguridad()
+raiz = Path(__file__).resolve().parents[1]
+cabeza = raiz / ".git" / "HEAD"
+rama_pruebas = cabeza.is_file() and cabeza.read_text().strip().endswith(
+    "/pruebas-frontend"
+)
+archivo_entorno = os.environ.get("TURNO_ENV")
+if archivo_entorno is None:
+    archivo_entorno = ".env.pruebas" if rama_pruebas else ".env"
+    if rama_pruebas and not (raiz / archivo_entorno).is_file():
+        raise RuntimeError(
+            "Falta .env.pruebas. No se permite usar la base de main en la rama de pruebas"
+        )
+revision = GuardiaSeguridad(_env_file=raiz / archivo_entorno)
+if rama_pruebas:
+    from sqlalchemy.engine import make_url
+
+    destino = make_url(revision.DATABASE_URL)
+    if destino.get_backend_name() != "sqlite" and not (
+        destino.host in ("127.0.0.1", "localhost")
+        and destino.port == 55432
+        and (
+            destino.database == "turnogroup_pruebas"
+            or (destino.database or "").endswith("_pytest")
+        )
+    ):
+        raise RuntimeError(
+            "La rama de pruebas solo puede usar PostgreSQL local de pruebas"
+        )
 
 
 """

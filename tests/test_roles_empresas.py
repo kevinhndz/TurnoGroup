@@ -201,7 +201,7 @@ def test_no_se_elimina_ultimo_gerente(client,datos):
 
 
 def test_alta_publica_no_permite_rol_de_plataforma(client,monkeypatch):
-    assert client.post('/usuarios/',json={'nombre':'Ataque','correo':'ataque@example.com','clave':'Una clave larga 123','rol_plataforma':'Superadministrador'}).status_code==422
+    assert client.post('/usuarios/registro-negocio',json={'rol_plataforma':'Superadministrador'}).status_code==422
     client.cookies.clear()
     monkeypatch.setattr(revision,'ALTA_PUBLICA_HABILITADA',False)
     assert client.post('/usuarios/',json={}).status_code==401
@@ -310,16 +310,14 @@ def test_administrador_no_asigna_ni_retira_productos(client,db,datos):
     assert client.delete(f'/disponibilidad-productos/{datos["producto"]}/{datos["sucursal"]}').status_code==403
 
 
-def test_alta_login_propietario_crea_empresa_y_selecciona_contexto(client):
+def test_alta_final_crea_cuenta_empresa_y_contexto(client):
     client.cookies.clear()
-    datos={'correo':'propietario-nuevo@example.com','nombre':'Propietario nuevo','clave':'Clave propia de prueba 123'}
-    assert client.post('/usuarios/',json=datos).status_code==201
-    assert client.post('/sesiones/iniciar',json={'correo':datos['correo'],'clave':datos['clave']}).status_code==200
-    assert client.get('/productos/').status_code==403
-    creada=client.post('/empresas/',json={'nombre':'Empresa del propietario','tipo_negocio':'Otro','codigo_pais':'HN','zona_horaria':'America/Tegucigalpa','codigo_moneda':'HNL'})
+    cuenta={'correo':'propietario-nuevo@example.com','nombre':'Propietario nuevo','clave':'Clave propia de prueba 123'}
+    assert client.post('/sesiones/iniciar',json={'correo':cuenta['correo'],'clave':cuenta['clave']}).status_code==401
+    registro={'cuenta':cuenta,'negocio':{'nombre':'Empresa del propietario','tipo_negocio':'Otro','codigo_pais':'HN','zona_horaria':'America/Tegucigalpa','codigo_moneda':'HNL'},'sucursales':[{'id_local':1,'nombre':'Principal','direccion':'Direccion principal','es_principal':True,'servicios':{'comer_aqui':{'habilitado':True}},'pagos':['efectivo']}]}
+    creada=client.post('/usuarios/registro-negocio',json=registro)
     assert creada.status_code==201,creada.text
-    contexto=client.get('/sesiones/actual').json()
-    assert contexto['id_empresa']==creada.json()['id'] and contexto['rol_empresa']=='Gerente'
+    assert creada.json()['rol_empresa']=='Gerente'
     assert client.get('/productos/').status_code==200
     assert client.post('/categorias/',json={'nombre':'Categoria propia'}).status_code==201
     assert client.post('/sesiones/cerrar').status_code==204

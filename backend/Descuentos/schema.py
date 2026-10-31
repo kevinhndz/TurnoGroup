@@ -4,7 +4,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Revisar_Json_Crear_Descuento(BaseModel):
-    id_empresa: int = Field(gt=0)
     nombre: str = Field(min_length=1, max_length=100)
     tipo_descuento: Literal["Porcentaje", "CantidadFija"]
     valor: Decimal = Field(ge=0, max_digits=12, decimal_places=2)

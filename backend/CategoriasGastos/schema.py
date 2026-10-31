@@ -3,7 +3,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Revisar_Json_Crear_Categoria_Gasto(BaseModel):
-    id_empresa: int = Field(gt=0)
     nombre: str = Field(min_length=1, max_length=100)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")

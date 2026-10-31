@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class Revisar_Json_Nueva_Categoria(BaseModel):
-    id_empresa: int = Field(gt=0)
     nombre: str = Field(min_length=1, max_length=60)
     orden_presentacion: int = Field(default=1, ge=0)
 

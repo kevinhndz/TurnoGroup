@@ -10,18 +10,18 @@ from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 class MesaService():
 
     @staticmethod
-    def crear_mesa_service(json: Revisar_Json_Crear_Mesa, id_empresa: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, json.id_sucursal, id_empresa)
+    def crear_mesa_service(json: Revisar_Json_Crear_Mesa, id_empresa: int, db: Session, id_sucursal: int):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
 
-        look_up = repo.buscar_mesa_por_nombre(db, json.id_sucursal, json.nombre)
+        look_up = repo.buscar_mesa_por_nombre(db, id_sucursal, json.nombre)
         if look_up is not None:
             raise RecursoDuplicadoError("Ya existe una mesa con ese nombre en la sucursal")
 
         nueva_mesa = Mesas(
-            id_sucursal=json.id_sucursal,
+            id_sucursal=id_sucursal,
             nombre=json.nombre,
             capacidad=json.capacidad
         )

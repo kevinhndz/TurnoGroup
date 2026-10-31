@@ -4,7 +4,6 @@ from typing import Optional
 
 
 class Revisar_Json_Nuevo_Producto(BaseModel):
-    id_empresa: int = Field(gt=0)
     id_categoria: Optional[int] = Field(default=None, gt=0)
     nombre: str = Field(min_length=1, max_length=100)
     descripcion: Optional[str] = None

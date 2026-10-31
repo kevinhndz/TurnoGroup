@@ -10,31 +10,31 @@ from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 class CategoriaService():
 
     @staticmethod
-    def crear_categoria_service(json: Revisar_Json_Nueva_Categoria, db: Session):
-        empresa = repo_empresa.buscar_empresa_por_id(db, json.id_empresa)
+    def crear_categoria_service(json: Revisar_Json_Nueva_Categoria, db: Session, id_empresa: int):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_categoria_por_nombre(db, json.id_empresa, json.nombre)
+        look_up = repo.buscar_categoria_por_nombre(db, id_empresa, json.nombre)
 
         if look_up is not None:
             raise RecursoDuplicadoError("Ya existe una categoria con ese nombre")
 
         nueva_categoria = Categorias(
-            id_empresa=json.id_empresa,
+            id_empresa=id_empresa,
             nombre=json.nombre,
             orden_presentacion=json.orden_presentacion
         )
         return repo.guardar_nueva_categoria(db, nueva_categoria)
 
     @staticmethod
-    def listar_categorias_service(id_empresa: int, pagina_actual: int, limite: int, db: Session):
+    def listar_categorias_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, id_sucursal=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
         total, lista_categorias = repo.listar_categorias(
-            db, id_empresa, pagina_actual, limite
+            db, id_empresa, pagina_actual, limite, id_sucursal
         )
         total_paginas = (total + limite - 1) // limite
 
@@ -47,12 +47,12 @@ class CategoriaService():
         }
 
     @staticmethod
-    def ver_categoria_service(id: int, id_empresa: int, db: Session):
+    def ver_categoria_service(id: int, id_empresa: int, db: Session, id_sucursal=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
+        look_up = repo.buscar_categoria_por_id(db, id, id_empresa, id_sucursal)
 
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro la categoria")

@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, SecretStr
-from typing import Optional
+from typing import Optional, Literal
 
 
 class Revisar_Json_Nuevo_Usuario(BaseModel):
@@ -16,6 +16,7 @@ class NuevoUsuarioRespuesta(BaseModel):
     correo: EmailStr
     nombre: str
     estado: bool
+    rol_plataforma: str
     fecha_registro: datetime
 
     model_config = ConfigDict(from_attributes=True)
@@ -27,3 +28,8 @@ class Revisar_Json_Editar_Usuario(BaseModel):
     nombre: Optional[str] = Field(default=None, min_length=1, max_length=100)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+class Revisar_Json_Rol_Plataforma(BaseModel):
+    rol_plataforma: Literal["Usuario", "Superadministrador"]
+    model_config = ConfigDict(extra="forbid")

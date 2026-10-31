@@ -1,3 +1,4 @@
+from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
@@ -18,13 +19,13 @@ router = APIRouter(
 
 
 @router.post("/", response_model=RespuestaConfiguracionImpuestos, status_code=201)
-def crear_configuracion_impuestos(json: Revisar_Json_Crear_Configuracion_Impuestos, db: Session = Depends(abrir_puerta_bd)):
-    return service.crear_configuracion_impuestos_service(json, db)
+def crear_configuracion_impuestos(json: Revisar_Json_Crear_Configuracion_Impuestos, db: Session = Depends(abrir_puerta_bd), id_empresa: int = Depends(obtener_empresa)):
+    return service.crear_configuracion_impuestos_service(json, db, id_empresa)
 
 
 @router.get("/", response_model=RespuestaPaginada[RespuestaConfiguracionImpuestos])
 def ver_configuraciones_impuestos(
-    id_empresa: int = Query(..., gt=0),
+    id_empresa: int = Depends(obtener_empresa),
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     db: Session = Depends(abrir_puerta_bd)
@@ -35,7 +36,7 @@ def ver_configuraciones_impuestos(
 @router.get("/{id}", response_model=RespuestaConfiguracionImpuestos)
 def ver_configuracion_impuestos(
     id: Annotated[int, Path(gt=0)],
-    id_empresa: int = Query(..., gt=0),
+    id_empresa: int = Depends(obtener_empresa),
     db: Session = Depends(abrir_puerta_bd)
 ):
     return service.ver_configuracion_impuestos_service(id, id_empresa, db)
@@ -45,7 +46,7 @@ def ver_configuracion_impuestos(
 def editar_configuracion_impuestos(
     id: Annotated[int, Path(gt=0)],
     json: Revisar_Json_Editar_Configuracion_Impuestos,
-    id_empresa: int = Query(..., gt=0),
+    id_empresa: int = Depends(obtener_empresa),
     db: Session = Depends(abrir_puerta_bd)
 ):
     return service.editar_configuracion_impuestos_service(json, id, id_empresa, db)
@@ -54,7 +55,7 @@ def editar_configuracion_impuestos(
 @router.post("/{id}/desactivar", response_model=RespuestaConfiguracionImpuestos)
 def desactivar_configuracion_impuestos(
     id: Annotated[int, Path(gt=0)],
-    id_empresa: int = Query(..., gt=0),
+    id_empresa: int = Depends(obtener_empresa),
     db: Session = Depends(abrir_puerta_bd)
 ):
     return service.desactivar_configuracion_impuestos_service(id, id_empresa, db)

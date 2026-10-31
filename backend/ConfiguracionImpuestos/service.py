@@ -13,18 +13,18 @@ from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 class ConfiguracionImpuestosService():
 
     @staticmethod
-    def crear_configuracion_impuestos_service(json: Revisar_Json_Crear_Configuracion_Impuestos, db: Session):
-        empresa = repo_empresa.buscar_empresa_por_id(db, json.id_empresa)
+    def crear_configuracion_impuestos_service(json: Revisar_Json_Crear_Configuracion_Impuestos, db: Session, id_empresa: int):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_configuracion_impuestos_por_empresa(db, json.id_empresa)
+        look_up = repo.buscar_configuracion_impuestos_por_empresa(db, id_empresa)
         if look_up is not None:
             raise RecursoDuplicadoError("La empresa ya tiene una configuracion de impuestos")
 
         nueva_configuracion_impuestos = ConfiguracionImpuestos(
-            id_empresa=json.id_empresa,
+            id_empresa=id_empresa,
             nombre=json.nombre,
             porcentaje=json.porcentaje,
             precios_incluyen_impuesto=json.precios_incluyen_impuesto

@@ -10,24 +10,24 @@ from core.exceptions import RecursoNoEncontradoError, RecursoDuplicadoError
 class SucursalService():
 
     @staticmethod
-    def crear_sucursal_service(json: Revisar_Json_Crear_Sucursal, db: Session):
-        empresa = repo_empresa.buscar_empresa_por_id(db, json.id_empresa)
+    def crear_sucursal_service(json: Revisar_Json_Crear_Sucursal, db: Session, id_empresa: int):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_sucursal(db, json.id_empresa, json.nombre)
+        look_up = repo.buscar_sucursal(db, id_empresa, json.nombre)
 
         if look_up is not None:
             raise RecursoDuplicadoError("Ya existe esta sucursal")
 
         if json.es_principal is True:
-            sucursal_principal = repo.buscar_sucursal_principal(db, json.id_empresa)
+            sucursal_principal = repo.buscar_sucursal_principal(db, id_empresa)
             if sucursal_principal is not None:
                 raise RecursoDuplicadoError("La empresa ya tiene una sucursal principal")
 
         nueva_sucursal = Sucursales(
-            id_empresa=json.id_empresa,
+            id_empresa=id_empresa,
             nombre=json.nombre,
             direccion=json.direccion,
             telefono=json.telefono,
@@ -37,14 +37,14 @@ class SucursalService():
         return repo.guardar_nueva_sucursal(db, nueva_sucursal)
 
     @staticmethod
-    def listar_sucursales_service(id_empresa: int, pagina_actual: int, limite: int, db: Session):
+    def listar_sucursales_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, id_sucursal=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
         total, lista_sucursales = repo.listar_sucursales(
-            db, id_empresa, pagina_actual, limite
+            db, id_empresa, pagina_actual, limite, id_sucursal
         )
         total_paginas = (total + limite - 1) // limite
 

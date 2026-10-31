@@ -11,24 +11,24 @@ from core.exceptions import RecursoNoEncontradoError, RecursoDuplicadoError
 class ProductoService():
 
     @staticmethod
-    def crear_producto_service(json: Revisar_Json_Nuevo_Producto, db: Session):
-        empresa = repo_empresa.buscar_empresa_por_id(db, json.id_empresa)
+    def crear_producto_service(json: Revisar_Json_Nuevo_Producto, db: Session, id_empresa: int):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
         if json.id_categoria is not None:
             categoria = repo_categoria.buscar_categoria_por_id(
-                db, json.id_categoria, json.id_empresa
+                db, json.id_categoria, id_empresa
             )
             if categoria is None or not categoria.activo:
                 raise RecursoNoEncontradoError("No se encontro la categoria de esta empresa")
 
-        look_up = repo.buscar_producto_por_nombre(db, json.id_empresa, json.nombre)
+        look_up = repo.buscar_producto_por_nombre(db, id_empresa, json.nombre)
         if look_up is not None:
             raise RecursoDuplicadoError("Ya existe un producto con ese nombre en la empresa")
 
         nuevo_producto = Productos(
-            id_empresa=json.id_empresa,
+            id_empresa=id_empresa,
             id_categoria=json.id_categoria,
             nombre=json.nombre,
             descripcion=json.descripcion,
@@ -37,12 +37,12 @@ class ProductoService():
         return repo.guardar_nuevo_producto(db, nuevo_producto)
 
     @staticmethod
-    def listar_productos_service(id_empresa: int, pagina_actual: int, limite: int, db: Session):
+    def listar_productos_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, id_sucursal=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        total, lista_productos = repo.listar_productos(db, id_empresa, pagina_actual, limite)
+        total, lista_productos = repo.listar_productos(db, id_empresa, pagina_actual, limite, id_sucursal)
         total_paginas = (total + limite - 1) // limite
         return {
             "total": total, "pagina_actual": pagina_actual, "limite": limite,
@@ -50,12 +50,12 @@ class ProductoService():
         }
 
     @staticmethod
-    def ver_producto_service(id: int, id_empresa: int, db: Session):
+    def ver_producto_service(id: int, id_empresa: int, db: Session, id_sucursal=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_producto_por_id(db, id, id_empresa)
+        look_up = repo.buscar_producto_por_id(db, id, id_empresa, id_sucursal)
 
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro el producto")

@@ -8,6 +8,7 @@ from backend.Productos.schema import (
     Revisar_Json_Nuevo_Producto,
 )
 from backend.Productos.service import ProductoService as service
+from core.schema import RespuestaPaginada
 
 
 router = APIRouter(
@@ -21,9 +22,14 @@ def crear_producto(json: Revisar_Json_Nuevo_Producto, db: Session = Depends(abri
     return service.crear_producto_service(json, db)
 
 
-@router.get("/", response_model=list[NuevoProductoRespuesta])
-def ver_productos(id_empresa: int = Query(..., gt=0), db: Session = Depends(abrir_puerta_bd)):
-    return service.listar_productos_service(id_empresa, db)
+@router.get("/", response_model=RespuestaPaginada[NuevoProductoRespuesta])
+def ver_productos(
+    id_empresa: int = Query(..., gt=0),
+    pagina_actual: int = Query(1, ge=1),
+    limite: int = Query(10, ge=1, le=100),
+    db: Session = Depends(abrir_puerta_bd)
+):
+    return service.listar_productos_service(id_empresa, pagina_actual, limite, db)
 
 
 @router.get("/{id}", response_model=NuevoProductoRespuesta)

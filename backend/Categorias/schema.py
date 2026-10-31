@@ -7,7 +7,7 @@ class Revisar_Json_Nueva_Categoria(BaseModel):
     nombre: str = Field(min_length=1, max_length=60)
     orden_presentacion: int = Field(default=1, ge=0)
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class NuevaCategoriaRespuesta(BaseModel):
@@ -21,7 +21,8 @@ class NuevaCategoriaRespuesta(BaseModel):
 
 
 class Revisar_Json_Editar_Categoria(BaseModel):
+    activo: Optional[bool] = None
     nombre: Optional[str] = Field(default=None, min_length=1, max_length=60)
     orden_presentacion: Optional[int] = Field(default=None, ge=0)
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")

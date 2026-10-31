@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from backend.Categorias.repository import CategoriaRepository as repo
 from backend.Categorias.schema import Revisar_Json_Nueva_Categoria, Revisar_Json_Editar_Categoria
@@ -17,7 +18,7 @@ class CategoriaService():
         look_up = repo.buscar_categoria_por_nombre(db, json.id_empresa, json.nombre)
 
         if look_up is not None:
-            raise RecursoDuplicadoError("Ya existe una categoria activa con ese nombre")
+            raise RecursoDuplicadoError("Ya existe una categoria con ese nombre")
 
         nueva_categoria = Categorias(
             id_empresa=json.id_empresa,
@@ -54,7 +55,7 @@ class CategoriaService():
         look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
 
         if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la categoria activa")
+            raise RecursoNoEncontradoError("No se encontro la categoria")
 
         return look_up
 
@@ -67,17 +68,22 @@ class CategoriaService():
         look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
 
         if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la categoria activa")
+            raise RecursoNoEncontradoError("No se encontro la categoria")
 
         # Guarda en un diccionario solo los campos que llegaron en la peticion.
-        cambios = json.model_dump(exclude_unset=True, exclude_none=True)
+        cambios = json.model_dump(exclude_unset=True)
+        if not cambios:
+            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+        for campo, valor in cambios.items():
+            if valor is None:
+                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
 
         if "nombre" in cambios and cambios["nombre"] != look_up.nombre:
             categoria_existente = repo.buscar_categoria_por_nombre(
                 db, look_up.id_empresa, cambios["nombre"]
             )
             if categoria_existente is not None:
-                raise RecursoDuplicadoError("Ya existe una categoria activa con ese nombre")
+                raise RecursoDuplicadoError("Ya existe una categoria con ese nombre")
 
         # Recorre el diccionario y actualiza cada campo enviado.
         for campo, valor in cambios.items():
@@ -96,7 +102,7 @@ class CategoriaService():
         look_up = repo.buscar_categoria_por_id(db, id, id_empresa)
 
         if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la categoria activa")
+            raise RecursoNoEncontradoError("No se encontro la categoria")
 
         look_up.activo = False
         db.commit()

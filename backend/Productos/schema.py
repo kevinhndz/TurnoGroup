@@ -8,9 +8,9 @@ class Revisar_Json_Nuevo_Producto(BaseModel):
     id_categoria: Optional[int] = Field(default=None, gt=0)
     nombre: str = Field(min_length=1, max_length=100)
     descripcion: Optional[str] = None
-    precio: Decimal = Field(ge=0)
+    precio: Decimal = Field(ge=0, max_digits=10, decimal_places=2)
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class NuevoProductoRespuesta(BaseModel):
@@ -27,9 +27,10 @@ class NuevoProductoRespuesta(BaseModel):
 
 
 class Revisar_Json_Editar_Producto(BaseModel):
+    disponible: Optional[bool] = None
     id_categoria: Optional[int] = Field(default=None, gt=0)
     nombre: Optional[str] = Field(default=None, min_length=1, max_length=100)
     descripcion: Optional[str] = None
-    precio: Optional[Decimal] = Field(default=None, ge=0)
+    precio: Optional[Decimal] = Field(default=None, ge=0, max_digits=10, decimal_places=2)
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")

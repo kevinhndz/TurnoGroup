@@ -21,6 +21,10 @@ from backend.VinculosLaborales.tabla import VinculosLaborales, AsignacionesSucur
 from backend.Mesas.tabla import Mesas
 from backend.ConfiguracionImpuestos.tabla import ConfiguracionImpuestos
 from backend.Descuentos.tabla import Descuentos
+from backend.TiposServicio.tabla import TiposServicio
+from backend.MetodosPago.tabla import MetodosPago
+from backend.ServiciosSucursales.tabla import ServiciosSucursales
+from backend.PagosSucursales.tabla import PagosSucursales
 from backend.CategoriasGastos.tabla import CategoriasGastos
 
 #EJEMPLOS  FUTUROS:

@@ -1,9 +1,10 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, SecretStr
 from typing import Optional
 
 
 class Revisar_Json_Nuevo_Usuario(BaseModel):
+    clave: SecretStr = Field(min_length=12, max_length=128)
     correo: EmailStr
     nombre: str = Field(min_length=1, max_length=100)
 

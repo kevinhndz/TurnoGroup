@@ -11,7 +11,7 @@ def caso(modulo, datos):
         "empresas": {"nombre": "Nuevo negocio", "tipo_negocio": "Otro", "codigo_pais": "HN", "zona_horaria": "America/Tegucigalpa", "codigo_moneda": "HNL"},
         "categorias": {"id_empresa": empresa, "nombre": "Bebidas"},
         "productos": {"id_empresa": empresa, "id_categoria": datos["categoria"], "nombre": "Nuevo cafe", "precio": "75.50"},
-        "usuarios": {"correo": "nuevo@example.com", "nombre": "Nueva persona"},
+        "usuarios": {"correo": "nuevo@example.com", "nombre": "Nueva persona", "clave": "Clave-de-prueba-123"},
         "sucursales": {"id_empresa": empresa, "nombre": "Nuevo local", "direccion": "Direccion del nuevo local"},
         "mesas": {"id_sucursal": datos["sucursal"], "nombre": "Mesa 01", "capacidad": 4},
         "configuracion-impuestos": {"id_empresa": empresa, "nombre": "ISV", "porcentaje": "15", "precios_incluyen_impuesto": False},
@@ -204,10 +204,10 @@ def test_descuento_valida_tipo_y_valor_al_editar(client,datos):
 
 
 def test_usuario_normaliza_correo(client,datos):
-    respuesta=client.post('/usuarios/',json={'nombre':'Otra persona','correo':'NUEVO@EXAMPLE.COM'})
+    respuesta=client.post('/usuarios/',json={'nombre':'Otra persona','correo':'NUEVO@EXAMPLE.COM','clave':'Clave-de-prueba-123'})
     assert respuesta.status_code==201
     assert respuesta.json()['correo']=='nuevo@example.com'
-    assert client.post('/usuarios/',json={'nombre':'Otra persona','correo':'nuevo@example.com'}).status_code==409
+    assert client.post('/usuarios/',json={'nombre':'Otra persona','correo':'nuevo@example.com','clave':'Clave-de-prueba-123'}).status_code==409
 
 
 def test_categoria_desactivada_no_pierde_identidad(client,datos):

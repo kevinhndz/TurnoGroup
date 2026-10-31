@@ -1,3 +1,4 @@
+from utils.hash import encriptar_contrasena
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from backend.Usuarios.repository import UsuarioRepository as repo
@@ -18,6 +19,7 @@ class UsuarioService():
 
         nuevo_usuario = Usuarios(
             correo=correo,
+            clave_protegida=encriptar_contrasena(json.clave.get_secret_value()),
             nombre=json.nombre
         )
         return repo.guardar_nuevo_usuario(db, nuevo_usuario)

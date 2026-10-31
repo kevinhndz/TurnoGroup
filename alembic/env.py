@@ -26,6 +26,7 @@ from backend.MetodosPago.tabla import MetodosPago
 from backend.ServiciosSucursales.tabla import ServiciosSucursales
 from backend.PagosSucursales.tabla import PagosSucursales
 from backend.CategoriasGastos.tabla import CategoriasGastos
+from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
 
 #EJEMPLOS  FUTUROS:
 # from backend.empresas.model import Empresa

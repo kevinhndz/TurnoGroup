@@ -9,11 +9,15 @@ class Revisar_Json_Crear_Servicio_Sucursal(BaseModel):
     mesas_habilitadas: bool = False
     reservas_habilitadas: bool = False
 
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
 
 class Revisar_Json_Editar_Servicio_Sucursal(BaseModel):
     habilitado: Optional[bool] = None
     mesas_habilitadas: Optional[bool] = None
     reservas_habilitadas: Optional[bool] = None
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class RespuestaServicioSucursal(BaseModel):

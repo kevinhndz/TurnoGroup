@@ -26,7 +26,7 @@ class VinculoLaboralRepository():
         ).count()
         lista_vinculos = db.query(VinculosLaborales).filter(
             VinculosLaborales.id_empresa == id_empresa
-        ).offset(salto).limit(limite).all()
+        ).order_by(VinculosLaborales.id).offset(salto).limit(limite).all()
         return total, lista_vinculos
 
     @staticmethod
@@ -64,3 +64,13 @@ class VinculoLaboralRepository():
     def quitar_asignacion_sucursal(db: Session, asignacion: AsignacionesSucursales):
         db.delete(asignacion)
         db.commit()
+
+    @staticmethod
+    def listar_asignaciones_sucursales_paginadas(db: Session, id_vinculo_laboral: int, pagina_actual: int, limite: int):
+        salto = (pagina_actual - 1) * limite
+        consulta = db.query(AsignacionesSucursales).filter(
+            AsignacionesSucursales.id_vinculo_laboral == id_vinculo_laboral
+        )
+        total = consulta.count()
+        asignaciones = consulta.order_by(AsignacionesSucursales.id).offset(salto).limit(limite).all()
+        return total, asignaciones

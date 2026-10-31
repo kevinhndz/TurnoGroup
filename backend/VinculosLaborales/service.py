@@ -70,8 +70,8 @@ class VinculoLaboralService():
         }
 
     @staticmethod
-    def asignar_sucursal_service(id: int, id_sucursal: int, db: Session):
-        look_up = repo.buscar_vinculo_por_id_sin_empresa(db, id)
+    def asignar_sucursal_service(id: int, id_sucursal: int, id_empresa: int, db: Session):
+        look_up = repo.buscar_vinculo_por_id(db, id, id_empresa)
 
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro el vinculo laboral")
@@ -95,8 +95,8 @@ class VinculoLaboralService():
         return repo.guardar_asignacion_sucursal(db, nueva_asignacion)
 
     @staticmethod
-    def quitar_asignacion_sucursal_service(id: int, id_sucursal: int, db: Session):
-        look_up = repo.buscar_vinculo_por_id_sin_empresa(db, id)
+    def quitar_asignacion_sucursal_service(id: int, id_sucursal: int, id_empresa: int, db: Session):
+        look_up = repo.buscar_vinculo_por_id(db, id, id_empresa)
 
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro el vinculo laboral")
@@ -106,3 +106,14 @@ class VinculoLaboralService():
             raise RecursoNoEncontradoError("No se encontro la asignacion de la sucursal")
 
         repo.quitar_asignacion_sucursal(db, asignacion)
+
+    @staticmethod
+    def listar_asignaciones_sucursales_service(id: int, id_empresa: int, pagina_actual: int, limite: int, db: Session):
+        look_up = repo.buscar_vinculo_por_id(db, id, id_empresa)
+        if look_up is None:
+            raise RecursoNoEncontradoError("No se encontro el vinculo laboral")
+        total, asignaciones = repo.listar_asignaciones_sucursales_paginadas(db, id, pagina_actual, limite)
+        return {
+            "total": total, "pagina_actual": pagina_actual, "limite": limite,
+            "total_paginas": (total + limite - 1) // limite, "data": asignaciones
+        }

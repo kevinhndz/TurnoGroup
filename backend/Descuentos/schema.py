@@ -9,7 +9,7 @@ class Revisar_Json_Crear_Descuento(BaseModel):
     tipo_descuento: Literal["Porcentaje", "CantidadFija"]
     valor: Decimal = Field(ge=0, max_digits=12, decimal_places=2)
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class Revisar_Json_Editar_Descuento(BaseModel):
@@ -18,7 +18,7 @@ class Revisar_Json_Editar_Descuento(BaseModel):
     valor: Optional[Decimal] = Field(default=None, ge=0, max_digits=12, decimal_places=2)
     activo: Optional[bool] = None
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class RespuestaDescuento(BaseModel):

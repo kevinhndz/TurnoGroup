@@ -56,9 +56,10 @@ def ver_vinculo_laboral(
 def asignar_sucursal(
     id: Annotated[int, Path(gt=0)],
     json: Revisar_Json_Asignar_Sucursal,
+    id_empresa: int = Query(..., gt=0),
     db: Session = Depends(abrir_puerta_bd)
 ):
-    return service.asignar_sucursal_service(id, json.id_sucursal, db)
+    return service.asignar_sucursal_service(id, json.id_sucursal, id_empresa, db)
 
 
 @router.delete(
@@ -68,7 +69,19 @@ def asignar_sucursal(
 def quitar_asignacion_sucursal(
     id: Annotated[int, Path(gt=0)],
     id_sucursal: Annotated[int, Path(gt=0)],
+    id_empresa: int = Query(..., gt=0),
     db: Session = Depends(abrir_puerta_bd)
 ):
-    service.quitar_asignacion_sucursal_service(id, id_sucursal, db)
+    service.quitar_asignacion_sucursal_service(id, id_sucursal, id_empresa, db)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{id}/sucursales", response_model=RespuestaPaginada[RespuestaAsignacionSucursal])
+def ver_asignaciones_sucursales(
+    id: Annotated[int, Path(gt=0)],
+    id_empresa: int = Query(..., gt=0),
+    pagina_actual: int = Query(1, ge=1),
+    limite: int = Query(10, ge=1, le=100),
+    db: Session = Depends(abrir_puerta_bd)
+):
+    return service.listar_asignaciones_sucursales_service(id, id_empresa, pagina_actual, limite, db)

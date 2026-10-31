@@ -6,14 +6,14 @@ class Revisar_Json_Crear_Categoria_Gasto(BaseModel):
     id_empresa: int = Field(gt=0)
     nombre: str = Field(min_length=1, max_length=100)
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class Revisar_Json_Editar_Categoria_Gasto(BaseModel):
     nombre: Optional[str] = Field(default=None, min_length=1, max_length=100)
     activo: Optional[bool] = None
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class RespuestaCategoriaGasto(BaseModel):

@@ -9,7 +9,7 @@ class Revisar_Json_Crear_Configuracion_Impuestos(BaseModel):
     porcentaje: Decimal = Field(ge=0, le=100, max_digits=6, decimal_places=3)
     precios_incluyen_impuesto: bool
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class Revisar_Json_Editar_Configuracion_Impuestos(BaseModel):
@@ -18,7 +18,7 @@ class Revisar_Json_Editar_Configuracion_Impuestos(BaseModel):
     precios_incluyen_impuesto: Optional[bool] = None
     activo: Optional[bool] = None
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class RespuestaConfiguracionImpuestos(BaseModel):

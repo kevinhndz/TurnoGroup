@@ -76,7 +76,12 @@ class DescuentoService():
         if look_up is None:
             raise RecursoNoEncontradoError("No se encontro el descuento")
 
-        cambios = json.model_dump(exclude_unset=True, exclude_none=True)
+        cambios = json.model_dump(exclude_unset=True)
+        if not cambios:
+            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+        for campo, valor in cambios.items():
+            if valor is None:
+                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
 
         if "nombre" in cambios and cambios["nombre"] != look_up.nombre:
             descuento_existente = repo.buscar_descuento_por_nombre(

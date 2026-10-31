@@ -1,10 +1,20 @@
 from typing import Literal
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class GuardiaSeguridad(BaseSettings):
 
     DATABASE_URL: str
     ALGORITHM: Literal["HS256"] = "HS256"
+    ALTA_PUBLICA_HABILITADA: bool = True
+    COOKIE_SEGURA: bool = True
+    SESION_HORAS: int = Field(default=8, ge=1, le=24)
+    ORIGENES_PERMITIDOS: list[str] = ["http://localhost:3000"]
+    SMTP_SERVIDOR: str = ""
+    SMTP_PUERTO: int = 587
+    SMTP_USUARIO: str = ""
+    SMTP_CLAVE: str = ""
+    SMTP_REMITENTE: str = ""
     SECRET_KEY : str
 
 

@@ -27,6 +27,9 @@ from backend.ServiciosSucursales.tabla import ServiciosSucursales
 from backend.PagosSucursales.tabla import PagosSucursales
 from backend.CategoriasGastos.tabla import CategoriasGastos
 from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
+from backend.InvitacionesLaborales.tabla import InvitacionesLaborales, SucursalesInvitacion
+from backend.Sesiones.tabla import Sesiones
+from backend.RecuperacionesClave.tabla import RecuperacionesClave
 
 #EJEMPLOS  FUTUROS:
 # from backend.empresas.model import Empresa

@@ -13,13 +13,13 @@ from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 class DescuentoService():
 
     @staticmethod
-    def crear_descuento_service(json: Revisar_Json_Crear_Descuento, db: Session):
-        empresa = repo_empresa.buscar_empresa_por_id(db, json.id_empresa)
+    def crear_descuento_service(json: Revisar_Json_Crear_Descuento, db: Session, id_empresa: int):
+        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_descuento_por_nombre(db, json.id_empresa, json.nombre)
+        look_up = repo.buscar_descuento_por_nombre(db, id_empresa, json.nombre)
         if look_up is not None:
             raise RecursoDuplicadoError("Ya existe un descuento con ese nombre en la empresa")
 
@@ -27,7 +27,7 @@ class DescuentoService():
             raise HTTPException(status_code=422, detail="El porcentaje del descuento debe estar entre 0 y 100")
 
         nuevo_descuento = Descuentos(
-            id_empresa=json.id_empresa,
+            id_empresa=id_empresa,
             nombre=json.nombre,
             tipo_descuento=json.tipo_descuento,
             valor=json.valor

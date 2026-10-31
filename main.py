@@ -20,15 +20,22 @@ from backend.PagosSucursales import router as routerpagossucursales
 
 from backend.DisponibilidadProductos import router as routerdisponibilidadproductos
 
+from backend.Sesiones import router as routersesiones
+from backend.RecuperacionesClave import router as routerrecuperaciones
+from backend.InvitacionesLaborales import router as routerinvitaciones
 from core.schema import RespuestaError
+from utils.autorizacion import autorizar_ruta, obtener_sesion
 
-app = FastAPI(responses={
+app = FastAPI(dependencies=[Depends(autorizar_ruta)], docs_url=None, redoc_url=None, openapi_url=None, responses={
     404: {"model": RespuestaError, "description": "Registro no encontrado"},
     409: {"model": RespuestaError, "description": "Registro duplicado"},
     422: {"model": RespuestaError, "description": "Datos invalidos"},
 })
 
 
+app.include_router(routerinvitaciones.router)
+app.include_router(routersesiones.router)
+app.include_router(routerrecuperaciones.router)
 app.include_router(routerempresas.router)
 app.include_router(routercategorias.router)
 app.include_router(routerproductos.router)
@@ -52,3 +59,20 @@ def salud(db: Session = Depends(abrir_puerta_bd)):
     return {"servicio": "disponible", "base_datos": "conectada"}
 
 eg.directorio(app)
+
+
+@app.get("/openapi.json", include_in_schema=False)
+def esquema_privado():
+    return app.openapi()
+
+
+@app.get("/docs", include_in_schema=False)
+def documentacion_privada():
+    from fastapi.openapi.docs import get_swagger_ui_html
+    return get_swagger_ui_html(openapi_url="/openapi.json", title="Turno Group")
+
+
+@app.get("/redoc", include_in_schema=False)
+def redoc_privado():
+    from fastapi.openapi.docs import get_redoc_html
+    return get_redoc_html(openapi_url="/openapi.json", title="Turno Group")

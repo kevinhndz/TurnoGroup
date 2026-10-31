@@ -58,12 +58,23 @@ def db():
 
 
 @pytest.fixture
-def client(db):
+def client(db, datos, monkeypatch, request):
+    from core.config import revision
+    monkeypatch.setattr(revision, "COOKIE_SEGURA", False)
+    monkeypatch.setattr(revision, "ALTA_PUBLICA_HABILITADA", True)
+    modulo = request.node.callspec.params.get("modulo") if hasattr(request.node, "callspec") else None
+    if modulo in ("usuarios", "empresas"):
+        db.get(Usuarios, datos["usuario_autorizado"]).rol_plataforma = "Superadministrador"
+        db.commit()
     def abrir_base_pruebas():
-        yield db
+        try:
+            yield db
+        finally:
+            db.rollback()
     app.dependency_overrides[abrir_puerta_bd] = abrir_base_pruebas
     try:
-        with TestClient(app) as cliente:
+        with TestClient(app, headers={"X-Solicitud":"TurnoGroup"}) as cliente:
+            cliente.cookies.set("sesion_turnogroup", "token-local-pruebas-autorizacion", domain="testserver.local")
             yield cliente
     finally:
         app.dependency_overrides.clear()
@@ -82,8 +93,22 @@ def datos(db):
     db.flush()
     productos = [Productos(id_empresa=empresas[i].id, id_categoria=categorias[i].id, nombre="Producto " + str(i), precio=75) for i in range(2)]
     db.add_all(productos)
+    from datetime import datetime, timedelta
+    from backend.VinculosLaborales.tabla import VinculosLaborales
+    from backend.Sesiones.tabla import Sesiones
+    from utils.token import proteger_token_sesion
+    autorizado = Usuarios(nombre="Gerente de pruebas", correo="gerente@example.com")
+    db.add(autorizado)
+    db.flush()
+    vinculo = VinculosLaborales(id_usuario=autorizado.id, id_empresa=empresas[0].id, rol="Gerente")
+    db.add(vinculo)
+    db.flush()
+    sesion = Sesiones(id_usuario=autorizado.id, id_vinculo_laboral=vinculo.id, id_sucursal=sucursales[0].id,
+                      token_protegido=proteger_token_sesion("token-local-pruebas-autorizacion"),
+                      fecha_inicio=datetime.utcnow(), vencimiento=datetime.utcnow()+timedelta(hours=8))
+    db.add(sesion)
     db.commit()
-    return {"empresa": empresas[0].id, "otra_empresa": empresas[1].id,
+    return {"usuario_autorizado": autorizado.id, "vinculo": vinculo.id, "sesion": sesion.id, "empresa": empresas[0].id, "otra_empresa": empresas[1].id,
             "sucursal": sucursales[0].id, "otra_sucursal": sucursales[1].id,
             "categoria": categorias[0].id, "otra_categoria": categorias[1].id,
             "producto": productos[0].id, "otro_producto": productos[1].id,

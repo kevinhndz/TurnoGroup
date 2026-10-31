@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class Revisar_Json_Crear_Sucursal(BaseModel):
-    id_empresa: int = Field(gt=0)
     nombre: str = Field(min_length=2, max_length=100)
     direccion: str = Field(min_length=5, max_length=255)
     telefono: Optional[str] = Field(default=None, min_length=8, max_length=20)
@@ -23,6 +22,7 @@ class Revisar_Json_Editar_Sucursal(BaseModel):
 
 
 class RespuestaSucursalCreada(Revisar_Json_Crear_Sucursal):
+    id_empresa: int
     id: int
     activo: bool
 

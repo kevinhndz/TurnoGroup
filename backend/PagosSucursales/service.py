@@ -14,8 +14,8 @@ from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 class PagoSucursalService():
 
     @staticmethod
-    def crear_pago_sucursal_service(json: Revisar_Json_Crear_Pago_Sucursal, id_empresa: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, json.id_sucursal, id_empresa)
+    def crear_pago_sucursal_service(json: Revisar_Json_Crear_Pago_Sucursal, id_empresa: int, db: Session, id_sucursal: int):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
 
@@ -23,12 +23,12 @@ class PagoSucursalService():
         if opcion is None:
             raise RecursoNoEncontradoError("No se encontro la opcion del sistema")
 
-        look_up = repo.buscar_pago_sucursal(db, json.id_sucursal, json.id_metodo_pago)
+        look_up = repo.buscar_pago_sucursal(db, id_sucursal, json.id_metodo_pago)
         if look_up is not None:
             raise RecursoDuplicadoError("La opcion ya esta configurada en esta sucursal")
 
         nuevo_pago_sucursal = PagosSucursales(
-            id_sucursal=json.id_sucursal,
+            id_sucursal=id_sucursal,
             id_metodo_pago=json.id_metodo_pago,
             habilitado=json.habilitado,
         )

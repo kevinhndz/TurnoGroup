@@ -3,7 +3,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Revisar_Json_Crear_Pago_Sucursal(BaseModel):
-    id_sucursal: int = Field(gt=0)
     id_metodo_pago: int = Field(gt=0)
     habilitado: bool = False
 

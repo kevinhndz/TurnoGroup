@@ -4,7 +4,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Revisar_Json_Crear_Configuracion_Impuestos(BaseModel):
-    id_empresa: int = Field(gt=0)
     nombre: Optional[str] = Field(default=None, min_length=1, max_length=80)
     porcentaje: Decimal = Field(ge=0, le=100, max_digits=6, decimal_places=3)
     precios_incluyen_impuesto: bool

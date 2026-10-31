@@ -21,7 +21,7 @@ def caso(modulo, datos):
     params = {} if modulo in ("empresas", "usuarios") else {"id_empresa": empresa}
     if modulo == "mesas":
         params["id_sucursal"] = datos["sucursal"]
-    body = cuerpos[modulo]
+    body = {campo:valor for campo,valor in cuerpos[modulo].items() if campo not in ("id_empresa", "id_sucursal")}
     crear_params = {"id_empresa": empresa} if modulo == "mesas" else {}
     return "/" + modulo + "/", body, params, crear_params
 
@@ -125,13 +125,12 @@ def test_limite_entre_empresas(client, datos, modulo):
     ruta, creado, params = crear(client, modulo, datos)
     ajenos = {**params, "id_empresa": datos["otra_empresa"]}
     detalle = ruta + str(creado["id"])
-    assert client.get(detalle, params=ajenos).status_code == 404
+    assert client.get(detalle, params=ajenos).status_code == 403
     cambio = {"porcentaje": 10} if modulo == "configuracion-impuestos" else {"nombre": "Cambio ajeno"}
-    assert client.patch(detalle, params=ajenos, json=cambio).status_code == 404
-    assert client.post(detalle + "/desactivar", params=ajenos).status_code == 404
+    assert client.patch(detalle, params=ajenos, json=cambio).status_code == 403
+    assert client.post(detalle + "/desactivar", params=ajenos).status_code == 403
     if modulo != "mesas":
-        listado = client.get(ruta, params=ajenos).json()
-        assert all(item["id"] != creado["id"] for item in listado["data"])
+        assert client.get(ruta, params=ajenos).status_code == 403
 
 
 @pytest.mark.parametrize("modulo", [m for m in MODULOS if m != "configuracion-impuestos"])
@@ -167,7 +166,7 @@ def test_campos_opcionales_se_pueden_limpiar(client, datos, modulo, campo):
 
 
 def test_sucursal_principal_no_se_duplica_al_reactivar(client, datos):
-    body = {"id_empresa": datos["empresa"], "nombre": "Principal A", "direccion": "Direccion de prueba", "es_principal": True}
+    body = {"nombre": "Principal A", "direccion": "Direccion de prueba", "es_principal": True}
     primera = client.post('/sucursales/', json=body).json()
     params = {"id_empresa": datos["empresa"]}
     assert client.post(f'/sucursales/{primera["id"]}/desactivar', params=params).status_code == 200

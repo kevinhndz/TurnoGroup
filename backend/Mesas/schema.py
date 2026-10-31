@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class Revisar_Json_Crear_Mesa(BaseModel):
-    id_sucursal: int = Field(gt=0)
     nombre: str = Field(min_length=1, max_length=60)
     capacidad: Optional[int] = Field(default=None, gt=0)
 

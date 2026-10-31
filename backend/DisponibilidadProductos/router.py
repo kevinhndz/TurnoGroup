@@ -1,3 +1,4 @@
+from utils.autorizacion import obtener_empresa, obtener_sucursal
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Query, Response
 from sqlalchemy.orm import Session
@@ -17,16 +18,17 @@ router = APIRouter(prefix="/disponibilidad-productos", tags=["Disponibilidad de 
 @router.post("/", response_model=RespuestaDisponibilidadProducto, status_code=201)
 def crear_disponibilidad_producto(
     json: Revisar_Json_Crear_Disponibilidad_Producto,
-    id_empresa: int = Query(..., gt=0),
+    id_empresa: int = Depends(obtener_empresa),
+    id_sucursal: int = Depends(obtener_sucursal),
     db: Session = Depends(abrir_puerta_bd)
 ):
-    return service.crear_disponibilidad_producto_service(json, id_empresa, db)
+    return service.crear_disponibilidad_producto_service(json, id_empresa, db, id_sucursal)
 
 
 @router.get("/", response_model=RespuestaPaginada[RespuestaDisponibilidadProducto])
 def ver_disponibilidad_productos(
-    id_sucursal: int = Query(..., gt=0),
-    id_empresa: int = Query(..., gt=0),
+    id_sucursal: int = Depends(obtener_sucursal),
+    id_empresa: int = Depends(obtener_empresa),
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     db: Session = Depends(abrir_puerta_bd)
@@ -38,7 +40,7 @@ def ver_disponibilidad_productos(
 def ver_disponibilidad_producto(
     id_producto: Annotated[int, Path(gt=0)],
     id_sucursal: Annotated[int, Path(gt=0)],
-    id_empresa: int = Query(..., gt=0),
+    id_empresa: int = Depends(obtener_empresa),
     db: Session = Depends(abrir_puerta_bd)
 ):
     return service.ver_disponibilidad_producto_service(id_producto, id_sucursal, id_empresa, db)
@@ -49,7 +51,7 @@ def editar_disponibilidad_producto(
     id_producto: Annotated[int, Path(gt=0)],
     id_sucursal: Annotated[int, Path(gt=0)],
     json: Revisar_Json_Editar_Disponibilidad_Producto,
-    id_empresa: int = Query(..., gt=0),
+    id_empresa: int = Depends(obtener_empresa),
     db: Session = Depends(abrir_puerta_bd)
 ):
     return service.editar_disponibilidad_producto_service(json, id_producto, id_sucursal, id_empresa, db)
@@ -59,7 +61,7 @@ def editar_disponibilidad_producto(
 def retirar_disponibilidad_producto(
     id_producto: Annotated[int, Path(gt=0)],
     id_sucursal: Annotated[int, Path(gt=0)],
-    id_empresa: int = Query(..., gt=0),
+    id_empresa: int = Depends(obtener_empresa),
     db: Session = Depends(abrir_puerta_bd)
 ):
     service.retirar_disponibilidad_producto_service(id_producto, id_sucursal, id_empresa, db)

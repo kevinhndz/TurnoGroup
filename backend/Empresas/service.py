@@ -9,7 +9,7 @@ from backend.Empresas.tabla import Empresas
 class EmpresaService():
 
     @staticmethod
-    def crear_empresa_service(json: Revisar_Json_Nueva_Empresa, db: Session):
+    def crear_empresa_service(json: Revisar_Json_Nueva_Empresa, db: Session, usuario, sesion):
         look_up = repo.buscar_empresa(db, json.nombre)
         if look_up is not None:
             raise RecursoDuplicadoError("Ya existe una empresa con ese nombre")
@@ -21,11 +21,22 @@ class EmpresaService():
             zona_horaria=json.zona_horaria,
             codigo_moneda=json.codigo_moneda
         )
-        return repo.guardar_nueva_empresa(db, nueva_empresa)
+        from backend.VinculosLaborales.tabla import VinculosLaborales
+        db.add(nueva_empresa)
+        db.flush()
+        if usuario.rol_plataforma != "Superadministrador":
+            vinculo = VinculosLaborales(id_usuario=usuario.id, id_empresa=nueva_empresa.id, rol="Gerente")
+            db.add(vinculo)
+            db.flush()
+            sesion.id_vinculo_laboral = vinculo.id
+            sesion.id_sucursal = None
+        db.commit()
+        db.refresh(nueva_empresa)
+        return nueva_empresa
 
     @staticmethod
-    def listar_empresas_service(pagina_actual: int, limite: int, db: Session):
-        total, lista_empresas = repo.listar_empresas(db, pagina_actual, limite)
+    def listar_empresas_service(pagina_actual: int, limite: int, db: Session, id_empresa=None):
+        total, lista_empresas = repo.listar_empresas(db, pagina_actual, limite, id_empresa)
         total_paginas = (total + limite - 1) // limite
         return {
             "total": total,

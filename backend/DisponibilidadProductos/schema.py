@@ -5,7 +5,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class Revisar_Json_Crear_Disponibilidad_Producto(BaseModel):
     id_producto: int = Field(gt=0)
-    id_sucursal: int = Field(gt=0)
     disponible: bool = True
     precio_especial: Optional[Decimal] = Field(default=None, ge=0, max_digits=12, decimal_places=2)
 

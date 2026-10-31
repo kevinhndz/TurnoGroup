@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta, timezone
+from secrets import token_urlsafe
+from hashlib import sha256
 from jose import JWTError, jwt
 from core.config import revision as settings
 from core.exceptions import AccesoProhibidoError
@@ -33,3 +35,11 @@ def verificar_token(token: str) -> dict:
 
     except JWTError:
         raise AccesoProhibidoError("Token invalido o sesion expirada") from None
+
+
+def crear_token_sesion() -> str:
+    return token_urlsafe(32)
+
+
+def proteger_token_sesion(token: str) -> str:
+    return sha256(token.encode()).hexdigest()

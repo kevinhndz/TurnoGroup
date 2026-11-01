@@ -118,7 +118,7 @@ function Interior() {
   return (
     <div className="tg-wizard">
       <header className="tg-wizard-header">
-        <Link href="/" className="tg-brand">
+        <Link href="/panel" className="tg-brand">
           Turno Group
           <span />
         </Link>

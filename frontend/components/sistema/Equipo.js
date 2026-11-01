@@ -6,7 +6,7 @@ import { useDatos } from './Datos';
 import { Campo, Mensaje, Modal, Vacio } from './Controles';
 import Formulario from './Formulario';
 
-const roles = ['Gerente', 'Administrador', 'Mesero', 'Cajero'];
+const roles = ['Gerente', 'Administrador', 'Mesero'];
 
 export default function Equipo() {
   const [pagina, setPagina] = useState(1);

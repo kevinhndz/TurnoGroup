@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 export const runtime = 'nodejs';
 
 const colecciones = new Set([
+  'bitacora',
   'usuarios',
   'pedidos',
   'reservas',
@@ -15,7 +16,6 @@ const colecciones = new Set([
   'mesas',
   'configuracion-impuestos',
   'descuentos',
-  'categorias-gastos',
   'vinculos-laborales',
   'invitaciones-laborales',
   'tipos-servicio',

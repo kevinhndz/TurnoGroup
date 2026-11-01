@@ -65,6 +65,17 @@ function Contenido({ editar }) {
   }, [sesion.id_sucursal, mesasHabilitadas]);
 
   useEffect(() => {
+    function sincronizar(event) {
+      if (event.detail?.clave === claveCarrito && Array.isArray(event.detail.lineas)) {
+        setCarrito(event.detail.lineas);
+        setPaso('catalogo');
+      }
+    }
+    window.addEventListener('turno-carrito', sincronizar);
+    return () => window.removeEventListener('turno-carrito', sincronizar);
+  }, [claveCarrito]);
+
+  useEffect(() => {
     try {
       const guardado = JSON.parse(sessionStorage.getItem(claveCarrito) || '[]');
       const lineas = Array.isArray(guardado) ? guardado : guardado.lineas;

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '../../lib/api';
 import { usarSesion } from './Sesion';
@@ -24,6 +24,7 @@ function FormularioInvitacion() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [ocupado, setOcupado] = useState(false);
+  const [codigo, setCodigo] = usarCodigoInvitacion();
   if (sesion.usuario.rol_plataforma === 'Superadministrador')
     return <p>Las invitaciones laborales se aceptan con una cuenta de usuario.</p>;
   return (
@@ -52,6 +53,7 @@ function FormularioInvitacion() {
             if (autorizado)
               await cambiarContexto(autorizado.id, autorizado.sucursales[0]?.id || null);
             await actualizar();
+            sessionStorage.removeItem('turno-invitacion');
             router.replace('/panel');
           } catch (fallo) {
             setError(fallo.message);
@@ -63,6 +65,8 @@ function FormularioInvitacion() {
         <Campo label="Código de invitación">
           <input
             name="codigo"
+            value={codigo}
+            onChange={(e) => setCodigo(e.target.value)}
             autoComplete="off"
             required
             minLength={40}
@@ -83,6 +87,7 @@ function RegistroInvitado() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [ocupado, setOcupado] = useState(false);
+  const [codigo, setCodigo] = usarCodigoInvitacion();
   return (
     <main id="contenido" className="tg-loading">
       <section className="tg-card tg-narrow">
@@ -108,6 +113,7 @@ function RegistroInvitado() {
                 body: Object.fromEntries(datos),
               });
               await actualizar();
+              sessionStorage.removeItem('turno-invitacion');
               router.replace('/panel');
             } catch (fallo) {
               setError(fallo.message);
@@ -119,6 +125,8 @@ function RegistroInvitado() {
           <Campo label="Código de invitación">
             <input
               name="codigo"
+              value={codigo}
+              onChange={(e) => setCodigo(e.target.value)}
               required
               minLength={40}
               maxLength={128}
@@ -149,4 +157,19 @@ function RegistroInvitado() {
       </section>
     </main>
   );
+}
+
+function usarCodigoInvitacion() {
+  const [codigo, setCodigo] = useState('');
+  useEffect(() => {
+    try {
+      const nuevo = new URLSearchParams(window.location.hash.slice(1)).get('codigo');
+      if (nuevo && nuevo.length >= 40 && nuevo.length <= 128) {
+        setCodigo(nuevo);
+        sessionStorage.setItem('turno-invitacion', nuevo);
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      } else setCodigo(sessionStorage.getItem('turno-invitacion') || '');
+    } catch {}
+  }, []);
+  return [codigo, setCodigo];
 }

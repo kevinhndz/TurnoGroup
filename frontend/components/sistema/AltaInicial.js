@@ -86,6 +86,19 @@ export default function AltaInicial() {
       if (sinServicios)
         throw new Error(`Activa al menos un servicio en ${sinServicios.nombre}.`);
     }
+    if (punto >= 3) {
+      const sinMesas = registro.sucursales.find(
+        (item) =>
+          Object.values(item.servicios).some(
+            (opcion) => opcion.habilitado && opcion.mesas_habilitadas,
+          ) &&
+          (!Number.isInteger(item.cantidad_mesas) ||
+            item.cantidad_mesas < 1 ||
+            item.cantidad_mesas > 200),
+      );
+      if (sinMesas)
+        throw new Error(`Indica entre 1 y 200 mesas para ${sinMesas.nombre}.`);
+    }
     if (punto >= 4) {
       const sinPagos = registro.sucursales.find((item) => !item.pagos.length);
       if (sinPagos)
@@ -281,6 +294,21 @@ export default function AltaInicial() {
                           />
                           Gestionar mesas en este local
                         </label>
+                        {sucursal.servicios[clave]?.mesas_habilitadas && (
+                          <Campo label="¿Cuántas mesas tiene este local?">
+                            <input
+                              type="number"
+                              min={0}
+                              max={200}
+                              value={sucursal.cantidad_mesas || ''}
+                              onChange={(event) =>
+                                cambiarLocal({
+                                  cantidad_mesas: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </Campo>
+                        )}
                         <label className="tg-check">
                           <input
                             type="checkbox"

@@ -137,41 +137,60 @@ export default function ImportarProductos({
 
 export function ImagenProducto({ producto, guardar }) {
   const [error, setError] = useState('');
+  const [aviso, setAviso] = useState('');
+  const [imagen, setImagen] = useState(producto.ruta_imagen);
   const [ocupado, setOcupado] = useState(false);
   return (
-    <label className="tg-field">
-      <span>{ocupado ? 'Guardando imagen…' : 'Cambiar foto JPG / PNG · hasta 5 MB'}</span>
-      <input
-        type="file"
-        accept="image/jpeg,image/png"
-        disabled={ocupado}
-        onChange={async (event) => {
-          const archivo = event.target.files[0];
-          if (!archivo) return;
-          setError('');
-          setOcupado(true);
-          try {
-            if (archivo.size > 5 * 1024 * 1024) throw new Error('La imagen supera 5 MB.');
-            const contenido = await new Promise((resolve, reject) => {
-              const lector = new FileReader();
-              lector.onload = () => resolve(lector.result.split(',')[1]);
-              lector.onerror = () => reject(new Error('No se pudo leer la imagen.'));
-              lector.readAsDataURL(archivo);
-            });
-            await api(`/productos/${producto.id}/imagen`, {
-              method: 'POST',
-              body: { contenido },
-            });
-            guardar();
-          } catch (fallo) {
-            setError(fallo.message);
-          } finally {
-            setOcupado(false);
-            event.target.value = '';
-          }
-        }}
-      />
-      <Mensaje error={error} />
-    </label>
+    <div className="tg-photo-field">
+      <label className="tg-field">
+        <span>
+          {ocupado ? 'Guardando imagen…' : 'Cambiar foto JPG / PNG · hasta 5 MB'}
+        </span>
+        <input
+          type="file"
+          accept="image/jpeg,image/png"
+          disabled={ocupado}
+          onChange={async (event) => {
+            const archivo = event.target.files[0];
+            if (!archivo) return;
+            setError('');
+            setAviso('');
+            setOcupado(true);
+            try {
+              if (archivo.size > 5 * 1024 * 1024)
+                throw new Error('La imagen supera 5 MB.');
+              const contenido = await new Promise((resolve, reject) => {
+                const lector = new FileReader();
+                lector.onload = () => resolve(lector.result.split(',')[1]);
+                lector.onerror = () => reject(new Error('No se pudo leer la imagen.'));
+                lector.readAsDataURL(archivo);
+              });
+              const actualizado = await api(`/productos/${producto.id}/imagen`, {
+                method: 'POST',
+                body: { contenido },
+              });
+              setImagen(actualizado.ruta_imagen);
+              setAviso(`Foto actualizada correctamente: ${archivo.name}`);
+              guardar();
+            } catch (fallo) {
+              setError(fallo.message);
+            } finally {
+              setOcupado(false);
+              event.target.value = '';
+            }
+          }}
+        />
+      </label>
+      {imagen && (
+        <img
+          className="tg-photo-preview"
+          src={`/api/backend/productos/${producto.id}/imagen?v=${encodeURIComponent(imagen)}`}
+          alt={`Foto actual de ${producto.nombre}`}
+          width={72}
+          height={72}
+        />
+      )}
+      <Mensaje error={error} aviso={aviso} />
+    </div>
   );
 }

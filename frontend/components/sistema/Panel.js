@@ -11,9 +11,9 @@ import Configuracion from './Configuracion';
 import Disponibilidad from './Disponibilidad';
 import Equipo from './Equipo';
 import Cuenta from './Cuenta';
+import Bitacora from './Bitacora';
 import Pedidos from './Pedidos';
 import Reservas from './Reservas';
-import Caja from './Caja';
 import Finanzas from './Finanzas';
 import Suscripcion from './Suscripcion';
 import { EmpresasPlataforma, UsuariosPlataforma, AsignarGerente } from './Plataforma';
@@ -33,6 +33,7 @@ function Contenido({ seccion }) {
   if (seccion === 'cuenta') return <Cuenta />;
   if (!seccion) return <Inicio />;
   if (superadmin) {
+    if (seccion === 'bitacora') return <Bitacora />;
     if (seccion === 'empresas') return <EmpresasPlataforma />;
     if (seccion === 'usuarios') return <UsuariosPlataforma />;
     if (seccion === 'asignar-gerente') return <AsignarGerente />;
@@ -55,7 +56,6 @@ function Contenido({ seccion }) {
       'categorias',
       'sucursales',
       'descuentos',
-      'categorias-gastos',
       'configuracion',
       'equipo',
     ].includes(seccion) &&
@@ -78,6 +78,7 @@ function Contenido({ seccion }) {
     );
   if (seccion === 'configuracion') return <Configuracion />;
   if (seccion === 'equipo') return <Equipo />;
+  if (seccion === 'bitacora') return <Bitacora />;
   if (seccion === 'pedidos') return <Pedidos />;
   if (seccion === 'reservas')
     return reservasHabilitadas ? (
@@ -85,8 +86,6 @@ function Contenido({ seccion }) {
     ) : (
       <Vacio titulo="Las reservas están deshabilitadas" />
     );
-  if (seccion === 'caja')
-    return gerente || sesion.rol_empresa === 'Cajero' ? <Caja /> : <SinPermiso />;
   if (seccion === 'finanzas') return gerente ? <Finanzas /> : <SinPermiso />;
   if (seccion === 'suscripcion') return gerente ? <Suscripcion /> : <SinPermiso />;
   return <SinPermiso />;

@@ -7,6 +7,7 @@ import Icon from '../Icon';
 import { AccesoPrivado, usarSesion } from './Sesion';
 import { Mensaje } from './Controles';
 import { api } from '../../lib/api';
+import CarritoPendiente from './CarritoPendiente';
 
 export function SelectorContexto() {
   const { sesion, cambiarContexto, version } = usarSesion();
@@ -129,47 +130,85 @@ function Interior({ children }) {
     setMenu(false);
   }, [pathname]);
 
-  const enlaces = superadmin
+  const grupos = superadmin
     ? [
-        ['Inicio', '/panel', 'chart'],
-        ['Empresas', '/panel/empresas', 'store'],
-        ['Usuarios', '/panel/usuarios', 'team'],
-        ['Asignar gerente', '/panel/asignar-gerente', 'team'],
+        {
+          nombre: 'Inicio',
+          icono: 'chart',
+          enlaces: [
+            ['Resumen', '/panel'],
+            ['Bitácora', '/panel/bitacora'],
+          ],
+        },
+        {
+          nombre: 'Plataforma',
+          icono: 'store',
+          enlaces: [
+            ['Empresas', '/panel/empresas'],
+            ['Usuarios', '/panel/usuarios'],
+            ['Asignar gerente', '/panel/asignar-gerente'],
+          ],
+        },
       ]
     : [
-        ['Inicio', '/panel', 'chart'],
-        ['Pedidos', '/panel/pedidos', 'receipt'],
-        ...(gerente
-          ? [
-              ['Productos', '/panel/productos', 'coffee'],
-              ['Categorías', '/panel/categorias', 'book'],
-            ]
-          : []),
-        ...(gerente || sesion.rol_empresa === 'Administrador'
-          ? [['Disponibilidad por local', '/panel/disponibilidad', 'store']]
-          : []),
-        ...(gerente
-          ? [
-              ['Sucursales', '/panel/sucursales', 'store'],
-              ['Empleados', '/panel/equipo', 'team'],
-            ]
-          : []),
-        ...(mesasHabilitadas ? [['Mesas', '/panel/mesas', 'table']] : []),
-        ...(gerente
-          ? [
-              ['Configuración', '/panel/configuracion', 'menu'],
-              ['Categorías de gastos', '/panel/categorias-gastos', 'chart'],
-            ]
-          : []),
-        ...(reservasHabilitadas ? [['Reservas', '/panel/reservas', 'table']] : []),
-        ...(sesion.rol_empresa === 'Cajero' || gerente
-          ? [['Caja diaria', '/panel/caja', 'money']]
-          : []),
-        ...(gerente ? [['Plan y facturación', '/panel/suscripcion', 'money']] : []),
-        ...(gerente && sesion.finanzas_habilitadas
-          ? [['Finanzas', '/panel/finanzas', 'chart']]
-          : []),
+        {
+          nombre: 'Inicio',
+          icono: 'chart',
+          enlaces: [
+            ['Resumen', '/panel'],
+            ['Bitácora', '/panel/bitacora'],
+          ],
+        },
+        {
+          nombre: 'Operación',
+          icono: 'receipt',
+          enlaces: [
+            ['Pedidos', '/panel/pedidos'],
+            ['Nuevo pedido', '/nuevo-pedido'],
+            ...(mesasHabilitadas ? [['Mesas', '/panel/mesas']] : []),
+            ...(reservasHabilitadas ? [['Reservas', '/panel/reservas']] : []),
+          ],
+        },
+        {
+          nombre: 'Catálogo',
+          icono: 'coffee',
+          enlaces: [
+            ...(gerente
+              ? [
+                  ['Productos', '/panel/productos'],
+                  ['Categorías', '/panel/categorias'],
+                ]
+              : []),
+            ...(gerente || sesion.rol_empresa === 'Administrador'
+              ? [['Disponibilidad por local', '/panel/disponibilidad']]
+              : []),
+          ],
+        },
+        {
+          nombre: 'Administración',
+          icono: 'store',
+          enlaces: [
+            ...(gerente
+              ? [
+                  ['Sucursales', '/panel/sucursales'],
+                  ['Empleados', '/panel/equipo'],
+                  ['Configuración', '/panel/configuracion'],
+                  ['Configuración inicial', '/configuracion-inicial'],
+                  ...(sesion.finanzas_habilitadas
+                    ? [['Finanzas', '/panel/finanzas']]
+                    : []),
+                  ['Plan y facturación', '/panel/suscripcion'],
+                ]
+              : []),
+          ],
+        },
       ];
+  const grupoActual = grupos.find((grupo) =>
+    grupo.enlaces.some(([, href]) => href === pathname),
+  )?.nombre;
+  const [grupoElegido, setGrupoElegido] = useState(null);
+  const grupoAbierto =
+    grupoElegido?.ruta === pathname ? grupoElegido.nombre : grupoActual;
   async function salir() {
     setSaliendo(true);
     try {
@@ -202,24 +241,53 @@ function Interior({ children }) {
         </Link>
         <span className="tg-sidebar-caption">EL ORDEN DETRÁS DEL SERVICIO</span>
         <nav aria-label="Panel de gestión">
-          {enlaces.map(([label, href, icono]) => (
-            <Link
-              href={href}
-              key={href}
-              aria-current={pathname === href ? 'page' : undefined}
-              className={pathname === href ? 'is-current' : ''}
-            >
-              <Icon name={icono} size={19} />
-              {label}
-            </Link>
-          ))}
+          {grupos
+            .filter((grupo) => grupo.enlaces.length)
+            .map((grupo, indice) => {
+              const abierto = grupoAbierto === grupo.nombre;
+              const activo = grupoActual === grupo.nombre;
+              return (
+                <div className="tg-nav-group" key={grupo.nombre}>
+                  <button
+                    type="button"
+                    className={`tg-nav-group-button ${activo ? 'is-active' : ''}`}
+                    aria-expanded={abierto}
+                    aria-controls={`tg-nav-group-${indice}`}
+                    onClick={() =>
+                      setGrupoElegido({
+                        ruta: pathname,
+                        nombre: abierto ? null : grupo.nombre,
+                      })
+                    }
+                  >
+                    <Icon name={grupo.icono} size={19} />
+                    <span>{grupo.nombre}</span>
+                    <span className="tg-nav-chevron" aria-hidden="true">
+                      ⌄
+                    </span>
+                  </button>
+                  <div
+                    id={`tg-nav-group-${indice}`}
+                    className="tg-nav-children"
+                    hidden={!abierto}
+                  >
+                    {grupo.enlaces.map(([label, href]) => (
+                      <Link
+                        href={href}
+                        key={href}
+                        aria-current={pathname === href ? 'page' : undefined}
+                        className={pathname === href ? 'is-current' : ''}
+                        onClick={() => setMenu(false)}
+                      >
+                        {label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
         </nav>
         <div className="tg-sidebar-bottom">
-          {gerente && (
-            <Link href="/configuracion-inicial" className="tg-setup-link">
-              Configuración inicial <Icon name="arrow" size={16} />
-            </Link>
-          )}
           <Link href="/invitacion">Aceptar invitación</Link>
           <Link href="/panel/cuenta">Mi cuenta</Link>
           <button onClick={salir} disabled={saliendo}>
@@ -246,6 +314,7 @@ function Interior({ children }) {
             </strong>
             <span>{empresa?.tipo_negocio || 'Gestión presencial'}</span>
           </div>
+          {!superadmin && <CarritoPendiente />}
           <SelectorContexto />
           <Link href="/panel/cuenta" className="tg-user">
             <span className="tg-avatar">

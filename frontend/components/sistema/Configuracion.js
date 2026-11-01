@@ -10,6 +10,7 @@ import { Mensaje, Vacio } from './Controles';
 import Formulario from './Formulario';
 import Crud from './Crud';
 import Icon from '../Icon';
+import PrepararMesas from './PrepararMesas';
 
 export function Negocio({ crear = false, despues }) {
   const { sesion, actualizar } = usarSesion();
@@ -242,6 +243,11 @@ export function OpcionesSucursal({ pagos = false, lectura = false }) {
           })}
         </div>
       )}
+      {!pagos &&
+        !lectura &&
+        datos.datos?.asignaciones.some(
+          (item) => item.habilitado && item.mesas_habilitadas,
+        ) && <PrepararMesas guardar={datos.recargar} />}
     </section>
   );
 }

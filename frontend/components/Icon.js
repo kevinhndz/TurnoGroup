@@ -1,4 +1,11 @@
 const paths = {
+  cart: (
+    <>
+      <path d="M3 3h2l3 12h10l3-9H6" />
+      <circle cx="9" cy="20" r="1" />
+      <circle cx="18" cy="20" r="1" />
+    </>
+  ),
   arrow: (
     <>
       <path d="M4 12h16M14 6l6 6-6 6" />

@@ -168,17 +168,6 @@ export const modulos = {
       ['valor', 'Valor'],
     ],
   },
-  'categorias-gastos': {
-    titulo: 'Categorías de gastos',
-    singular: 'categoría de gasto',
-    ruta: '/categorias-gastos/',
-    icono: 'chart',
-    detalle:
-      'Deja preparadas las clasificaciones. El registro de gastos y los reportes financieros están pendientes.',
-    estado: 'activo',
-    campos: [nombre()],
-    columnas: [['nombre', 'Categoría']],
-  },
 };
 
 export const camposEmpresa = [

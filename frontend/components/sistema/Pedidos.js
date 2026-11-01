@@ -59,7 +59,7 @@ export default function Pedidos() {
         accion.tipo === 'cancelar'
           ? { motivo: formulario.get('motivo') }
           : accion.tipo === 'cobrar'
-            ? { id_metodo_pago: Number(formulario.get('metodo')) }
+            ? { id_metodo_pago: accion.pedido.id_metodo_pago }
             : undefined;
       const resultado = await api(`/pedidos/${accion.pedido.id}/${accion.tipo}`, {
         method: 'POST',
@@ -318,7 +318,7 @@ export default function Pedidos() {
             accion.tipo === 'cancelar'
               ? '¿Confirmar cancelación?'
               : accion.tipo === 'cobrar'
-                ? 'Registrar cobro recibido'
+                ? '¿Confirmas que recibiste el pago?'
                 : 'Confirmar entrega'
           }
           cerrar={() => {
@@ -340,12 +340,12 @@ export default function Pedidos() {
             ) : accion.tipo === 'cobrar' ? (
               <>
                 <p>
-                  Confirma que ya recibiste el dinero. El sistema solo registra el cobro.
+                  Se registrará el pago con {metodo(accion.pedido.id_metodo_pago)} y el
+                  pedido quedará cerrado.
                 </p>
-                <MetodoCobro inicial={accion.pedido.id_metodo_pago} />
               </>
             ) : (
-              <p>El pedido quedará cerrado cuando también tenga registrado su cobro.</p>
+              <p>Se marcará la entrega. El estado cerrado depende del pago.</p>
             )}
             <div className="tg-form-actions">
               <button
@@ -357,41 +357,16 @@ export default function Pedidos() {
                 Volver
               </button>
               <button className="tg-button tg-primary" disabled={ocupado}>
-                {ocupado ? 'Guardando…' : 'Confirmar'}
+                {ocupado
+                  ? 'Guardando…'
+                  : accion.tipo === 'cobrar'
+                    ? 'Sí, registrar cobro'
+                    : 'Confirmar'}
               </button>
             </div>
           </form>
         </Modal>
       )}
     </>
-  );
-}
-
-function MetodoCobro({ inicial }) {
-  const datos = useDatos(async () => {
-    const [asignaciones, metodos] = await Promise.all([
-      listarTodo('/pagos-sucursales/'),
-      listarTodo('/metodos-pago/'),
-    ]);
-    return asignaciones.map((item) => ({
-      id: item.id_metodo_pago,
-      nombre: metodos.find((metodo) => metodo.id === item.id_metodo_pago)?.nombre_visible,
-    }));
-  }, []);
-  if (datos.cargando) return <p role="status">Cargando métodos…</p>;
-  if (datos.error) return <Mensaje error={datos.error} />;
-  return (
-    <Campo label="Método utilizado">
-      <select name="metodo" defaultValue={inicial} required>
-        {!datos.datos?.some((item) => item.id === inicial) && (
-          <option value="">Selecciona un método habilitado</option>
-        )}
-        {datos.datos?.map((item) => (
-          <option key={item.id} value={item.id}>
-            {item.nombre}
-          </option>
-        ))}
-      </select>
-    </Campo>
   );
 }

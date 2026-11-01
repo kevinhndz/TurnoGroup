@@ -13,7 +13,7 @@ export default function Caja() {
   const [cierre, setCierre] = useState(false);
   const [error, setError] = useState('');
   const [aviso, setAviso] = useState('');
-  const cajero = sesion.rol_empresa === 'Cajero';
+  const cajero = sesion.rol_empresa === 'Mesero';
   const datos = useDatos(async () => {
     if (!sesion.id_sucursal) return null;
     const [actual, lista, empresa] = await Promise.all([

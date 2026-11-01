@@ -8,6 +8,7 @@ import { useDatos } from './Datos';
 import { Mensaje, Modal, Vacio } from './Controles';
 import Formulario from './Formulario';
 import Icon from '../Icon';
+import PrepararMesas from './PrepararMesas';
 import ImportarProductos, { ImagenProducto } from './ImportarProductos';
 
 export default function Crud({ modulo, compacto = false, alGuardar, configuracion }) {
@@ -152,6 +153,7 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
         )}
       </div>
       <Mensaje error={error || datos.error} aviso={aviso} />
+      {modulo === 'mesas' && editable && <PrepararMesas guardar={datos.recargar} />}
       {modulo === 'productos' && editable && (
         <div className="tg-form-actions">
           <button className="tg-button tg-secondary" onClick={() => setImportando(true)}>

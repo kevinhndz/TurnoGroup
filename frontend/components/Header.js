@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ActionButton from './ActionButton';
 import Icon from './Icon';
+import { usarSesion } from './sistema/Sesion';
 
 const links = [
   ['Funciones', '#funciones'],
@@ -10,6 +11,7 @@ const links = [
   ['Contacto', '#contacto'],
 ];
 export default function Header() {
+  const { sesion } = usarSesion();
   const [open, setOpen] = useState(false);
   return (
     <header
@@ -19,7 +21,11 @@ export default function Header() {
       }}
     >
       <div className="container header-inner">
-        <a className="brand" href="#inicio" aria-label="Turno Group, inicio">
+        <a
+          className="brand"
+          href={sesion ? '/panel' : '#inicio'}
+          aria-label={sesion ? 'Turno Group, resumen' : 'Turno Group, inicio'}
+        >
           Turno Group
           <span className="brand-dot" />
         </a>

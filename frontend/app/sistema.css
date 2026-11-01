@@ -2133,3 +2133,514 @@
   height: 100%;
   object-fit: cover;
 }
+
+.tg-resume-cart {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.tg-cart-count {
+  background: #fff4;
+  min-width: 24px;
+  padding: 2px 6px;
+  border-radius: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.tg-table-picker {
+  padding: 18px;
+  border: 1px solid #e3ddd4;
+  border-radius: 8px;
+  margin: 20px 0;
+  min-width: 0;
+}
+.tg-table-picker legend {
+  padding: 0 8px;
+  font-weight: 700;
+}
+.tg-table-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 12px;
+}
+.tg-table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.tg-table-tile {
+  border: 1px solid #a4bd9f;
+  border-radius: 10px;
+  padding: 18px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  background: #f0f6ec;
+  color: #31572c;
+  cursor: pointer;
+  min-height: 150px;
+  font: inherit;
+}
+.tg-table-tile small {
+  font-size: 11px;
+}
+.tg-table-tile.is-busy {
+  background: #fcecea;
+  border-color: #d9a29c;
+  color: #953b34;
+  cursor: not-allowed;
+  opacity: 1;
+}
+.tg-table-tile.is-reserved {
+  background: #fff3dc;
+  border-color: #d8ba82;
+  color: #805714;
+  cursor: not-allowed;
+  opacity: 1;
+}
+.tg-table-tile.is-selected,
+.tg-table-picker > button[aria-pressed='true'] {
+  outline: 3px solid #9f432a;
+  outline-offset: 2px;
+}
+.tg-table-tile.is-free:hover {
+  background: #e0edd9;
+}
+.tg-photo-field {
+  display: grid;
+  gap: 8px;
+  min-width: 180px;
+  max-width: 300px;
+  white-space: normal;
+}
+.tg-photo-field input {
+  max-width: 100%;
+  font-size: 12px;
+}
+.tg-photo-preview {
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #e3ddd4;
+}
+.tg-inline-form {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+}
+.tg-inline-form .tg-field {
+  flex: 1;
+  min-width: 160px;
+}
+.tg-app button,
+.tg-orders button {
+  touch-action: manipulation;
+}
+@media (max-width: 1200px) {
+  .tg-app-header {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .tg-resume-cart {
+    margin-left: auto;
+  }
+  .tg-context {
+    order: 3;
+    width: 100%;
+  }
+}
+@media (max-width: 650px) {
+  .tg-table-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tg-resume-cart .tg-button {
+    padding: 10px;
+    font-size: 12px;
+    min-height: 44px;
+  }
+  .tg-main {
+    padding: 20px 14px;
+  }
+  .tg-app-header {
+    padding: 14px;
+  }
+  .tg-context {
+    flex-wrap: wrap;
+  }
+  .tg-context label {
+    flex: 1;
+    min-width: 120px;
+  }
+  .tg-context select {
+    max-width: 100%;
+    width: 100%;
+  }
+  .tg-table-picker {
+    padding: 12px;
+  }
+  .tg-choice-grid button {
+    min-height: 48px;
+  }
+  .tg-photo-field {
+    min-width: 140px;
+  }
+  .tg-order-header {
+    gap: 12px;
+  }
+}
+
+.tg-wizard button.tg-table-tile:disabled,
+.tg-app button.tg-table-tile:disabled {
+  opacity: 1;
+}
+
+.tg-header-business {
+  min-width: 180px;
+}
+.tg-header-business strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 650px) {
+  .tg-app-header {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 12px;
+  }
+  .tg-app-header .tg-nav-toggle {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .tg-app-header .tg-header-business {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 0;
+  }
+  .tg-app-header .tg-user {
+    grid-column: 3;
+    grid-row: 1;
+    margin: 0;
+  }
+  .tg-app-header .tg-resume-cart {
+    grid-column: 1/-1;
+    grid-row: 2;
+    margin: 0;
+    width: 100%;
+  }
+  .tg-resume-cart > .tg-button {
+    flex: 1;
+    min-height: 44px;
+  }
+  .tg-resume-cart > .tg-icon-button {
+    width: 44px;
+    height: 44px;
+  }
+  .tg-app-header .tg-context {
+    grid-column: 1/-1;
+    order: unset;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+  .tg-context label {
+    min-width: 0;
+  }
+}
+
+.tg-nav-group-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #6c6357;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tg-table-picker {
+  background: #17191c;
+  color: #e2e8f0;
+  border: 1px solid #343a42;
+  border-radius: 10px;
+  padding: 20px;
+}
+.tg-table-picker legend {
+  color: #e2e8f0;
+  background: #17191c;
+  padding: 4px 10px;
+}
+.tg-table-picker .tg-table-legend {
+  color: #cbd5e1;
+  flex-wrap: wrap;
+}
+.tg-table-picker .tg-link-button {
+  color: #f4ba9e;
+}
+.tg-table-picker .tg-table-grid {
+  background-image:
+    linear-gradient(#ffffff06 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff06 1px, transparent 1px);
+  background-size: 24px 24px;
+  padding: 18px 8px;
+  gap: 20px 12px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  border: 1px solid #343a42;
+}
+.tg-table-picker .tg-table-tile {
+  --mesa: #54c984;
+  color: #d7f4e1;
+  background: #1b211f;
+  border: 1px solid #355c43;
+  min-height: 180px;
+  padding: 16px 8px;
+}
+.tg-table-picker .tg-table-tile small {
+  color: #a7b8ac;
+}
+.tg-table-picker .tg-table-tile.is-busy {
+  --mesa: #f07171;
+  background: #2b1e20;
+  border-color: #804144;
+  color: #ffd6d6;
+}
+.tg-table-picker .tg-table-tile.is-reserved {
+  --mesa: #e9b54c;
+  background: #2b261a;
+  border-color: #78612f;
+  color: #ffe6af;
+}
+.tg-table-picker .tg-table-tile.is-selected {
+  outline: 2px solid #f9c4ac;
+  outline-offset: 3px;
+  background: #2e362b;
+}
+.tg-table-picker .tg-table-tile.is-free:hover {
+  background: #27372d;
+}
+.tg-floor-table {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 82px;
+  margin: 6px auto;
+  color: var(--mesa);
+}
+.tg-table-surface {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.tg-floor-table.is-long {
+  width: 100px;
+}
+.tg-floor-table.is-long .tg-table-surface {
+  width: 78px;
+}
+.tg-chair {
+  position: absolute;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  background: #ffffff08;
+}
+.tg-chair-top,
+.tg-chair-bottom {
+  width: 28px;
+  height: 7px;
+  left: calc(50% - 14px);
+}
+.tg-chair-top {
+  top: 0;
+}
+.tg-chair-bottom {
+  bottom: 0;
+}
+.tg-chair-left,
+.tg-chair-right {
+  height: 28px;
+  width: 7px;
+  top: 27px;
+}
+.tg-chair-left {
+  left: 0;
+}
+.tg-chair-right {
+  right: 0;
+}
+.tg-payment-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+}
+.tg-payment-options .tg-payment-option {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #ddd4c8;
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 180px;
+  text-align: left;
+  background: #f7f3ec;
+}
+.tg-payment-options .tg-payment-option.is-selected {
+  border: 2px solid #9a4023;
+  background: #f5e9df;
+  padding: 13px;
+}
+.tg-payment-art {
+  display: grid;
+  place-items: center;
+  height: 102px;
+  border-radius: 8px;
+  background: radial-gradient(ellipse at top, #e3cebc, #eee7df);
+}
+.tg-bank-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 130px;
+  height: 78px;
+  padding: 12px;
+  border: 1px solid #ffffffaa;
+  border-radius: 9px;
+  background: linear-gradient(130deg, #52596baa, #1f253dcc);
+  color: white;
+  box-shadow: 0 10px 20px #27233224;
+  backdrop-filter: blur(6px);
+  transform: rotate(-7deg);
+  font-size: 10px;
+}
+.tg-card-chip {
+  width: 22px;
+  height: 17px;
+  border-radius: 4px;
+  background: #dcc597;
+  border: 1px solid #b29765;
+}
+.tg-card-circles {
+  position: absolute;
+  right: 13px;
+  top: 15px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #efab7e;
+  box-shadow: 12px 0 #e76f51aa;
+}
+.tg-cash-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 130px;
+  height: 67px;
+  border: 5px double #5d8065;
+  border-radius: 6px;
+  background: #c3d4b6cc;
+  color: #35593a;
+  transform: rotate(-6deg);
+  box-shadow: 5px 6px 0 #9caf9633;
+}
+.tg-cash-note strong {
+  font-size: 26px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  padding: 0 12px;
+}
+.tg-cash-note span {
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+.tg-bank-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 66px;
+  height: 91px;
+  border: 3px solid #777b8a;
+  border-radius: 12px;
+  background: #eef1f8cc;
+  color: #465b71;
+  padding: 9px 2px;
+  font-size: 7px;
+  box-shadow: 0 6px 12px #33333322;
+}
+.tg-bank-app strong {
+  font-size: 24px;
+  color: #478460;
+}
+.tg-payment-option small {
+  color: #756556;
+}
+@media (max-width: 450px) {
+  .tg-table-picker {
+    padding: 12px;
+  }
+  .tg-table-picker .tg-table-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .tg-payment-options {
+    grid-template-columns: 1fr;
+  }
+  .tg-payment-options .tg-payment-option {
+    display: grid;
+    grid-template-columns: minmax(115px, 145px) minmax(0, 1fr);
+    min-height: 120px;
+    align-items: center;
+  }
+  .tg-payment-art {
+    grid-row: span 2;
+  }
+}
+.tg-nav-group-button:hover {
+  background: #f0eae1;
+}
+.tg-nav-group-button.is-active {
+  color: #994129;
+  background: #f1e5d9;
+}
+.tg-nav-group-button:focus-visible {
+  outline: 2px solid #994129;
+  outline-offset: 2px;
+}
+.tg-nav-chevron {
+  margin-left: auto;
+  font-size: 19px;
+  line-height: 1;
+}
+.tg-nav-group-button[aria-expanded='true'] .tg-nav-chevron {
+  transform: rotate(180deg);
+}
+.tg-nav-children {
+  margin: 4px 0 12px 21px;
+  padding-left: 12px;
+  border-left: 1px solid #ded4c7;
+}
+.tg-sidebar nav .tg-nav-children a {
+  min-height: 44px;
+  font-size: 12px;
+}

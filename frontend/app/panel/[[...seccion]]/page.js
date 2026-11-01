@@ -12,14 +12,13 @@ const secciones = new Set([
   'sucursales',
   'mesas',
   'descuentos',
-  'categorias-gastos',
   'configuracion',
   'equipo',
   'disponibilidad',
   'pedidos',
+  'bitacora',
   'finanzas',
   'reservas',
-  'caja',
   'suscripcion',
 ]);
 export const metadata = { title: 'Mi espacio | Turno Group' };

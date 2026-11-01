@@ -33,7 +33,11 @@ export function ProveedorSesion({ children }) {
     setCargando(false);
     try {
       for (const clave of Object.keys(sessionStorage)) {
-        if (clave.startsWith('turno-carrito:') || clave.startsWith('turno-pedido:'))
+        if (
+          clave === 'turno-invitacion' ||
+          clave.startsWith('turno-carrito:') ||
+          clave.startsWith('turno-pedido:')
+        )
           sessionStorage.removeItem(clave);
       }
     } catch {}

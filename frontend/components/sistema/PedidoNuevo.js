@@ -7,6 +7,7 @@ import { useDatos } from './Datos';
 import { Campo, Mensaje, Modal, Vacio } from './Controles';
 import { api, dinero } from '../../lib/api';
 import Icon from '../Icon';
+import SelectorMesas from './SelectorMesas';
 
 export default function PedidoNuevo({ editar = null }) {
   const { sesion } = usarSesion();
@@ -32,6 +33,7 @@ function Contenido({ editar }) {
   const [nota, setNota] = useState(null);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [verificandoOperacion, setVerificandoOperacion] = useState(false);
   const [cotizacion, setCotizacion] = useState(null);
   const [calculando, setCalculando] = useState(false);
   const [creado, setCreado] = useState(null);
@@ -47,6 +49,7 @@ function Contenido({ editar }) {
     cobrado: false,
   });
   const claveOperacion = useRef(null);
+  const restaurado = useRef(false);
   const claveCarrito = `turno-pedido:${sesion.usuario.id}:${sesion.id_empresa}:${sesion.id_sucursal}:${editar || 'nuevo'}`;
   const datos = useDatos(async () => {
     if (!sesion.id_sucursal || sesion.usuario.rol_plataforma === 'Superadministrador')
@@ -64,31 +67,78 @@ function Contenido({ editar }) {
   useEffect(() => {
     try {
       const guardado = JSON.parse(sessionStorage.getItem(claveCarrito) || '[]');
-      if (Array.isArray(guardado))
-        setCarrito(
-          guardado
-            .filter(
-              (item) =>
-                Number.isInteger(item.id_producto) &&
-                Number.isInteger(item.cantidad) &&
-                item.cantidad > 0 &&
-                item.cantidad <= 99,
+      const lineas = Array.isArray(guardado) ? guardado : guardado.lineas;
+      if (Array.isArray(lineas)) {
+        const validas = lineas
+          .filter(
+            (item) =>
+              Number.isInteger(item.id_producto) &&
+              Number.isInteger(item.cantidad) &&
+              item.cantidad > 0 &&
+              item.cantidad <= 99,
+          )
+          .map((item) => ({
+            id_producto: item.id_producto,
+            cantidad: item.cantidad,
+            nota: typeof item.nota === 'string' ? item.nota.slice(0, 300) : null,
+          }));
+        setCarrito(validas);
+        if (validas.length && !Array.isArray(guardado)) {
+          restaurado.current = true;
+          if (
+            typeof guardado.claveOperacion === 'string' &&
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+              guardado.claveOperacion,
             )
-            .map((item) => ({
-              id_producto: item.id_producto,
-              cantidad: item.cantidad,
-              nota: typeof item.nota === 'string' ? item.nota.slice(0, 300) : null,
-            })),
-        );
+          )
+            claveOperacion.current = guardado.claveOperacion;
+          if (claveOperacion.current && !editar) {
+            setVerificandoOperacion(true);
+            api(`/pedidos/operaciones/${claveOperacion.current}`)
+              .then((pedido) => {
+                setError('');
+                setCreado(pedido);
+                setCarrito([]);
+                setPaso('confirmado');
+                try {
+                  sessionStorage.removeItem(claveCarrito);
+                  window.dispatchEvent(new Event('turno-carrito'));
+                } catch {}
+              })
+              .catch((fallo) => {
+                if (fallo.estado !== 404) setError(fallo.message);
+              })
+              .finally(() => setVerificandoOperacion(false));
+          }
+
+          if (guardado.seleccion) setSeleccion(guardado.seleccion);
+          if (guardado.paso === 'revision') setPaso('revision');
+        }
+      }
     } catch {}
     setListo(true);
   }, [claveCarrito]);
   useEffect(() => {
     if (listo)
       try {
-        sessionStorage.setItem(claveCarrito, JSON.stringify(carrito));
+        if (carrito.length)
+          sessionStorage.setItem(
+            claveCarrito,
+            JSON.stringify({
+              claveOperacion: claveOperacion.current,
+              lineas: carrito,
+              seleccion,
+              paso: paso === 'revision' ? 'revision' : 'catalogo',
+              actualizado: Date.now(),
+            }),
+          );
+        else {
+          sessionStorage.removeItem(claveCarrito);
+          claveOperacion.current = null;
+        }
+        window.dispatchEvent(new Event('turno-carrito'));
       } catch {}
-  }, [carrito, listo, claveCarrito]);
+  }, [carrito, seleccion, paso, listo, claveCarrito]);
   useEffect(() => {
     if (datos.datos)
       setSeleccion((anterior) => ({
@@ -101,7 +151,7 @@ function Contenido({ editar }) {
   }, [datos.datos]);
 
   useEffect(() => {
-    if (!editar) return;
+    if (!editar || restaurado.current) return;
     let vigente = true;
     api(`/pedidos/${editar}`)
       .then((pedido) => {
@@ -120,7 +170,7 @@ function Contenido({ editar }) {
         setSeleccion({
           id_tipo_servicio: pedido.id_tipo_servicio,
           id_metodo_pago: pedido.id_metodo_pago,
-          id_mesa: pedido.id_mesa || '',
+          id_mesa: pedido.id_mesa || 'mostrador',
           id_descuento: pedido.id_descuento || '',
           cliente: pedido.cliente || '',
           telefono: pedido.telefono || '',
@@ -138,7 +188,10 @@ function Contenido({ editar }) {
   const cuerpo = {
     id_tipo_servicio: Number(seleccion.id_tipo_servicio),
     id_metodo_pago: Number(seleccion.id_metodo_pago),
-    id_mesa: seleccion.id_mesa ? Number(seleccion.id_mesa) : null,
+    id_mesa:
+      seleccion.id_mesa && seleccion.id_mesa !== 'mostrador'
+        ? Number(seleccion.id_mesa)
+        : null,
     id_descuento: seleccion.id_descuento ? Number(seleccion.id_descuento) : null,
     cliente: seleccion.cliente || null,
     telefono: seleccion.telefono || null,
@@ -148,7 +201,7 @@ function Contenido({ editar }) {
   };
   const firma = JSON.stringify(cuerpo);
   useEffect(() => {
-    if (paso !== 'revision' || !carrito.length) return;
+    if (paso !== 'revision' || !carrito.length || verificandoOperacion) return;
     const cancelar = new AbortController();
     setCotizacion(null);
     setCalculando(true);
@@ -173,7 +226,7 @@ function Contenido({ editar }) {
       clearTimeout(temporizador);
       cancelar.abort();
     };
-  }, [firma, paso, carrito.length]);
+  }, [firma, paso, carrito.length, verificandoOperacion]);
 
   if (sesion.usuario.rol_plataforma === 'Superadministrador')
     return (
@@ -251,11 +304,31 @@ function Contenido({ editar }) {
   }
   async function registrar(event) {
     event.preventDefault();
-    if (!cotizacion || calculando || enviando) return;
+    if (!cotizacion || calculando || enviando || verificandoOperacion) return;
+    if (
+      servicio?.clave_concepto === 'comer_aqui' &&
+      servicio.mesas_habilitadas &&
+      !seleccion.id_mesa
+    ) {
+      setError('Selecciona una mesa o atención en mostrador.');
+      return;
+    }
     setEnviando(true);
     setError('');
     try {
       claveOperacion.current ||= crypto.randomUUID();
+      try {
+        sessionStorage.setItem(
+          claveCarrito,
+          JSON.stringify({
+            lineas: carrito,
+            seleccion,
+            paso,
+            claveOperacion: claveOperacion.current,
+            actualizado: Date.now(),
+          }),
+        );
+      } catch {}
       const pedido = await api(editar ? `/pedidos/${editar}` : '/pedidos/', {
         method: editar ? 'PATCH' : 'POST',
         body: editar
@@ -267,6 +340,10 @@ function Contenido({ editar }) {
               total_esperado: Number(cotizacion.total).toFixed(2),
             },
       });
+      try {
+        sessionStorage.removeItem(claveCarrito);
+        window.dispatchEvent(new Event('turno-carrito'));
+      } catch {}
       setCreado(pedido);
       setCarrito([]);
       setPaso('confirmado');
@@ -376,7 +453,7 @@ function Contenido({ editar }) {
                 <header>
                   <Icon name="receipt" />
                   <div>
-                    <h2>Pedido</h2>
+                    <h2>Carrito</h2>
                     <small>
                       {carrito.reduce((n, item) => n + item.cantidad, 0)} productos
                     </small>
@@ -385,7 +462,7 @@ function Contenido({ editar }) {
                 <div className="tg-cart-lines">
                   {!lineas.length ? (
                     <Vacio
-                      titulo="Comanda vacía"
+                      titulo="Carrito vacío"
                       detalle="Selecciona productos del catálogo para armar el pedido."
                     />
                   ) : (
@@ -456,7 +533,7 @@ function Contenido({ editar }) {
                   <button
                     className="tg-link-button"
                     onClick={() => {
-                      if (window.confirm('¿Quitar los productos de esta comanda?'))
+                      if (window.confirm('¿Quitar los productos de este carrito?'))
                         setCarrito([]);
                     }}
                   >
@@ -493,35 +570,28 @@ function Contenido({ editar }) {
                 )}
                 {servicio?.clave_concepto === 'comer_aqui' &&
                   servicio.mesas_habilitadas && (
-                    <Campo label="Mesa asignada">
-                      <select
-                        value={seleccion.id_mesa}
-                        onChange={(event) => cambiar('id_mesa', event.target.value)}
-                      >
-                        <option value="">Sin mesa / mostrador</option>
-                        {d.mesas.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.nombre}
-                          </option>
-                        ))}
-                      </select>
-                    </Campo>
+                    <SelectorMesas
+                      valor={seleccion.id_mesa}
+                      cambiar={(valor) => cambiar('id_mesa', valor)}
+                      editar={editar}
+                    />
                   )}
                 <div className="tg-form-grid">
-                  <Campo
-                    label={`Nombre del cliente${servicio?.clave_concepto === 'domicilio' ? ' (requerido)' : ' (opcional)'}`}
-                  >
+                  <Campo label="Nombre del cliente (requerido)">
                     <input
                       maxLength={100}
                       value={seleccion.cliente}
-                      required={servicio?.clave_concepto === 'domicilio'}
+                      required
+                      pattern=".*\S.*"
                       onChange={(event) => cambiar('cliente', event.target.value)}
                     />
                   </Campo>
-                  <Campo label="Teléfono de contacto">
+                  <Campo label="Teléfono de contacto (requerido)">
                     <input
                       maxLength={30}
                       type="tel"
+                      required
+                      pattern=".*\S.*"
                       value={seleccion.telefono}
                       onChange={(event) => cambiar('telefono', event.target.value)}
                     />
@@ -540,19 +610,43 @@ function Contenido({ editar }) {
               </section>
               <section className="tg-card">
                 <h2>2. ¿Cómo pagará el cliente?</h2>
-                <div className="tg-choice-grid">
+                <div className="tg-choice-grid tg-payment-options">
                   {d.pagos.map((item) => (
                     <button
                       type="button"
-                      className={
+                      className={`tg-payment-option tg-payment-${item.clave_concepto} ${Number(seleccion.id_metodo_pago) === item.id_metodo_pago ? 'is-selected' : ''}`}
+                      aria-pressed={
                         Number(seleccion.id_metodo_pago) === item.id_metodo_pago
-                          ? 'is-selected'
-                          : ''
                       }
                       key={item.id_metodo_pago}
                       onClick={() => cambiar('id_metodo_pago', item.id_metodo_pago)}
                     >
-                      {item.nombre_visible}
+                      <span className="tg-payment-art" aria-hidden="true">
+                        {item.clave_concepto === 'tarjeta' ? (
+                          <span className="tg-bank-card">
+                            <span className="tg-card-chip" />
+                            <span>•••• •••• ••••</span>
+                            <span className="tg-card-circles" />
+                          </span>
+                        ) : item.clave_concepto === 'transferencia' ? (
+                          <span className="tg-bank-app">
+                            <span>Transferencia</span>
+                            <strong>✓</strong>
+                            <span>Recibida</span>
+                          </span>
+                        ) : (
+                          <span className="tg-cash-note">
+                            <strong>L</strong>
+                            <span>EFECTIVO</span>
+                          </span>
+                        )}
+                      </span>
+                      <strong>{item.nombre_visible}</strong>
+                      <small>
+                        {Number(seleccion.id_metodo_pago) === item.id_metodo_pago
+                          ? 'Seleccionado'
+                          : 'Seleccionar'}
+                      </small>
                     </button>
                   ))}
                 </div>
@@ -565,8 +659,8 @@ function Contenido({ editar }) {
                   Registrar que ya se recibió el pago
                 </label>
                 <p className="tg-muted">
-                  El dinero se cobra fuera de Turno Group. Para registrar un cobro debe
-                  haber una caja abierta.
+                  Selecciona el método con el que pagó el cliente. También puedes guardar
+                  el pedido pendiente y registrar el cobro después desde Pedidos.
                 </p>
                 <Campo label="Descuento">
                   <select
@@ -648,7 +742,7 @@ function Contenido({ editar }) {
               <Mensaje error={error} />
               <button
                 className="tg-button tg-primary tg-wide"
-                disabled={enviando || calculando || !cotizacion}
+                disabled={enviando || calculando || verificandoOperacion || !cotizacion}
               >
                 {enviando
                   ? 'Guardando…'

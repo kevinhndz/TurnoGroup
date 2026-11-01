@@ -1,4 +1,51 @@
 /* Pantallas de acceso y espacio de trabajo. */
+.tg-modal:has(.tg-cart-peek) {
+  margin: 0 0 0 auto;
+  width: min(460px, 100vw);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 18px 0 0 18px;
+  padding: 24px;
+}
+.tg-cart-peek-lines {
+  max-height: 58dvh;
+  overflow-y: auto;
+}
+.tg-cart-peek-lines article {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding-block: 18px;
+  border-bottom: 1px solid #eee5da;
+}
+.tg-cart-peek-lines img {
+  object-fit: cover;
+  border-radius: 10px;
+}
+.tg-cart-peek-lines small {
+  display: block;
+  color: #746c63;
+}
+.tg-cart-peek-lines .tg-quantity {
+  margin-top: 10px;
+}
+.tg-cart-peek footer {
+  padding-top: 20px;
+}
+.tg-cart-peek footer > .tg-button {
+  width: 100%;
+}
+@media (max-width: 600px) {
+  .tg-modal:has(.tg-cart-peek) {
+    margin: auto 0 0;
+    height: auto;
+    max-height: 90dvh;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+  }
+}
 :root {
   --tg-surface: #fffdfa;
   --tg-panel: #ffffff;

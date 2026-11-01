@@ -19,6 +19,13 @@ class GuardiaSeguridad(BaseSettings):
     SMTP_USUARIO: str = ""
     SMTP_CLAVE: str = ""
     SMTP_REMITENTE: str = ""
+    FACTURACION_MODO: Literal["simulado", "paddle"] = "simulado"
+    PADDLE_ENTORNO: Literal["sandbox", "production"] = "sandbox"
+    PADDLE_API_KEY: str = ""
+    PADDLE_CLIENT_TOKEN: str = ""
+    PADDLE_WEBHOOK_SECRET: str = ""
+    PADDLE_PRECIO_SUCURSAL: str = ""
+    PADDLE_PRECIO_FINANZAS: str = ""
     SECRET_KEY: str
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

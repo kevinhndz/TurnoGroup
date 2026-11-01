@@ -51,13 +51,15 @@ def pedido(datos, operacion, **extra):
         "clave_operacion": str(uuid4()),
         "id_tipo_servicio": operacion["servicio"],
         "id_metodo_pago": operacion["pago"],
+        "cliente": "Cliente de prueba",
+        "telefono": "9999-1234",
         "detalles": [{"id_producto": datos["producto"], "cantidad": 2}],
         **extra,
     }
 
 
 def abrir_caja(client, db, datos):
-    usar_rol(client, db, datos, "Cajero")
+    usar_rol(client, db, datos, "Mesero")
     respuesta = client.post("/cajas/", json={"monto_inicial": "100.00"})
     assert respuesta.status_code == 201, respuesta.text
     return respuesta.json()["id"]
@@ -80,8 +82,7 @@ def test_pedido_importes_y_doble_envio(client, db, datos, operacion):
     assert client.get("/pedidos/").json()["total"] == 1
 
 
-def test_pago_y_entrega_cierran_pedido_y_caja(client, db, datos, operacion):
-    caja = abrir_caja(client, db, datos)
+def test_pago_y_entrega_cierran_pedido_sin_caja(client, db, datos, operacion):
     id = client.post("/pedidos/", json=pedido(datos, operacion)).json()["id"]
     assert client.post(f"/pedidos/{id}/entregar").json()["estado"] == "Abierto"
     cobrado = client.post(
@@ -95,33 +96,41 @@ def test_pago_y_entrega_cierran_pedido_y_caja(client, db, datos, operacion):
         ).status_code
         == 409
     )
-    assert client.get("/cajas/actual").json()["efectivo_esperado"] == "250.00"
-    cierre = client.post(f"/cajas/{caja}/cerrar", json={"efectivo_contado": "245.00"})
-    assert cierre.status_code == 200, cierre.text
-    assert cierre.json()["diferencia"] == "-5.00"
-    assert (
-        client.post(
-            f"/pedidos/{id}/cancelar", json={"motivo": "Caja cerrada"}
-        ).status_code
-        == 409
-    )
-    assert (
-        client.post(f"/cajas/{caja}/cerrar", json={"efectivo_contado": 0}).status_code
-        == 409
-    )
 
 
-def test_caja_cobro_obligatoria_y_roles(client, db, datos, operacion):
-    assert client.post("/cajas/", json={"monto_inicial": 0}).status_code == 403
+@pytest.mark.parametrize("rol", ["Gerente", "Administrador", "Mesero"])
+def test_cobro_cierra_sin_entrega_para_cada_rol(client, db, datos, operacion, rol):
+    usar_rol(client, db, datos, rol)
+    creado = client.post("/pedidos/", json=pedido(datos, operacion, cobrado=True))
+    assert creado.status_code == 201, creado.text
+    assert creado.json()["estado"] == "Cerrado"
+    assert creado.json()["fecha_entrega"] is None
+    pendiente = client.post("/pedidos/", json=pedido(datos, operacion)).json()
+    assert pendiente["estado"] == "Abierto"
+    cobrado = client.post(f'/pedidos/{pendiente["id"]}/cobrar', json={"id_metodo_pago": operacion["pago"]})
+    assert cobrado.status_code == 200, cobrado.text
+    assert cobrado.json()["estado"] == "Cerrado"
+    assert cobrado.json()["fecha_entrega"] is None
+    assert client.post(f'/pedidos/{pendiente["id"]}/cobrar', json={"id_metodo_pago": operacion["pago"]}).status_code == 409
+
+
+@pytest.mark.parametrize("campo", ["cliente", "telefono"])
+@pytest.mark.parametrize("valor", [None, "", "   "])
+def test_pedido_requiere_nombre_y_telefono(client, db, datos, operacion, campo, valor):
+    assert client.post("/pedidos/", json=pedido(datos, operacion, **{campo: valor})).status_code == 422
+    assert client.get("/pedidos/").json()["total"] == 0
+
+
+def test_cobro_sin_caja_y_permisos_de_roles(client, db, datos, operacion):
     assert (
         client.post(
             "/pedidos/", json=pedido(datos, operacion, cobrado=True)
         ).status_code
-        == 409
+        == 201
     )
-    assert client.get("/pedidos/").json()["total"] == 0
+    assert client.get("/pedidos/").json()["total"] == 1
     usar_rol(client, db, datos, "Mesero")
-    assert client.get("/cajas/").status_code == 403
+    assert client.get("/cajas/").status_code == 200
     assert (
         client.get(
             "/finanzas/ventas", params={"desde": "2026-01-01", "hasta": "2026-12-31"}
@@ -221,7 +230,6 @@ def test_reservas_capacidad_horario_y_cruces(client, operacion):
 
 
 def test_finanzas_ventas_y_habilitacion(client, db, datos, operacion):
-    abrir_caja(client, db, datos)
     assert (
         client.post(
             "/pedidos/", json=pedido(datos, operacion, cobrado=True)
@@ -262,7 +270,7 @@ def test_operaciones_sucursal_ajena_no_filtran(client, db, datos, operacion):
     )
 
 
-@pytest.mark.parametrize("rol", ["Administrador", "Mesero", "Cajero"])
+@pytest.mark.parametrize("rol", ["Administrador", "Mesero"])
 @pytest.mark.parametrize(
     "ruta",
     [
@@ -378,7 +386,7 @@ def test_invitado_crea_acceso_sin_crear_otra_empresa(client, db, datos, monkeypa
         "/invitaciones-laborales/",
         json={
             "correo": "nuevo-cajero@example.com",
-            "rol": "Cajero",
+            "rol": "Mesero",
             "sucursales": [datos["sucursal"]],
         },
     )
@@ -387,12 +395,12 @@ def test_invitado_crea_acceso_sin_crear_otra_empresa(client, db, datos, monkeypa
     client.cookies.clear()
     cuerpo = {
         "codigo": codigo,
-        "nombre": "Cajero invitado",
+        "nombre": "Mesero invitado",
         "clave": "Clave de prueba personal 123",
     }
     respuesta = client.post("/invitaciones-laborales/registrar", json=cuerpo)
     assert respuesta.status_code == 201, respuesta.text
-    assert respuesta.json()["rol_empresa"] == "Cajero"
+    assert respuesta.json()["rol_empresa"] == "Mesero"
     assert respuesta.json()["id_empresa"] == datos["empresa"]
     assert db.query(Empresas).count() == anterior
     assert "clave" not in respuesta.text

@@ -1,3 +1,4 @@
+from uuid import UUID
 from typing import Literal
 from fastapi import APIRouter, Depends, Query, Path
 from typing import Annotated
@@ -13,6 +14,26 @@ from backend.Pedidos.schema import (
 from backend.Pedidos.service import PedidoService as service
 
 router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
+
+
+@router.get("/operaciones/{clave_operacion}")
+def consultar_operacion(
+    clave_operacion: UUID,
+    contexto=Depends(obtener_contexto),
+    db: Session = Depends(abrir_puerta_bd),
+):
+    return service.consultar_operacion_service(clave_operacion, db, contexto)
+
+
+@router.get("/mesas")
+def disponibilidad_mesas(
+    id_pedido: int | None = Query(None, gt=0),
+    contexto=Depends(obtener_contexto),
+    db: Session = Depends(abrir_puerta_bd),
+):
+    if id_pedido:
+        service.ver_service(id_pedido, db, contexto)
+    return service.mesas_service(db, contexto, id_pedido)
 
 
 @router.get("/catalogo")

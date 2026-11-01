@@ -194,7 +194,10 @@ class UsuarioService():
             categorias = {item.id_local: Categorias(id_empresa=empresa.id, nombre=item.nombre, orden_presentacion=item.orden_presentacion) for item in json.categorias}
             db.add_all(list(sucursales.values()) + list(categorias.values()))
             db.flush()
+            from backend.Mesas.tabla import Mesas
             for item in json.sucursales:
+                if any(servicio.habilitado and servicio.mesas_habilitadas for servicio in item.servicios.values()):
+                    db.add_all([Mesas(id_sucursal=sucursales[item.id_local].id,nombre=f'Mesa {numero}') for numero in range(1,item.cantidad_mesas+1)])
                 for clave, servicio in item.servicios.items():
                     db.add(ServiciosSucursales(id_sucursal=sucursales[item.id_local].id, id_tipo_servicio=tipos[clave], **servicio.model_dump()))
                 for clave in set(item.pagos):

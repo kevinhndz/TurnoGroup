@@ -33,7 +33,7 @@ def test_rutas_privadas_requieren_sesion(client,ruta):
     assert client.get(ruta).status_code==401
 
 
-@pytest.mark.parametrize('rol',['Administrador','Mesero','Cajero','Superadministrador'])
+@pytest.mark.parametrize('rol',['Administrador','Mesero','Superadministrador'])
 @pytest.mark.parametrize('ruta',['/configuracion-impuestos/','/categorias-gastos/','/vinculos-laborales/','/invitaciones-laborales/'])
 def test_configuracion_y_empleados_solo_gerente(client,db,datos,rol,ruta):
     usar_rol(client,db,datos,rol)
@@ -42,7 +42,7 @@ def test_configuracion_y_empleados_solo_gerente(client,db,datos,rol,ruta):
     assert client.post(ruta,json={}).status_code==esperado
 
 
-@pytest.mark.parametrize('rol',['Gerente','Administrador','Mesero','Cajero'])
+@pytest.mark.parametrize('rol',['Gerente','Administrador','Mesero'])
 @pytest.mark.parametrize('ruta',['/usuarios/','/usuarios/999999/rol-plataforma'])
 def test_roles_empresa_no_administran_plataforma(client,db,datos,rol,ruta):
     usar_rol(client,db,datos,rol)
@@ -59,7 +59,7 @@ def test_superadministrador_no_opera_clientes(client,db,datos,ruta):
     assert client.get('/usuarios/').status_code==200
 
 
-@pytest.mark.parametrize('rol',['Administrador','Mesero','Cajero'])
+@pytest.mark.parametrize('rol',['Administrador','Mesero'])
 def test_catalogo_solo_sucursal_asignada(client,db,datos,rol):
     usar_rol(client,db,datos,rol)
     segundo=Sucursales(id_empresa=datos['empresa'],nombre='Local no asignado',direccion='Direccion secundaria')
@@ -169,7 +169,7 @@ def test_invitacion_verifica_correo_y_se_acepta_una_vez(client,db,datos,monkeypa
 @pytest.mark.parametrize('caso',['vencida','revocada','sustituida','gerente_inactivo','sucursal_inactiva','cuenta_invitante_inactiva','invitante_de_plataforma'])
 def test_invitaciones_invalidas_no_crean_vinculos(client,db,datos,monkeypatch,caso):
     enviados=preparar_correo(monkeypatch)
-    body={'correo':'nuevo-invitado@example.com','rol':'Cajero','sucursales':[datos['sucursal']]}
+    body={'correo':'nuevo-invitado@example.com','rol':'Mesero','sucursales':[datos['sucursal']]}
     creada=client.post('/invitaciones-laborales/',json=body)
     assert creada.status_code==201,creada.text
     codigo=enviados[0][1]
@@ -192,12 +192,12 @@ def test_invitacion_no_acepta_sucursal_de_otra_empresa(client,datos,monkeypatch)
     preparar_correo(monkeypatch)
     assert client.post('/invitaciones-laborales/',json={'correo':'nuevo@example.com','rol':'Mesero','sucursales':[datos['otra_sucursal']]}).status_code==404
     assert client.post('/invitaciones-laborales/',json={'correo':'nuevo@example.com','rol':'Superadministrador','sucursales':[]}).status_code==422
-    assert client.post('/invitaciones-laborales/',json={'correo':'nuevo@example.com','rol':'Cajero','sucursales':[datos['sucursal'],datos['sucursal']]}).status_code==422
+    assert client.post('/invitaciones-laborales/',json={'correo':'nuevo@example.com','rol':'Mesero','sucursales':[datos['sucursal'],datos['sucursal']]}).status_code==422
 
 
 def test_no_se_elimina_ultimo_gerente(client,datos):
     assert client.patch('/vinculos-laborales/'+str(datos['vinculo']),json={'activo':False}).status_code==409
-    assert client.patch('/vinculos-laborales/'+str(datos['vinculo']),json={'rol':'Cajero'}).status_code==409
+    assert client.patch('/vinculos-laborales/'+str(datos['vinculo']),json={'rol':'Mesero'}).status_code==409
 
 
 def test_alta_publica_no_permite_rol_de_plataforma(client,monkeypatch):
@@ -215,7 +215,7 @@ def test_todas_las_rutas_tienen_matriz():
                 assert (metodo.upper(), ruta) in RUTAS_CON_PERMISO
 
 
-@pytest.mark.parametrize('rol',['Administrador','Mesero','Cajero'])
+@pytest.mark.parametrize('rol',['Administrador','Mesero'])
 def test_disponibilidad_edicion_segun_rol(client,db,datos,rol):
     usar_rol(client,db,datos,rol)
     db.add(DisponibilidadProductos(id_producto=datos['producto'],id_sucursal=datos['sucursal']))
@@ -253,7 +253,7 @@ def test_reactivacion_por_invitacion_reemplaza_asignaciones(client,db,datos,monk
     local=Sucursales(id_empresa=datos['empresa'],nombre='Nuevo local asignado',direccion='Direccion del nuevo local')
     db.add(local);db.flush()
     usuario=db.get(Usuarios,datos['usuario'])
-    vinculo=VinculosLaborales(id_usuario=usuario.id,id_empresa=datos['empresa'],rol='Cajero',activo=False)
+    vinculo=VinculosLaborales(id_usuario=usuario.id,id_empresa=datos['empresa'],rol='Mesero',activo=False)
     db.add(vinculo);db.flush()
     db.add(AsignacionesSucursales(id_vinculo_laboral=vinculo.id,id_sucursal=datos['sucursal']))
     db.commit()
@@ -289,7 +289,7 @@ def test_detalles_ajenos_no_filtran_existencia(client,db,datos,modulo):
     assert ajeno.status_code==ausente.status_code==404
     assert ajeno.json()==ausente.json()
     if modulo not in ('invitaciones-laborales',):
-        body={'rol':'Cajero'} if modulo=='vinculos-laborales' else {'nombre':'Cambio ajeno'}
+        body={'rol':'Mesero'} if modulo=='vinculos-laborales' else {'nombre':'Cambio ajeno'}
         assert client.patch(f'/{modulo}/{fila.id}',json=body).status_code==404
 
 
@@ -298,7 +298,7 @@ def test_perfil_propio_y_empresa_propia(client,db,datos):
     assert client.patch('/usuarios/'+str(datos['usuario_autorizado']),json={'nombre':'Nombre propio'}).status_code==200
     assert client.get('/usuarios/'+str(datos['usuario'])).status_code==403
     assert client.get('/empresas/'+str(datos['empresa'])).status_code==200
-    usar_rol(client,db,datos,'Cajero')
+    usar_rol(client,db,datos,'Mesero')
     assert client.get('/sucursales/'+str(datos['sucursal'])).status_code==200
 
 

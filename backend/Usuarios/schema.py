@@ -52,6 +52,7 @@ class ServicioRegistro(BaseModel):
 
 
 class SucursalRegistro(Revisar_Json_Crear_Sucursal):
+    cantidad_mesas: int = Field(default=0,ge=0,le=200)
     id_local: int = Field(gt=0)
     servicios: dict[Literal["comer_aqui", "para_llevar", "domicilio"], ServicioRegistro]
     pagos: list[Literal["efectivo", "transferencia", "tarjeta"]] = Field(min_length=1, max_length=3)

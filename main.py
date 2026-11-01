@@ -39,6 +39,8 @@ app = FastAPI(dependencies=[Depends(autorizar_ruta)], docs_url=None, redoc_url=N
 })
 
 
+from backend.Bitacora.router import router as routerbitacora
+app.include_router(routerbitacora)
 app.include_router(routerpedidos)
 app.include_router(routercajas)
 app.include_router(routerreservas)

@@ -6,7 +6,7 @@ from database.base import PoderAuditor
 class VinculosLaborales(miclaseBase, PoderAuditor):
     __tablename__ = "vinculos_laborales"
     __table_args__ = (
-        CheckConstraint("rol IN ('Gerente', 'Administrador', 'Mesero', 'Cajero')", name="ck_vinculo_rol"),
+        CheckConstraint("rol IN ('Gerente', 'Administrador', 'Mesero')", name="ck_vinculo_rol"),
         UniqueConstraint("id_usuario", "id_empresa", name="uq_vinculo_usuario_empresa"),
     )
 

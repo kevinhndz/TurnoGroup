@@ -4,7 +4,7 @@ from database.almacen import miclaseBase
 
 class InvitacionesLaborales(miclaseBase):
     __tablename__ = "invitaciones_laborales"
-    __table_args__ = (CheckConstraint("rol IN ('Gerente', 'Administrador', 'Mesero', 'Cajero')", name="ck_invitacion_rol"),)
+    __table_args__ = (CheckConstraint("rol IN ('Gerente', 'Administrador', 'Mesero')", name="ck_invitacion_rol"),)
 
     id = Column(Integer, primary_key=True)
     correo = Column(String(255), nullable=False)

@@ -8,10 +8,24 @@ from backend.MetodosPago.tabla import MetodosPago
 from backend.Mesas.tabla import Mesas
 from backend.Descuentos.tabla import Descuentos
 from backend.ConfiguracionImpuestos.tabla import ConfiguracionImpuestos
+from backend.Sucursales.tabla import Sucursales
 from backend.Empresas.tabla import Empresas
 
 
 class PedidoRepository:
+    @staticmethod
+    def bloquear_sucursal(db, id_empresa, id_sucursal):
+        return (
+            db.query(Sucursales)
+            .filter(
+                Sucursales.id == id_sucursal,
+                Sucursales.id_empresa == id_empresa,
+                Sucursales.activo.is_(True),
+            )
+            .with_for_update()
+            .first()
+        )
+
     @staticmethod
     def buscar(db, id, id_empresa, id_sucursal, bloquear=False):
         consulta = db.query(Pedidos).filter(

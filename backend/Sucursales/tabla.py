@@ -7,7 +7,7 @@ class Sucursales(miclaseBase, PoderAuditor):
 
     __tablename__ = "sucursales"
     __table_args__ = (
-        UniqueConstraint("id_empresa", "nombre", name="uq_sucursal_empresa_nombre"),
+        UniqueConstraint("id_empresa", "nombre", "direccion", name="uq_sucursal_empresa_nombre_direccion"),
     )
 
     id = Column(Integer, primary_key=True)

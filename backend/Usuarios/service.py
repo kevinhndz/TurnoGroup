@@ -153,8 +153,9 @@ class UsuarioService():
             if not condicion:
                 raise HTTPException(422, mensaje)
 
-        for lista in (json.sucursales, json.categorias, json.productos, json.descuentos):
+        for lista in (json.categorias, json.productos, json.descuentos):
             validar(len({item.nombre.casefold() for item in lista}) == len(lista), "Hay nombres repetidos en la configuracion")
+        validar(len({(item.nombre.casefold(), item.direccion.casefold()) for item in json.sucursales}) == len(json.sucursales), "Hay sucursales con el mismo nombre y direccion")
         sucursales_locales = {item.id_local for item in json.sucursales}
         categorias_locales = {item.id_local for item in json.categorias}
         validar(len(sucursales_locales) == len(json.sucursales), "Hay sucursales repetidas")

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { etiquetaSucursal } from '../../lib/sucursales';
 import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
 import { api, listarTodo } from '../../lib/api';
 import { useDatos } from './Datos';
@@ -299,7 +300,7 @@ export default function Equipo() {
                     }
                     onChange={() => asignar(sucursal, tiene)}
                   />
-                  {sucursal.nombre}
+                  {etiquetaSucursal(sucursal)}
                   {!sucursal.activo && ' (desactivada)'}
                 </label>
               );
@@ -378,7 +379,7 @@ function Invitar({ sucursales, terminar }) {
                   )
                 }
               />
-              {item.nombre}
+              {etiquetaSucursal(item)}
             </label>
           ))}
         </div>

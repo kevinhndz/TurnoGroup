@@ -383,4 +383,6 @@ def test_selector_solo_enumera_sucursales_asignadas(client,db,datos):
     usar_rol(client,db,datos,'Mesero')
     respuesta=client.get('/sesiones/vinculos')
     assert respuesta.status_code==200
-    assert respuesta.json()[0]['sucursales']==[{'id':datos['sucursal'],'nombre':'Local 0'}]
+    assert respuesta.json()[0]['sucursales'][0]['id'] == datos['sucursal']
+    assert respuesta.json()[0]['sucursales'][0]['nombre'] == 'Local 0'
+    assert respuesta.json()[0]['sucursales'][0]['direccion']

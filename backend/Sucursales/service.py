@@ -16,10 +16,10 @@ class SucursalService():
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_sucursal(db, id_empresa, json.nombre)
+        look_up = repo.buscar_sucursal(db, id_empresa, json.nombre, json.direccion)
 
         if look_up is not None:
-            raise RecursoDuplicadoError("Ya existe esta sucursal")
+            raise RecursoDuplicadoError("Ya existe una sucursal con ese nombre y direccion")
 
         if json.es_principal is True:
             sucursal_principal = repo.buscar_sucursal_principal(db, id_empresa)
@@ -88,10 +88,10 @@ class SucursalService():
             if valor is None and campo not in ('telefono',):
                 raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
 
-        if "nombre" in cambios and cambios["nombre"] != look_up.nombre:
-            sucursal_existente = repo.buscar_sucursal(db, id_empresa, cambios["nombre"])
-            if sucursal_existente is not None:
-                raise RecursoDuplicadoError("Ya existe esta sucursal")
+        if "nombre" in cambios or "direccion" in cambios:
+            sucursal_existente = repo.buscar_sucursal(db, id_empresa, cambios.get("nombre", look_up.nombre), cambios.get("direccion", look_up.direccion))
+            if sucursal_existente is not None and sucursal_existente.id != look_up.id:
+                raise RecursoDuplicadoError("Ya existe una sucursal con ese nombre y direccion")
 
         es_principal = cambios.get("es_principal", look_up.es_principal)
         activo = cambios.get("activo", look_up.activo)

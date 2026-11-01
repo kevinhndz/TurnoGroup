@@ -37,3 +37,15 @@ def test_buscar_empleado_por_nombre(client, db, datos):
     assert resultado.status_code == 200
     assert resultado.json()['total'] == 1
     assert resultado.json()['data'][0]['nombre_usuario'] == usuario.nombre
+
+
+def test_sucursales_mismo_nombre_distinta_direccion(client):
+    cuerpo = {'nombre':'La Cafeteada', 'direccion':'Boulevard principal, local 10'}
+    primera = client.post('/sucursales/', json=cuerpo)
+    assert primera.status_code == 201, primera.text
+    segunda = client.post('/sucursales/', json={**cuerpo, 'direccion':'Centro comercial, local 25'})
+    assert segunda.status_code == 201, segunda.text
+    assert primera.json()['id'] != segunda.json()['id']
+    assert client.post('/sucursales/', json=cuerpo).status_code == 409
+    assert client.patch(f'/sucursales/{segunda.json()["id"]}', json={'direccion':cuerpo['direccion']}).status_code == 409
+    assert client.patch(f'/sucursales/{segunda.json()["id"]}', json={'nombre':cuerpo['nombre']}).status_code == 200

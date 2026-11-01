@@ -32,11 +32,16 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
     const [lista, categorias, empresa] = await Promise.all([
       api(`${config.ruta}?pagina_actual=${pagina}&limite=10&${filtros.parametros}`),
       modulo === 'productos' ? listarTodo('/categorias/') : Promise.resolve([]),
-      ['productos', 'descuentos'].includes(modulo)
+      ['productos', 'descuentos', 'sucursales'].includes(modulo)
         ? api(`/empresas/${sesion.id_empresa}`)
         : Promise.resolve(null),
     ]);
-    return { lista, categorias, moneda: empresa?.codigo_moneda };
+    return {
+      lista,
+      categorias,
+      moneda: empresa?.codigo_moneda,
+      nombre_empresa: empresa?.nombre,
+    };
   }, [pagina, config.ruta, sesion.id_sucursal, filtros.parametros]);
 
   if (config.porSucursal && !sesion.id_sucursal)
@@ -139,7 +144,11 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
           <button
             className="tg-button tg-primary"
             onClick={() => {
-              setEdicion({});
+              setEdicion(
+                modulo === 'sucursales'
+                  ? { nombre: datos.datos?.nombre_empresa || '' }
+                  : {},
+              );
               setAviso('');
             }}
           >

@@ -8,6 +8,7 @@ import { AccesoPrivado, usarSesion } from './Sesion';
 import { Mensaje } from './Controles';
 import { api } from '../../lib/api';
 import CarritoPendiente from './CarritoPendiente';
+import { etiquetaSucursal } from '../../lib/sucursales';
 
 export function SelectorContexto() {
   const { sesion, cambiarContexto, version } = usarSesion();
@@ -65,15 +66,16 @@ export function SelectorContexto() {
             </option>
             {vinculo?.sucursales.map((item) => (
               <option value={item.id} key={item.id}>
-                {item.nombre}
+                {etiquetaSucursal(item)}
               </option>
             ))}
           </select>
         </label>
       ) : (
         <span className="tg-branch-name">
-          {vinculo?.sucursales.find((item) => item.id === sesion.id_sucursal)?.nombre ||
-            'Sin sucursal asignada'}
+          {etiquetaSucursal(
+            vinculo?.sucursales.find((item) => item.id === sesion.id_sucursal),
+          )}
         </span>
       )}
       {error && <small role="alert">{error}</small>}

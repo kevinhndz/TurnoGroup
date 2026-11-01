@@ -6,11 +6,14 @@ from backend.Sucursales.tabla import Sucursales
 class SucursalRespository():
 
     @staticmethod
-    def buscar_sucursal(db: Session, id_empresa: int, nombre: str) -> Sucursales | None:
-        return db.query(Sucursales).filter(
+    def buscar_sucursal(db: Session, id_empresa: int, nombre: str, direccion=None) -> Sucursales | None:
+        consulta = db.query(Sucursales).filter(
             Sucursales.id_empresa == id_empresa,
             Sucursales.nombre == nombre
-        ).first()
+        )
+        if direccion is not None:
+            consulta = consulta.filter(Sucursales.direccion == direccion)
+        return consulta.first()
 
     @staticmethod
     def buscar_sucursal_principal(db: Session, id_empresa: int) -> Sucursales | None:

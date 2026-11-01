@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
 import { useEffect, useState } from 'react';
 import { usarSesion } from './Sesion';
 import { useDatos } from './Datos';
@@ -11,7 +12,7 @@ export default function Pedidos() {
   const { sesion } = usarSesion();
   const [estado, setEstado] = useState('');
   const [pagina, setPagina] = useState(1);
-  const [busqueda, setBusqueda] = useState('');
+  const filtros = useFiltrosListado();
   const [detalle, setDetalle] = useState(null);
   const [accion, setAccion] = useState(null);
   const [error, setError] = useState('');
@@ -21,13 +22,13 @@ export default function Pedidos() {
     if (!sesion.id_sucursal) return null;
     const [lista, tipos, metodos] = await Promise.all([
       api(
-        `/pedidos/?pagina_actual=${pagina}&limite=10${estado ? `&estado=${estado}` : ''}`,
+        `/pedidos/?pagina_actual=${pagina}&limite=10&${filtros.parametros}${estado ? `&estado=${estado}` : ''}`,
       ),
       listarTodo('/tipos-servicio/'),
       listarTodo('/metodos-pago/'),
     ]);
     return { lista, tipos, metodos };
-  }, [pagina, estado, sesion.id_sucursal]);
+  }, [pagina, estado, sesion.id_sucursal, filtros.parametros]);
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('pedido');
     if (id && /^\d+$/.test(id))
@@ -75,13 +76,7 @@ export default function Pedidos() {
       setOcupado(false);
     }
   }
-  const filas = (d?.lista.data || []).filter(
-    (item) =>
-      !busqueda ||
-      `TG-${item.id} ${item.cliente || ''}`
-        .toLocaleLowerCase('es')
-        .includes(busqueda.toLocaleLowerCase('es')),
-  );
+  const filas = d?.lista.data || [];
   const tipo = (id) => d?.tipos.find((item) => item.id === id)?.nombre_visible || '—';
   const metodo = (id) => d?.metodos.find((item) => item.id === id)?.nombre_visible || '—';
   return (
@@ -118,14 +113,11 @@ export default function Pedidos() {
           ))}
         </nav>
         <div className="tg-toolbar">
-          <Campo label="Buscar número o cliente en esta página">
-            <input
-              type="search"
-              value={busqueda}
-              onChange={(event) => setBusqueda(event.target.value)}
-              placeholder="Ej. TG-12…"
-            />
-          </Campo>
+          <FiltrosListado
+            filtros={filtros}
+            cambiar={() => setPagina(1)}
+            nombre="Buscar número, cliente o teléfono"
+          />
           <button className="tg-link-button" onClick={datos.recargar}>
             Actualizar
           </button>

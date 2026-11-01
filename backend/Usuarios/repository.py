@@ -1,3 +1,4 @@
+from core.listados import pagina_listado
 from sqlalchemy.orm import Session
 from backend.Usuarios.tabla import Usuarios
 
@@ -16,11 +17,9 @@ class UsuarioRepository():
         return nuevo_usuario
 
     @staticmethod
-    def listar_usuarios(db: Session, pagina_actual: int, limite: int):
-        salto = (pagina_actual - 1) * limite
-        total = db.query(Usuarios).count()
-        lista_usuarios = db.query(Usuarios).order_by(Usuarios.id).offset(salto).limit(limite).all()
-        return total, lista_usuarios
+    def listar_usuarios(db: Session, pagina_actual: int, limite: int, filtros=None):
+        consulta = db.query(Usuarios)
+        return pagina_listado(consulta, Usuarios, pagina_actual, limite, filtros)
 
     @staticmethod
     def buscar_usuario_por_id(db: Session, id: int) -> Usuarios | None:

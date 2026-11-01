@@ -1,3 +1,4 @@
+from core.listados import pagina_listado
 from sqlalchemy.orm import Session
 from backend.ConfiguracionImpuestos.tabla import ConfiguracionImpuestos
 
@@ -16,13 +17,9 @@ class ConfiguracionImpuestosRepository():
         return nueva_configuracion_impuestos
 
     @staticmethod
-    def listar_configuracion_impuestos(db: Session, id_empresa: int, pagina_actual: int, limite: int):
-        salto = (pagina_actual - 1) * limite
-        total = db.query(ConfiguracionImpuestos).filter(ConfiguracionImpuestos.id_empresa == id_empresa).count()
-        lista_configuracion_impuestos = db.query(ConfiguracionImpuestos).filter(
-            ConfiguracionImpuestos.id_empresa == id_empresa
-        ).order_by(ConfiguracionImpuestos.id).offset(salto).limit(limite).all()
-        return total, lista_configuracion_impuestos
+    def listar_configuracion_impuestos(db: Session, id_empresa: int, pagina_actual: int, limite: int, filtros=None):
+        consulta = db.query(ConfiguracionImpuestos).filter(ConfiguracionImpuestos.id_empresa == id_empresa)
+        return pagina_listado(consulta, ConfiguracionImpuestos, pagina_actual, limite, filtros)
 
     @staticmethod
     def buscar_configuracion_impuestos_por_id(db: Session, id: int, id_empresa: int) -> ConfiguracionImpuestos | None:

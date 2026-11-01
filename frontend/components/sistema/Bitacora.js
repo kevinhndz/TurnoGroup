@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
 import { usarSesion } from './Sesion';
 import { useDatos } from './Datos';
 import { api, fechaLocal } from '../../lib/api';
@@ -8,10 +9,13 @@ export default function Bitacora() {
   const { sesion } = usarSesion();
   const [soloSucursal, setSoloSucursal] = useState(true);
   const [pagina, setPagina] = useState(1);
+  const filtros = useFiltrosListado();
   const datos = useDatos(
     () =>
-      api(`/bitacora/?pagina_actual=${pagina}&limite=20&solo_sucursal=${soloSucursal}`),
-    [pagina, soloSucursal],
+      api(
+        `/bitacora/?pagina_actual=${pagina}&limite=20&solo_sucursal=${soloSucursal}&${filtros.parametros}`,
+      ),
+    [pagina, soloSucursal, filtros.parametros],
   );
   const lista = datos.datos;
   return (
@@ -19,7 +23,7 @@ export default function Bitacora() {
       <div className="tg-section-heading">
         <div>
           <span className="tg-eyebrow">ACTIVIDAD REGISTRADA</span>
-          <h1>Bitácora</h1>
+          <h1>Registros</h1>
           <p>
             Quién registró, actualizó, cobró o entregó cada pedido y quién abrió o cerró
             la caja.
@@ -30,6 +34,11 @@ export default function Bitacora() {
         </button>
       </div>
       <Mensaje error={datos.error} />
+      <FiltrosListado
+        filtros={filtros}
+        cambiar={() => setPagina(1)}
+        nombre="Buscar registros por persona"
+      />
       {sesion.rol_empresa === 'Gerente' && (
         <label className="tg-field">
           <span>Alcance de la actividad</span>

@@ -40,8 +40,8 @@ class EmpresaService():
         return nueva_empresa
 
     @staticmethod
-    def listar_empresas_service(pagina_actual: int, limite: int, db: Session, id_empresa=None):
-        total, lista_empresas = repo.listar_empresas(db, pagina_actual, limite, id_empresa)
+    def listar_empresas_service(pagina_actual: int, limite: int, db: Session, id_empresa=None, filtros=None):
+        total, lista_empresas = repo.listar_empresas(db, pagina_actual, limite, id_empresa, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
         return {
             "total": total,

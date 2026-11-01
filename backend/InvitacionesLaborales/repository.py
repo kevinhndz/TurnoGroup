@@ -1,3 +1,4 @@
+from core.listados import pagina_listado
 from backend.InvitacionesLaborales.tabla import InvitacionesLaborales, SucursalesInvitacion
 from backend.VinculosLaborales.tabla import VinculosLaborales, AsignacionesSucursales
 from backend.Empresas.tabla import Empresas
@@ -24,9 +25,9 @@ class InvitacionLaboralRepository():
         ).first()
 
     @staticmethod
-    def listar_invitaciones(db, id_empresa, pagina_actual, limite):
+    def listar_invitaciones(db, id_empresa, pagina_actual, limite, filtros=None):
         consulta = db.query(InvitacionesLaborales).filter(InvitacionesLaborales.id_empresa == id_empresa)
-        return consulta.count(), consulta.order_by(InvitacionesLaborales.id).offset((pagina_actual - 1) * limite).limit(limite).all()
+        return pagina_listado(consulta, InvitacionesLaborales, pagina_actual, limite, filtros)
 
     @staticmethod
     def sucursales_invitacion(db, id):

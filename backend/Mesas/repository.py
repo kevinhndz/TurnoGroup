@@ -1,3 +1,4 @@
+from core.listados import pagina_listado
 from sqlalchemy.orm import Session
 from backend.Mesas.tabla import Mesas
 
@@ -19,13 +20,9 @@ class MesaRepository():
         return nueva_mesa
 
     @staticmethod
-    def listar_mesas(db: Session, id_sucursal: int, pagina_actual: int, limite: int):
-        salto = (pagina_actual - 1) * limite
-        total = db.query(Mesas).filter(Mesas.id_sucursal == id_sucursal).count()
-        lista_mesas = db.query(Mesas).filter(
-            Mesas.id_sucursal == id_sucursal
-        ).order_by(Mesas.id).offset(salto).limit(limite).all()
-        return total, lista_mesas
+    def listar_mesas(db: Session, id_sucursal: int, pagina_actual: int, limite: int, filtros=None):
+        consulta = db.query(Mesas).filter(Mesas.id_sucursal == id_sucursal)
+        return pagina_listado(consulta, Mesas, pagina_actual, limite, filtros)
 
     @staticmethod
     def buscar_mesa_por_id(db: Session, id: int, id_sucursal: int) -> Mesas | None:

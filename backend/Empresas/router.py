@@ -1,3 +1,4 @@
+from core.listados import filtros_listado
 from utils.autorizacion import obtener_contexto, obtener_sesion
 from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy.orm import Session
@@ -22,9 +23,8 @@ def ver_empresas(
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     db: Session = Depends(abrir_puerta_bd),
-    contexto=Depends(obtener_contexto)
-):
-    return service.listar_empresas_service(pagina_actual, limite, db, contexto["id_empresa"])
+    contexto=Depends(obtener_contexto), filtros=Depends(filtros_listado)):
+    return service.listar_empresas_service(pagina_actual, limite, db, contexto["id_empresa"], filtros=filtros)
 
 @router.get("/{id}", response_model=NuevaEmpresaRespuesta)
 def ver_empresa(id: Annotated[int, Path(gt=0)], db: Session = Depends(abrir_puerta_bd)):

@@ -1,3 +1,4 @@
+from core.listados import filtros_listado
 from fastapi import Response
 from backend.Sesiones.schema import RespuestaSesion
 from backend.Sesiones.router import poner_cookie
@@ -43,9 +44,8 @@ def listar_invitaciones(
     id_empresa: int = Depends(obtener_empresa),
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
-    db: Session = Depends(abrir_puerta_bd),
-):
-    return service.listar_invitaciones_service(id_empresa, pagina_actual, limite, db)
+    db: Session = Depends(abrir_puerta_bd), filtros=Depends(filtros_listado)):
+    return service.listar_invitaciones_service(id_empresa, pagina_actual, limite, db, filtros=filtros)
 
 
 @router.get("/{id}", response_model=RespuestaInvitacionLaboral)

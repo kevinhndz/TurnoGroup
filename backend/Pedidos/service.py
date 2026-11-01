@@ -283,10 +283,10 @@ class PedidoService:
         return PedidoService.respuesta(db, look_up)
 
     @staticmethod
-    def listar_service(db, contexto, pagina, limite, estado):
+    def listar_service(db, contexto, pagina, limite, estado, filtros=None):
         empresa, sucursal = alcance(contexto)
         respuesta = paginar(
-            repo.listar(db, empresa, sucursal, estado),
+            repo.listar(db, empresa, sucursal, estado, filtros),
             pagina,
             limite,
             lambda fila: PedidoService.respuesta(db, fila, False),

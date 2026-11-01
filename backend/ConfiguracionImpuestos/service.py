@@ -32,13 +32,13 @@ class ConfiguracionImpuestosService():
         return repo.guardar_nueva_configuracion_impuestos(db, nueva_configuracion_impuestos)
 
     @staticmethod
-    def listar_configuracion_impuestos_service(id_empresa: int, pagina_actual: int, limite: int, db: Session):
+    def listar_configuracion_impuestos_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, filtros=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        total, lista_configuracion_impuestos = repo.listar_configuracion_impuestos(db, id_empresa, pagina_actual, limite)
+        total, lista_configuracion_impuestos = repo.listar_configuracion_impuestos(db, id_empresa, pagina_actual, limite, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
 
         return {

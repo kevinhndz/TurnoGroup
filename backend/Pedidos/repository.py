@@ -10,6 +10,7 @@ from backend.Descuentos.tabla import Descuentos
 from backend.ConfiguracionImpuestos.tabla import ConfiguracionImpuestos
 from backend.Sucursales.tabla import Sucursales
 from backend.Empresas.tabla import Empresas
+from core.listados import filtrar_listado
 
 
 class PedidoRepository:
@@ -50,13 +51,13 @@ class PedidoRepository:
         )
 
     @staticmethod
-    def listar(db, id_empresa, id_sucursal, estado):
+    def listar(db, id_empresa, id_sucursal, estado, filtros=None):
         consulta = db.query(Pedidos).filter(
             Pedidos.id_empresa == id_empresa, Pedidos.id_sucursal == id_sucursal
         )
         if estado:
             consulta = consulta.filter(Pedidos.estado == estado)
-        return consulta.order_by(Pedidos.id.desc())
+        return filtrar_listado(consulta.order_by(Pedidos.id.desc()), Pedidos, filtros)
 
     @staticmethod
     def detalles(db, id):

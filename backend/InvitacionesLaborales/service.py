@@ -80,8 +80,8 @@ class InvitacionLaboralService:
         return InvitacionLaboralService.respuesta_invitacion(invitacion, db)
 
     @staticmethod
-    def listar_invitaciones_service(id_empresa, pagina_actual, limite, db):
-        total, lista = repo.listar_invitaciones(db, id_empresa, pagina_actual, limite)
+    def listar_invitaciones_service(id_empresa, pagina_actual, limite, db, filtros=None):
+        total, lista = repo.listar_invitaciones(db, id_empresa, pagina_actual, limite, filtros=filtros)
         return {
             "total": total,
             "pagina_actual": pagina_actual,

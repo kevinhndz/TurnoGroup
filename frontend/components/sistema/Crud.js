@@ -10,13 +10,14 @@ import Formulario from './Formulario';
 import Icon from '../Icon';
 import PrepararMesas from './PrepararMesas';
 import ImportarProductos, { ImagenProducto } from './ImportarProductos';
+import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
 
 export default function Crud({ modulo, compacto = false, alGuardar, configuracion }) {
   const config = configuracion || modulos[modulo];
   const { sesion } = usarSesion();
   const [importando, setImportando] = useState(false);
   const [pagina, setPagina] = useState(1);
-  const [busqueda, setBusqueda] = useState('');
+  const filtros = useFiltrosListado();
   const [edicion, setEdicion] = useState(null);
   const [confirmacion, setConfirmacion] = useState(null);
   const [ocupado, setOcupado] = useState(false);
@@ -29,14 +30,14 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
     if (config.porSucursal && !sesion.id_sucursal)
       return { lista: { data: [], total: 0, total_paginas: 0 }, categorias: [] };
     const [lista, categorias, empresa] = await Promise.all([
-      api(`${config.ruta}?pagina_actual=${pagina}&limite=10`),
+      api(`${config.ruta}?pagina_actual=${pagina}&limite=10&${filtros.parametros}`),
       modulo === 'productos' ? listarTodo('/categorias/') : Promise.resolve([]),
       ['productos', 'descuentos'].includes(modulo)
         ? api(`/empresas/${sesion.id_empresa}`)
         : Promise.resolve(null),
     ]);
     return { lista, categorias, moneda: empresa?.codigo_moneda };
-  }, [pagina, config.ruta, sesion.id_sucursal]);
+  }, [pagina, config.ruta, sesion.id_sucursal, filtros.parametros]);
 
   if (config.porSucursal && !sesion.id_sucursal)
     return (
@@ -48,13 +49,7 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
     );
 
   const lista = datos.datos?.lista;
-  const filas = (lista?.data || []).filter(
-    (item) =>
-      !busqueda ||
-      String(item.nombre || item.correo || '')
-        .toLocaleLowerCase('es')
-        .includes(busqueda.toLocaleLowerCase('es')),
-  );
+  const filas = lista?.data || [];
 
   async function editar(fila) {
     setOcupado(true);
@@ -177,15 +172,7 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
 
       <div className="tg-card tg-table-card">
         <div className="tg-toolbar">
-          <label className="tg-search">
-            <span>Buscar en esta página</span>
-            <input
-              type="search"
-              value={busqueda}
-              placeholder="Escribe un nombre…"
-              onChange={(event) => setBusqueda(event.target.value)}
-            />
-          </label>
+          <FiltrosListado filtros={filtros} cambiar={() => setPagina(1)} />
           <span className="tg-muted">{lista?.total ?? '—'} registros</span>
           <button className="tg-link-button" onClick={datos.recargar}>
             Actualizar

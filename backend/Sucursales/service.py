@@ -37,15 +37,14 @@ class SucursalService():
         return repo.guardar_nueva_sucursal(db, nueva_sucursal)
 
     @staticmethod
-    def listar_sucursales_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, id_sucursal=None):
+    def listar_sucursales_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, id_sucursal=None, filtros=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
         total, lista_sucursales = repo.listar_sucursales(
-            db, id_empresa, pagina_actual, limite, id_sucursal
-        )
+            db, id_empresa, pagina_actual, limite, id_sucursal, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
 
         return {

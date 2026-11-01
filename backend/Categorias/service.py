@@ -28,14 +28,13 @@ class CategoriaService():
         return repo.guardar_nueva_categoria(db, nueva_categoria)
 
     @staticmethod
-    def listar_categorias_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, id_sucursal=None):
+    def listar_categorias_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, id_sucursal=None, filtros=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
         total, lista_categorias = repo.listar_categorias(
-            db, id_empresa, pagina_actual, limite, id_sucursal
-        )
+            db, id_empresa, pagina_actual, limite, id_sucursal, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
 
         return {

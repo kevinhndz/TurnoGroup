@@ -55,15 +55,13 @@ class VinculoLaboralService:
 
     @staticmethod
     def listar_vinculos_laborales_service(
-        id_empresa: int, pagina_actual: int, limite: int, db: Session
-    ):
+        id_empresa: int, pagina_actual: int, limite: int, db: Session, filtros=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
         total, lista_vinculos = repo.listar_vinculos_laborales(
-            db, id_empresa, pagina_actual, limite
-        )
+            db, id_empresa, pagina_actual, limite, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
         from backend.Usuarios.tabla import Usuarios
 

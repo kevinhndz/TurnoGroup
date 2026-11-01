@@ -1,3 +1,4 @@
+from core.listados import filtros_listado
 from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Query, Response, status
@@ -34,11 +35,9 @@ def ver_vinculos_laborales(
     id_empresa: int = Depends(obtener_empresa),
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
-    db: Session = Depends(abrir_puerta_bd)
-):
+    db: Session = Depends(abrir_puerta_bd), filtros=Depends(filtros_listado)):
     return service.listar_vinculos_laborales_service(
-        id_empresa, pagina_actual, limite, db
-    )
+        id_empresa, pagina_actual, limite, db, filtros=filtros)
 
 
 @router.get("/{id}", response_model=RespuestaVinculoLaboralDetalle)

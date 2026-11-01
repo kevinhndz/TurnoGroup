@@ -123,7 +123,7 @@ function Interior({ children }) {
           icono: 'chart',
           enlaces: [
             ['Resumen', '/panel'],
-            ['Bitácora', '/panel/bitacora'],
+            ['Registros', '/panel/bitacora'],
           ],
         },
         {
@@ -142,7 +142,7 @@ function Interior({ children }) {
           icono: 'chart',
           enlaces: [
             ['Resumen', '/panel'],
-            ['Bitácora', '/panel/bitacora'],
+            ['Registros', '/panel/bitacora'],
           ],
         },
         {

@@ -25,8 +25,8 @@ class UsuarioService():
         return repo.guardar_nuevo_usuario(db, nuevo_usuario)
 
     @staticmethod
-    def listar_usuarios_service(pagina_actual: int, limite: int, db: Session):
-        total, lista_usuarios = repo.listar_usuarios(db, pagina_actual, limite)
+    def listar_usuarios_service(pagina_actual: int, limite: int, db: Session, filtros=None):
+        total, lista_usuarios = repo.listar_usuarios(db, pagina_actual, limite, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
 
         return {

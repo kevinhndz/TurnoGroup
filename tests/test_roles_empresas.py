@@ -265,7 +265,7 @@ def test_disponibilidad_edicion_segun_rol(client,db,datos,rol):
     db.commit()
     ruta=f'/disponibilidad-productos/{datos["producto"]}/{datos["sucursal"]}'
     assert client.get(ruta).status_code==200
-    respuesta=client.patch(ruta,json={'precio_especial':'50.00'})
+    respuesta=client.patch(ruta,json={'disponible':False})
     assert respuesta.status_code==(200 if rol=='Administrador' else 403)
     assert client.get(f'/disponibilidad-productos/{datos["otro_producto"]}/{datos["otra_sucursal"]}').status_code==404
 

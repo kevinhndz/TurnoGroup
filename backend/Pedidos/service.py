@@ -99,8 +99,8 @@ class PedidoService:
             )
             exigir(estado == "Disponible", "La mesa ya no esta disponible", 409)
         productos = {
-            item.id: (item, especial)
-            for item, especial in repo.productos(
+            item.id: item
+            for item in repo.productos(
                 db, {fila.id_producto for fila in json.detalles}, empresa, sucursal
             )
         }
@@ -111,8 +111,8 @@ class PedidoService:
                 "Un producto ya no esta disponible en esta sucursal",
                 409,
             )
-            producto, especial = productos[item.id_producto]
-            precio = moneda(especial if especial is not None else producto.precio)
+            producto = productos[item.id_producto]
+            precio = moneda(producto.precio)
             detalles.append(
                 {
                     "id_producto": producto.id,
@@ -321,11 +321,9 @@ class PedidoService:
                     **NuevoProductoRespuesta.model_validate(producto).model_dump(
                         mode="json"
                     ),
-                    "precio_local": str(
-                        especial if especial is not None else producto.precio
-                    ),
+                    "precio_local": str(producto.precio),
                 }
-                for producto, especial in datos["productos"]
+                for producto in datos["productos"]
             ],
             "categorias": [
                 {"id": categoria.id, "nombre": categoria.nombre, "activo": True}

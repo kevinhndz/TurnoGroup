@@ -70,7 +70,7 @@ class PedidoRepository:
     @staticmethod
     def productos(db, ids, id_empresa, id_sucursal):
         return (
-            db.query(Productos, DisponibilidadProductos.precio_especial)
+            db.query(Productos)
             .join(
                 DisponibilidadProductos,
                 DisponibilidadProductos.id_producto == Productos.id,
@@ -169,7 +169,7 @@ class PedidoRepository:
         from backend.Sucursales.tabla import Sucursales
 
         productos = (
-            db.query(Productos, DisponibilidadProductos.precio_especial)
+            db.query(Productos)
             .join(
                 DisponibilidadProductos,
                 DisponibilidadProductos.id_producto == Productos.id,

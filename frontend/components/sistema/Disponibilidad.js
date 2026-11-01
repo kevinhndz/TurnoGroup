@@ -106,8 +106,7 @@ export default function Disponibilidad() {
               <thead>
                 <tr>
                   <th>Producto</th>
-                  <th>Precio maestro</th>
-                  <th>Precio del local</th>
+                  <th>Precio</th>
                   <th>Estado en el local</th>
                   {editable && <th>Acciones</th>}
                 </tr>
@@ -128,14 +127,6 @@ export default function Disponibilidad() {
                         )}
                       </td>
                       <td>{dinero(producto.precio, datos.datos.moneda)}</td>
-                      <td>
-                        {asignacion
-                          ? dinero(
-                              asignacion.precio_especial ?? producto.precio,
-                              datos.datos.moneda,
-                            )
-                          : '—'}
-                      </td>
                       <td>
                         <span
                           className={`tg-status ${asignacion?.disponible && producto.disponible ? 'is-active' : ''}`}
@@ -195,7 +186,8 @@ export default function Disponibilidad() {
       {edicion && (
         <Modal titulo={edicion.nombre} cerrar={() => setEdicion(null)}>
           <p className="tg-muted">
-            Deja vacío el precio especial para utilizar el precio del catálogo maestro.
+            El precio del producto es el mismo en todas las sucursales. El gerente puede
+            cambiarlo desde Productos.
           </p>
           <Formulario
             campos={[
@@ -204,14 +196,6 @@ export default function Disponibilidad() {
                 label: 'Disponible en esta sucursal',
                 type: 'checkbox',
                 valor: true,
-              },
-              {
-                clave: 'precio_especial',
-                label: `Precio especial (${datos.datos.moneda})`,
-                type: 'number',
-                step: '0.01',
-                min: 0,
-                nullable: true,
               },
             ]}
             inicial={edicion.asignacion || {}}

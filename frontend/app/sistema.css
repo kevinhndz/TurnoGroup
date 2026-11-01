@@ -2644,3 +2644,390 @@
   min-height: 44px;
   font-size: 12px;
 }
+
+/* Plano claro con los mismos estados y dibujos de las mesas. */
+.tg-table-picker {
+  background: #fcfaf6;
+  color: #403c34;
+  border-color: #ded7cc;
+}
+.tg-table-picker legend {
+  background: #fcfaf6;
+  color: #514738;
+}
+.tg-table-picker .tg-table-legend {
+  color: #645c50;
+}
+.tg-table-picker .tg-link-button {
+  color: #994129;
+}
+.tg-table-picker .tg-table-grid {
+  border-color: #ded7cc;
+  background-image:
+    linear-gradient(#73634a0a 1px, transparent 1px),
+    linear-gradient(90deg, #73634a0a 1px, transparent 1px);
+}
+.tg-table-picker .tg-table-tile {
+  --mesa: #39835a;
+  color: #28573c;
+  background: #f0f6ee;
+  border-color: #adc4ad;
+}
+.tg-table-picker .tg-table-tile small {
+  color: #6d7466;
+}
+.tg-table-picker .tg-table-tile.is-busy {
+  --mesa: #b7504c;
+  background: #fbefeb;
+  border-color: #dfb4ac;
+  color: #91433b;
+}
+.tg-table-picker .tg-table-tile.is-reserved {
+  --mesa: #aa7e23;
+  background: #fbf5e7;
+  border-color: #d7c18e;
+  color: #876321;
+}
+.tg-table-picker .tg-table-tile.is-selected {
+  outline-color: #9a4023;
+  background: #e6efdf;
+}
+.tg-table-picker .tg-table-tile.is-free:hover {
+  background: #e5eedf;
+}
+
+.tg-card-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: center;
+  padding: 12px 0;
+}
+.tg-card-entry-visual {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  min-width: 0;
+}
+.tg-card-entry-visual p {
+  color: #756b60;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.tg-card-entry-form {
+  padding: 24px;
+  border: 1px solid #e3d9cb;
+  background: #faf7f1;
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 12px 30px #5a453408;
+}
+.tg-demo-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tg-demo-cards button {
+  border: 1px solid #dcd0c2;
+  background: #fff;
+  color: #605344;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  min-height: 44px;
+}
+.tg-demo-cards button[aria-pressed='true'] {
+  border-color: #9a4023;
+  background: #f5e9df;
+  color: #994129;
+}
+.tg-credit-preview {
+  width: 100%;
+  max-width: 390px;
+  aspect-ratio: 1.586;
+  perspective: 1200px;
+}
+.tg-credit-rotor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 250ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+.tg-credit-preview.is-flipped .tg-credit-rotor {
+  transform: rotateY(180deg);
+}
+.tg-credit-face {
+  position: absolute;
+  inset: 0;
+  border: 1px solid #ffffff77;
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at top right, #6a7d94aa, transparent 65%),
+    linear-gradient(135deg, #304357, #141f31);
+  box-shadow:
+    inset 0 0 14px #ffffff44,
+    0 16px 28px #20232d22;
+  color: #fff;
+  backface-visibility: hidden;
+}
+.tg-credit-front {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(16px, 3vw, 26px);
+  background-image:
+    repeating-radial-gradient(
+      ellipse at -60% -70%,
+      transparent 0 19px,
+      #ffffff12 20px 21px
+    ),
+    linear-gradient(135deg, #35485e, #162234);
+}
+.tg-credit-top,
+.tg-credit-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tg-credit-top strong {
+  font-size: clamp(12px, 2vw, 19px);
+}
+.tg-credit-chip {
+  width: 40px;
+  height: 28px;
+  border: 1px solid #c4ac75;
+  background: linear-gradient(130deg, #ead9ac, #b99b5e);
+  border-radius: 6px;
+}
+.tg-credit-number {
+  font-family: monospace;
+  font-size: clamp(15px, 2.4vw, 24px);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.tg-credit-bottom > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.tg-credit-bottom small {
+  color: #c5ccd5;
+  font-size: 9px;
+  letter-spacing: 0.09em;
+}
+.tg-credit-bottom strong {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(11px, 2vw, 15px);
+}
+.tg-credit-back {
+  transform: rotateY(180deg);
+  padding-top: 24px;
+}
+.tg-credit-stripe {
+  height: 40px;
+  background: #0b0e15;
+}
+.tg-credit-signature {
+  margin: 20px 24px 14px;
+  background: #f1f0ed;
+  color: #282828;
+  text-align: right;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+.tg-credit-back > small {
+  margin: 24px;
+  color: #c7d0d9;
+  font-size: 10px;
+}
+.tg-wallet {
+  margin-top: 30px;
+  text-align: center;
+}
+.tg-card-folder {
+  position: relative;
+  width: 100%;
+  max-width: 390px;
+  margin: 24px auto;
+  aspect-ratio: 1.586;
+  perspective: 1200px;
+}
+.tg-folder-back {
+  position: absolute;
+  inset: 8% 0 0;
+  border: 1px solid #b9a389;
+  border-radius: 18px;
+  background: #dccab1;
+  transform-origin: center bottom;
+  transition:
+    transform 250ms cubic-bezier(0.77, 0, 0.175, 1),
+    opacity 180ms ease;
+}
+.tg-folder-trigger {
+  position: absolute;
+  inset: 0 4.7%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transform: translateY(-5%);
+  transition: transform 250ms cubic-bezier(0.77, 0, 0.175, 1);
+}
+.tg-folder-trigger:focus-visible {
+  outline: 2px solid #9a4023;
+  outline-offset: 5px;
+  border-radius: 16px;
+}
+.tg-folder-front {
+  position: absolute;
+  inset: 50% 0 0;
+  z-index: 2;
+  pointer-events: none;
+  transform-origin: center bottom;
+  transition:
+    transform 250ms cubic-bezier(0.77, 0, 0.175, 1),
+    opacity 180ms ease;
+}
+.tg-folder-front svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.tg-folder-front path {
+  fill: #f0e4d4;
+  stroke: #bba283;
+  stroke-width: 1;
+}
+.tg-folder-front path.tg-folder-stitch {
+  fill: none;
+  stroke: #c1a98b;
+  stroke-dasharray: 5 5;
+}
+.tg-folder-front > span,
+.tg-folder-front > strong {
+  position: absolute;
+  bottom: 15%;
+  font-size: 12px;
+  max-width: 52%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #705c45;
+}
+.tg-folder-front > span {
+  left: 6%;
+}
+.tg-folder-front > strong {
+  right: 6%;
+  font-family: monospace;
+}
+.tg-card-folder.is-open .tg-folder-trigger {
+  transform: translateY(-16%);
+}
+.tg-card-folder.is-open .tg-folder-back {
+  transform: translateY(18%) scaleY(0.18);
+  opacity: 0;
+}
+.tg-card-folder.is-open .tg-folder-front {
+  transform: translateY(18%) rotateX(-72deg);
+  opacity: 0;
+}
+.tg-wallet-navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 12px;
+}
+.tg-wallet-navigation span {
+  font-size: 12px;
+  color: #756758;
+}
+.tg-wallet > .tg-form-actions {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.tg-wallet .tg-muted {
+  font-size: 12px;
+}
+.tg-billing-history {
+  margin-top: 24px;
+}
+.tg-billing-history .tg-table {
+  min-width: 650px;
+}
+.tg-account-deactivation {
+  margin-top: 24px;
+  border-color: #e5c1b5;
+}
+.tg-subscription-step .tg-card-entry {
+  margin-top: 28px;
+}
+.tg-modal:has(.tg-card-entry) {
+  width: min(950px, calc(100vw - 28px));
+  max-width: 950px;
+}
+.tg-wizard:has(.tg-subscription-step) .tg-stepper {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+@media (max-width: 760px) {
+  .tg-card-entry {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .tg-card-entry-visual {
+    justify-items: center;
+  }
+  .tg-card-entry-form {
+    padding: 18px;
+  }
+  .tg-credit-preview {
+    max-width: 350px;
+  }
+  .tg-credit-number {
+    font-size: clamp(14px, 4vw, 23px);
+  }
+  .tg-credit-bottom strong {
+    font-size: 12px;
+    max-width: 180px;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .tg-folder-trigger:hover {
+    transform: translateY(-8%);
+  }
+  .tg-card-folder.is-open .tg-folder-trigger:hover {
+    transform: translateY(-16%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tg-credit-rotor,
+  .tg-folder-front,
+  .tg-folder-back,
+  .tg-folder-trigger {
+    transition-duration: 0.01ms;
+  }
+  .tg-folder-trigger,
+  .tg-card-folder.is-open .tg-folder-trigger {
+    transform: none;
+  }
+  .tg-folder-trigger:hover,
+  .tg-card-folder.is-open .tg-folder-trigger:hover {
+    transform: none;
+  }
+}
+.tg-card-folder.is-keyboard .tg-folder-trigger,
+.tg-card-folder.is-keyboard .tg-folder-front,
+.tg-card-folder.is-keyboard .tg-folder-back,
+.tg-card-folder.is-keyboard .tg-credit-rotor {
+  transition-duration: 0.01ms;
+}

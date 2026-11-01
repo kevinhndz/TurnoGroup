@@ -9,6 +9,7 @@ import Formulario from './Formulario';
 import { camposEmpresa, modulos } from '../../lib/modulos';
 import { dinero } from '../../lib/api';
 import ImportarProductos from './ImportarProductos';
+import TarjetaSuscripcion from './TarjetaSuscripcion';
 
 const pasos = [
   'Negocio',
@@ -18,6 +19,7 @@ const pasos = [
   'Descuentos',
   'Productos',
   'Revisión',
+  'Suscripción',
 ];
 const servicios = [
   ['comer_aqui', 'Comer aquí'],
@@ -123,7 +125,7 @@ export default function AltaInicial() {
       setError(fallo.message);
     }
   }
-  async function terminar() {
+  async function terminar(tarjeta) {
     setError('');
     try {
       validar(7);
@@ -131,6 +133,7 @@ export default function AltaInicial() {
       const { categorias, productos, descuentos, ...resto } = registro;
       await finalizarRegistro({
         ...resto,
+        tarjeta_suscripcion: tarjeta,
         impuesto: resto.impuesto
           ? { ...resto.impuesto, nombre: resto.impuesto.nombre?.trim() || null }
           : null,
@@ -174,7 +177,7 @@ export default function AltaInicial() {
       <main id="contenido" className="tg-wizard-main">
         <div className="tg-step-caption">
           <span>
-            PASO {paso} DE 7 · {pasos[paso - 1].toUpperCase()}
+            PASO {paso} DE 8 · {pasos[paso - 1].toUpperCase()}
           </span>
           <span>Configuración inicial</span>
         </div>
@@ -193,7 +196,7 @@ export default function AltaInicial() {
           ))}
         </ol>
         <p className="tg-table-note">
-          Tu cuenta y tu negocio se crearán al confirmar el paso 7. Mientras tanto, los
+          Tu cuenta y tu negocio se crearán al confirmar el paso 8. Mientras tanto, los
           cambios están solo en esta pantalla; si recargas, tendrás que empezar de nuevo.
         </p>
         <Mensaje error={error} />
@@ -459,8 +462,8 @@ export default function AltaInicial() {
             <>
               <div className="tg-section-heading">
                 <div>
-                  <h1>Revisa y activa tu negocio</h1>
-                  <p>Confirma estos datos para crear tu cuenta y abrir el panel.</p>
+                  <h1>Revisa tu negocio</h1>
+                  <p>Revisa estos datos antes de completar el método de suscripción.</p>
                 </div>
               </div>
               <div className="tg-summary-grid">
@@ -534,7 +537,8 @@ export default function AltaInicial() {
                     USD.
                   </p>
                   <small>
-                    La integración de cobro con Paddle se completará antes del despliegue.
+                    Primer mes gratuito. Podrás cancelar la renovación desde Plan y
+                    facturación.
                   </small>
                 </section>
                 <ResumenAlta titulo="Descuentos" editar={() => ir(5)}>
@@ -553,6 +557,24 @@ export default function AltaInicial() {
                 </ResumenAlta>
               </div>
             </>
+          )}
+          {paso === 8 && (
+            <section className="tg-card tg-subscription-step">
+              <span className="tg-eyebrow">ÚLTIMO PASO</span>
+              <h1>Tu método de suscripción</h1>
+              <p>
+                Hoy: 0 USD. Después de 30 días:{' '}
+                {registro.sucursales.length * 100 +
+                  (registro.finanzas_habilitadas ? 30 : 0)}{' '}
+                USD al mes. Puedes cancelar antes de terminar la prueba.
+              </p>
+              <TarjetaSuscripcion
+                titularInicial={registro.cuenta.nombre}
+                guardar={terminar}
+                ocupado={enviando}
+                boton="Crear cuenta e iniciar mes de prueba"
+              />
+            </section>
           )}
         </fieldset>
         {editarCuenta && (
@@ -598,11 +620,11 @@ export default function AltaInicial() {
             ← Volver
           </button>
           <span className="tg-muted">
-            {paso < 7
+            {paso < 8
               ? 'Todavía no se ha creado la cuenta'
               : 'Todo se guardará al confirmar'}
           </span>
-          {paso < 7 ? (
+          {paso < 8 ? (
             <button
               className="tg-button tg-primary"
               disabled={enviando || (paso === 1 && !registro.negocio)}
@@ -610,15 +632,7 @@ export default function AltaInicial() {
             >
               Continuar →
             </button>
-          ) : (
-            <button
-              className="tg-button tg-primary"
-              disabled={enviando}
-              onClick={terminar}
-            >
-              {enviando ? 'Creando tu negocio…' : 'Finalizar configuración y abrir panel'}
-            </button>
-          )}
+          ) : null}
         </footer>
       </main>
     </div>

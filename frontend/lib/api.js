@@ -66,13 +66,15 @@ async function solicitar(
   if (!respuesta.ok) {
     if (respuesta.status === 401 && avisarSesion && typeof window !== 'undefined')
       window.dispatchEvent(new Event('sesion-vencida'));
-    throw new ErrorAPI(
+    const fallo = new ErrorAPI(
       typeof datos?.detail === 'string'
         ? datos.detail
-        : 'No se pudo completar la solicitud.',
+        : datos?.detail?.mensaje || 'No se pudo completar la solicitud.',
       respuesta.status,
       datos?.errores || [],
     );
+    fallo.codigo = datos?.detail?.codigo;
+    throw fallo;
   }
   return datos;
 }

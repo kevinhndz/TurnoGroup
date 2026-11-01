@@ -104,6 +104,8 @@ async function comunicar(request, { params }) {
     const salida = new Headers({ 'Cache-Control': 'no-store' });
     const tipo = respuesta.headers.get('content-type');
     if (tipo) salida.set('content-type', tipo);
+    const descarga = respuesta.headers.get('content-disposition');
+    if (descarga) salida.set('content-disposition', descarga);
     for (const valor of respuesta.headers.getSetCookie())
       salida.append('set-cookie', valor);
 

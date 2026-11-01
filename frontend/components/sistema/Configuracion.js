@@ -11,6 +11,7 @@ import Formulario from './Formulario';
 import Crud from './Crud';
 import Icon from '../Icon';
 import PrepararMesas from './PrepararMesas';
+import DesactivarCuenta from './DesactivarCuenta';
 
 export function Negocio({ crear = false, despues }) {
   const { sesion, actualizar } = usarSesion();
@@ -377,7 +378,10 @@ export default function Configuracion({ pestañaInicial = 'negocio' }) {
       </nav>
       <div key={pestaña}>
         {pestaña === 'negocio' ? (
-          <Negocio />
+          <>
+            <Negocio />
+            <DesactivarCuenta />
+          </>
         ) : pestaña === 'servicios' ? (
           <OpcionesSucursal />
         ) : pestaña === 'pagos' ? (

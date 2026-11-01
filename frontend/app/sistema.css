@@ -1,4 +1,51 @@
 /* Pantallas de acceso y espacio de trabajo. */
+.tg-cart-peek footer > .tg-button + .tg-button {
+  margin-top: 10px;
+}
+.tg-cart-peek footer > .tg-link-button {
+  display: block;
+  margin: 16px auto 0;
+}
+.tg-modal:has(.tg-inline-checkout) {
+  width: min(860px, 100vw);
+}
+.tg-inline-checkout.tg-orders {
+  min-height: 0;
+  background: white;
+}
+.tg-inline-checkout .tg-order-header {
+  padding: 12px 0;
+  min-height: 0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.tg-inline-checkout .tg-order-main {
+  width: 100%;
+  padding: 16px 0;
+  margin: 0;
+}
+.tg-inline-checkout .tg-checkout {
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+.tg-inline-checkout .tg-checkout-summary {
+  position: static;
+}
+.tg-inline-checkout .tg-card {
+  padding: 18px;
+}
+.tg-inline-checkout .tg-choice-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 500px) {
+  .tg-inline-checkout .tg-choice-grid {
+    grid-template-columns: 1fr;
+  }
+  .tg-modal:has(.tg-inline-checkout) {
+    max-height: 96dvh;
+    padding: 16px;
+  }
+}
 .tg-finance {
   max-width: 1440px;
   margin-inline: auto;

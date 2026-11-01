@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { leerCSV } from '../../lib/csv';
 import { api } from '../../lib/api';
 import { Mensaje } from './Controles';
 
@@ -14,38 +13,78 @@ export default function ImportarProductos({
   const [filas, setFilas] = useState([]);
   const [error, setError] = useState('');
   const [ocupado, setOcupado] = useState(false);
+  const [formato, setFormato] = useState('csv');
+  const [leyendo, setLeyendo] = useState(false);
   return (
     <div className="tg-form">
       <p>
-        Exporta tu Excel como CSV UTF-8. Columnas: nombre, precio, categoria y
-        descripcion. Las dos últimas son opcionales. Usa categorías que ya existan.
+        Una fila por producto, hasta 1000 productos. Columnas: nombre, precio, categoria y
+        descripcion. Las dos últimas son opcionales. Usa categorías que ya existan o deja
+        esa columna vacía. Excel se lee desde la primera hoja, sin fórmulas. Los precios
+        se toman en la moneda de tu negocio.
       </p>
-      <a
-        className="tg-link-button"
-        download="productos.csv"
-        href={
-          'data:text/csv;charset=utf-8,' +
-          encodeURIComponent(
-            'nombre,precio,categoria,descripcion\nCafe americano,45.00,,Cafe negro\n',
-          )
-        }
-      >
-        Descargar ejemplo CSV
-      </a>
       <label className="tg-field">
-        <span>Archivo CSV · hasta 1 MB</span>
+        <span>Formato del archivo</span>
+        <select
+          value={formato}
+          disabled={ocupado || leyendo}
+          onChange={(event) => {
+            setFormato(event.target.value);
+            setFilas([]);
+            setError('');
+          }}
+        >
+          <option value="csv">CSV (.csv)</option>
+          <option value="excel">Excel (.xlsx)</option>
+        </select>
+      </label>
+      {formato === 'csv' && (
+        <a
+          className="tg-link-button"
+          download="productos.csv"
+          href={
+            'data:text/csv;charset=utf-8,' +
+            encodeURIComponent(
+              'nombre,precio,categoria,descripcion\nCafe americano,45.00,,Cafe negro\n',
+            )
+          }
+        >
+          Descargar ejemplo CSV
+        </a>
+      )}
+      <label className="tg-field">
+        <span>Archivo {formato === 'excel' ? 'Excel' : 'CSV'} · hasta 1 MB</span>
         <input
+          key={formato}
           type="file"
-          accept=".csv,text/csv"
-          disabled={ocupado}
+          accept={
+            formato === 'excel'
+              ? '.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+              : '.csv,text/csv'
+          }
+          disabled={ocupado || leyendo}
           onChange={async (event) => {
             setError('');
             setFilas([]);
             const archivo = event.target.files[0];
             if (!archivo) return;
+            setLeyendo(true);
             try {
               if (archivo.size > 1000000) throw new Error('El archivo supera 1 MB.');
-              const leidas = leerCSV(await archivo.text());
+              const extension = formato === 'excel' ? '.xlsx' : '.csv';
+              if (!archivo.name.toLowerCase().endsWith(extension))
+                throw new Error(`Selecciona un archivo ${extension}.`);
+              const contenido = await new Promise((resolve, reject) => {
+                const lector = new FileReader();
+                lector.onload = () => resolve(lector.result.split(',')[1]);
+                lector.onerror = () => reject(new Error('No se pudo leer el archivo.'));
+                lector.readAsDataURL(archivo);
+              });
+              const respuesta = await api('/productos/revisar-archivo', {
+                method: 'POST',
+                body: { formato, nombre_archivo: archivo.name, contenido },
+              });
+              const leidas = respuesta.productos;
               const productos = leidas.map((fila) => {
                 const categoria = categorias.find(
                   (item) =>
@@ -67,17 +106,20 @@ export default function ImportarProductos({
               setFilas(productos);
             } catch (fallo) {
               setError(fallo.message);
+            } finally {
+              setLeyendo(false);
             }
           }}
         />
       </label>
+      {leyendo && <p role="status">Leyendo archivo y preparando vista previa…</p>}
       <Mensaje error={error} />
       {!!filas.length && (
         <>
           <p>
             {filas.length} productos listos.{' '}
             {local
-              ? 'Se añadirán a la configuración y se guardarán al confirmar el paso 7.'
+              ? 'Se añadirán a la configuración y se guardarán al finalizar el registro.'
               : 'Se crearán en el catálogo y se asignarán a la sucursal seleccionada.'}
           </p>
           <div className="tg-table-scroll">
@@ -102,12 +144,16 @@ export default function ImportarProductos({
         </>
       )}
       <div className="tg-form-actions">
-        <button className="tg-button tg-secondary" disabled={ocupado} onClick={cancelar}>
+        <button
+          className="tg-button tg-secondary"
+          disabled={ocupado || leyendo}
+          onClick={cancelar}
+        >
           Cancelar
         </button>
         <button
           className="tg-button tg-primary"
-          disabled={!filas.length || ocupado}
+          disabled={!filas.length || ocupado || leyendo}
           onClick={async () => {
             setOcupado(true);
             setError('');

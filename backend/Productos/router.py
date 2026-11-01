@@ -8,6 +8,7 @@ from database.almacen import abrir_puerta_bd
 from backend.Productos.schema import (
     NuevoProductoRespuesta,
     Revisar_Json_Importar_Productos,
+    Revisar_Json_Archivo_Productos,
     Revisar_Json_Imagen_Producto,
     Revisar_Json_Editar_Producto,
     Revisar_Json_Nuevo_Producto,
@@ -38,6 +39,11 @@ def ver_productos(
     return service.listar_productos_service(
         id_empresa, pagina_actual, limite, db, id_sucursal
     )
+
+
+@router.post("/revisar-archivo")
+def revisar_archivo_productos(json: Revisar_Json_Archivo_Productos):
+    return service.revisar_archivo_service(json)
 
 
 @router.post("/importar", status_code=201)

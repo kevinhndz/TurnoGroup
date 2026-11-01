@@ -8,6 +8,7 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
 
 RUTAS_CON_PERMISO = {
+    ('POST', '/productos/revisar-archivo'),
     ('POST', '/suscripciones/desactivar-cuenta'),
     ('POST', '/suscripciones/tarjetas'),
     ('POST', '/suscripciones/tarjetas/{id}/principal'),
@@ -223,6 +224,9 @@ def autorizar_ruta(request: Request, db: Session = Depends(abrir_puerta_bd)):
         revisar_solicitud_sesion(request)
         return
     if ruta == "/usuarios/registro-negocio" and metodo == "POST" and revision.ALTA_PUBLICA_HABILITADA:
+        revisar_solicitud_sesion(request)
+        return
+    if ruta == "/productos/revisar-archivo" and metodo == "POST" and revision.ALTA_PUBLICA_HABILITADA:
         revisar_solicitud_sesion(request)
         return
 

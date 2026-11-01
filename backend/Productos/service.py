@@ -14,6 +14,101 @@ from core.exceptions import RecursoNoEncontradoError, RecursoDuplicadoError
 class ProductoService:
 
     @staticmethod
+    def revisar_archivo_service(json):
+        import base64
+        import binascii
+        import csv
+        from io import BytesIO, StringIO
+        from zipfile import ZipFile
+        from decimal import Decimal, InvalidOperation
+
+        extension = ".xlsx" if json.formato == "excel" else ".csv"
+        if not json.nombre_archivo.lower().endswith(extension):
+            raise HTTPException(422, f"Selecciona un archivo {extension}")
+        try:
+            contenido = base64.b64decode(json.contenido, validate=True)
+        except (ValueError, binascii.Error):
+            raise HTTPException(422, "No se pudo leer el archivo") from None
+        if len(contenido) > 1_000_000:
+            raise HTTPException(413, "El archivo supera 1 MB")
+        if json.formato == "excel":
+            from openpyxl import load_workbook
+            libro = None
+            try:
+                with ZipFile(BytesIO(contenido)) as archivo:
+                    entradas = archivo.infolist()
+                    if len(entradas) > 1000 or sum(item.file_size for item in entradas) > 10_000_000:
+                        raise HTTPException(422, "El Excel contiene demasiada informacion")
+                    for item in entradas:
+                        if item.filename.lower().endswith(".xml"):
+                            xml = archivo.read(item).upper()
+                            if b"<!DOCTYPE" in xml or b"<!ENTITY" in xml:
+                                raise HTTPException(422, "Usa un Excel sin contenido XML personalizado")
+                libro = load_workbook(BytesIO(contenido), read_only=True, data_only=False, keep_links=False)
+                hoja = libro.worksheets[0]
+                if hoja.max_row and hoja.max_row > 1001:
+                    raise HTTPException(422, "El Excel debe tener hasta 1000 productos y una fila de encabezados")
+                filas = []
+                for fila in hoja.iter_rows(max_row=1002, max_col=21):
+                    if any(celda.data_type == "f" for celda in fila):
+                        raise HTTPException(422, "Reemplaza las formulas del Excel por sus valores antes de importar")
+                    valores = [celda.value for celda in fila]
+                    while valores and valores[-1] is None:
+                        valores.pop()
+                    if any(valor is not None and str(valor).strip() for valor in valores):
+                        filas.append(valores)
+                if hoja.max_column and hoja.max_column > 20:
+                    raise HTTPException(422, "Usa solo las columnas de la plantilla")
+            except HTTPException:
+                raise
+            except Exception:
+                raise HTTPException(422, "No se pudo abrir el Excel. Usa un archivo .xlsx valido, sin contrasena") from None
+            finally:
+                if libro:
+                    libro.close()
+        else:
+            try:
+                texto = contenido.decode("utf-8-sig")
+                try:
+                    separador = csv.Sniffer().sniff(texto[:4096], delimiters=",;").delimiter
+                except csv.Error:
+                    separador = ","
+                filas = []
+                for fila in csv.reader(StringIO(texto), delimiter=separador, strict=True):
+                    if any(valor.strip() for valor in fila):
+                        filas.append(fila)
+                    if len(filas) > 1001:
+                        break
+            except (UnicodeDecodeError, csv.Error):
+                raise HTTPException(422, "No se pudo leer el CSV. Guardalo como CSV UTF-8") from None
+        if not 2 <= len(filas) <= 1001:
+            raise HTTPException(422, "El archivo debe tener entre 1 y 1000 productos")
+        titulos = [str(valor or "").strip().lower() for valor in filas[0]]
+        permitidos = {"nombre", "precio", "categoria", "descripcion"}
+        if not {"nombre", "precio"}.issubset(titulos) or len(set(titulos)) != len(titulos) or not set(titulos).issubset(permitidos):
+            raise HTTPException(422, "Usa las columnas nombre, precio, categoria y descripcion, sin repetir. Nombre y precio son obligatorias")
+        productos = []
+        nombres = set()
+        for numero, valores in enumerate(filas[1:], start=2):
+            if len(valores) > len(titulos):
+                raise HTTPException(422, f"Revisa las columnas de la fila {numero}")
+            valores = valores + [None] * (len(titulos) - len(valores))
+            fila = {titulo: str(valor).strip() if valor is not None else "" for titulo, valor in zip(titulos, valores)}
+            try:
+                precio = Decimal(fila["precio"])
+                if not precio.is_finite() or precio < 0 or precio > Decimal("99999999.99") or precio != precio.quantize(Decimal("0.01")):
+                    raise ValueError()
+            except (InvalidOperation, ValueError):
+                raise HTTPException(422, f"Revisa el precio de la fila {numero}. Usa un numero no negativo con hasta dos decimales") from None
+            if not fila["nombre"] or len(fila["nombre"]) > 100 or len(fila.get("descripcion", "")) > 10000:
+                raise HTTPException(422, f"Revisa el nombre y la descripcion de la fila {numero}")
+            if fila["nombre"].casefold() in nombres:
+                raise HTTPException(409, f"El producto de la fila {numero} esta repetido en el archivo")
+            nombres.add(fila["nombre"].casefold())
+            productos.append({"nombre": fila["nombre"], "precio": format(precio, ".2f"), "categoria": fila.get("categoria", ""), "descripcion": fila.get("descripcion") or None})
+        return {"productos": productos}
+
+    @staticmethod
     def crear_producto_service(
         json: Revisar_Json_Nuevo_Producto, db: Session, id_empresa: int
     ):

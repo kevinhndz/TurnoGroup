@@ -315,6 +315,7 @@ def test_alta_final_crea_cuenta_empresa_y_contexto(client):
     cuenta={'correo':'propietario-nuevo@example.com','nombre':'Propietario nuevo','clave':'Clave propia de prueba 123'}
     assert client.post('/sesiones/iniciar',json={'correo':cuenta['correo'],'clave':cuenta['clave']}).status_code==401
     registro={'cuenta':cuenta,'negocio':{'nombre':'Empresa del propietario','tipo_negocio':'Otro','codigo_pais':'HN','zona_horaria':'America/Tegucigalpa','codigo_moneda':'HNL'},'sucursales':[{'id_local':1,'nombre':'Principal','direccion':'Direccion principal','es_principal':True,'servicios':{'comer_aqui':{'habilitado':True}},'pagos':['efectivo']}]}
+    registro['tarjeta_suscripcion']={'tarjeta_prueba':'visa','titular':'Propietario nuevo','mes':12,'anio':2099}
     creada=client.post('/usuarios/registro-negocio',json=registro)
     assert creada.status_code==201,creada.text
     assert creada.json()['rol_empresa']=='Gerente'

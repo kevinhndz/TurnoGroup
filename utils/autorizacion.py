@@ -8,6 +8,15 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
 
 RUTAS_CON_PERMISO = {
+    ('POST', '/suscripciones/desactivar-cuenta'),
+    ('POST', '/suscripciones/tarjetas'),
+    ('POST', '/suscripciones/tarjetas/{id}/principal'),
+    ('POST', '/suscripciones/tarjetas/{id}/secundaria'),
+    ('DELETE', '/suscripciones/tarjetas/{id}'),
+    ('PATCH', '/suscripciones/renovacion'),
+    ('POST', '/suscripciones/comprobantes/registro'),
+    ('GET', '/suscripciones/comprobantes/excel'),
+    ('GET', '/suscripciones/comprobantes/{id}/pdf'),
     ('GET','/pedidos/operaciones/{clave_operacion}'),
     ('GET', '/bitacora/'),
     ('GET', '/pedidos/mesas'),

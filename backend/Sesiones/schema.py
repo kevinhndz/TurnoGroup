@@ -4,6 +4,7 @@ from backend.Usuarios.schema import NuevoUsuarioRespuesta
 
 
 class Revisar_Json_Iniciar_Sesion(BaseModel):
+    reactivar: bool = False
     correo: EmailStr
     clave: SecretStr = Field(min_length=1, max_length=128)
 

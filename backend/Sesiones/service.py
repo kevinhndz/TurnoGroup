@@ -18,8 +18,16 @@ class SesionService():
         hash_guardado = look_up.clave_protegida if look_up and look_up.clave_protegida else _hash_sin_usuario
         correcta = verificar_contrasena(json.clave.get_secret_value(), hash_guardado)
 
-        if not look_up or not look_up.estado or not look_up.clave_protegida or not correcta:
+        if not look_up or not look_up.clave_protegida or not correcta:
             raise HTTPException(401, "Correo o clave incorrectos")
+
+        if not look_up.estado:
+            if not look_up.fecha_desactivacion_voluntaria:
+                raise HTTPException(401, "Correo o clave incorrectos")
+            if not json.reactivar:
+                raise HTTPException(409, {"codigo": "CUENTA_DESACTIVADA", "mensaje": "Tu cuenta esta desactivada. Puedes reactivarla para recuperar el acceso."})
+            look_up.estado = True
+            look_up.fecha_desactivacion_voluntaria = None
 
         token = crear_token_sesion()
         ahora = datetime.now(timezone.utc).replace(tzinfo=None)

@@ -8,6 +8,7 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
 
 RUTAS_CON_PERMISO = {
+    ('GET', '/finanzas/dashboard'),
     ('POST', '/productos/revisar-archivo'),
     ('POST', '/suscripciones/desactivar-cuenta'),
     ('POST', '/suscripciones/tarjetas'),

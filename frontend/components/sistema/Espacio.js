@@ -273,7 +273,6 @@ function Interior({ children }) {
             })}
         </nav>
         <div className="tg-sidebar-bottom">
-          <Link href="/invitacion">Aceptar invitación</Link>
           <Link href="/panel/configuracion">Configuración</Link>
           <button onClick={salir} disabled={saliendo}>
             {saliendo ? 'Saliendo…' : 'Cerrar sesión'}

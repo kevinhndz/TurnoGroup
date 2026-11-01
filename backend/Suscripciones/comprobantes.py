@@ -61,3 +61,25 @@ def crear_excel(filas):
     salida = BytesIO()
     libro.save(salida)
     return salida.getvalue()
+
+
+def crear_historial_pdf(filas):
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib.pagesizes import A4
+    from xml.sax.saxutils import escape
+
+    salida = BytesIO()
+    estilos = getSampleStyleSheet()
+    contenido = [Paragraph("Turno Group - Historial de facturacion", estilos["Title"]),
+                 Paragraph("DOCUMENTOS DE PRUEBA - SIN VALIDEZ FISCAL", estilos["Normal"]), Spacer(1, 20)]
+    for item in filas:
+        contenido.extend([
+            Paragraph(f"TG-PRUEBA-{item.id:06} - {item.fecha:%d/%m/%Y}", estilos["Heading2"]),
+            Paragraph(escape(item.nombre_empresa), estilos["Normal"]),
+            Paragraph(escape(item.concepto), estilos["Normal"]),
+            Paragraph(escape(item.detalle), estilos["Normal"]),
+            Paragraph(f"Total: {item.importe:.2f} {escape(item.moneda)}", estilos["Normal"]), Spacer(1, 18),
+        ])
+    SimpleDocTemplate(salida, pagesize=A4).build(contenido)
+    return salida.getvalue()

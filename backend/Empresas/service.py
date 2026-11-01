@@ -10,6 +10,9 @@ class EmpresaService():
 
     @staticmethod
     def crear_empresa_service(json: Revisar_Json_Nueva_Empresa, db: Session, usuario, sesion):
+        from backend.InvitacionesLaborales.repository import InvitacionLaboralRepository
+        if usuario.rol_plataforma != "Superadministrador" and InvitacionLaboralRepository.buscar_otra_empresa(db, usuario.id):
+            raise HTTPException(409, "El usuario ya pertenece a una empresa")
         look_up = repo.buscar_empresa(db, json.nombre)
         if look_up is not None:
             raise RecursoDuplicadoError("Ya existe una empresa con ese nombre")

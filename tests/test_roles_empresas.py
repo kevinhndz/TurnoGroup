@@ -195,6 +195,49 @@ def test_invitacion_no_acepta_sucursal_de_otra_empresa(client,datos,monkeypatch)
     assert client.post('/invitaciones-laborales/',json={'correo':'nuevo@example.com','rol':'Mesero','sucursales':[datos['sucursal'],datos['sucursal']]}).status_code==422
 
 
+@pytest.mark.parametrize('rol', ['Mesero', 'Administrador'])
+def test_personal_solo_tiene_una_sucursal_y_no_cambia_contexto(client, db, datos, monkeypatch, rol):
+    preparar_correo(monkeypatch)
+    local = Sucursales(id_empresa=datos['empresa'], nombre='Otra sucursal', direccion='Direccion secundaria')
+    usuario = Usuarios(correo='personal-unico@example.com', nombre='Personal')
+    db.add_all([local, usuario]); db.flush()
+    vinculo = VinculosLaborales(id_usuario=usuario.id, id_empresa=datos['empresa'], rol=rol)
+    db.add(vinculo); db.commit()
+    ruta = f'/vinculos-laborales/{vinculo.id}/sucursales'
+    assert client.post(ruta, json={'id_sucursal':datos['sucursal']}).status_code == 201
+    assert client.post(ruta, json={'id_sucursal':local.id}).status_code == 409
+    assert client.post('/invitaciones-laborales/', json={'correo':'otro-personal@example.com','rol':rol,'sucursales':[datos['sucursal'],local.id]}).status_code == 422
+    usar_rol(client, db, datos, rol)
+    db.add(AsignacionesSucursales(id_vinculo_laboral=datos['vinculo'], id_sucursal=local.id))
+    db.commit()
+    assert client.patch('/sesiones/contexto', json={'id_vinculo_laboral':datos['vinculo'],'id_sucursal':local.id}).status_code == 403
+
+
+def test_gerente_puede_cambiar_sucursal_de_su_empresa(client, db, datos):
+    local = Sucursales(id_empresa=datos['empresa'], nombre='Local del gerente', direccion='Direccion secundaria')
+    db.add(local); db.commit()
+    respuesta = client.patch('/sesiones/contexto', json={'id_vinculo_laboral':datos['vinculo'],'id_sucursal':local.id})
+    assert respuesta.status_code == 200
+    assert respuesta.json()['id_sucursal'] == local.id
+
+
+def test_usuario_no_puede_crear_segunda_empresa_ni_recibir_otro_vinculo(client, db, datos):
+    cuerpo = {'nombre':'Segunda empresa','tipo_negocio':'Otro','codigo_pais':'HN','zona_horaria':'America/Tegucigalpa','codigo_moneda':'HNL'}
+    assert client.post('/empresas/', json=cuerpo).status_code == 409
+    usar_rol(client, db, datos, 'Superadministrador')
+    assert client.post('/vinculos-laborales/', json={'id_usuario':datos['usuario_autorizado'],'id_empresa':datos['otra_empresa'],'rol':'Gerente'}).status_code == 409
+
+
+def test_no_invita_usuario_que_ya_tiene_otra_empresa(client, db, datos, monkeypatch):
+    preparar_correo(monkeypatch)
+    usuario = Usuarios(nombre='Otra persona', correo='otra-empresa@example.com')
+    db.add(usuario); db.flush()
+    db.add(VinculosLaborales(id_usuario=usuario.id, id_empresa=datos['otra_empresa'], rol='Gerente'))
+    db.commit()
+    respuesta = client.post('/invitaciones-laborales/', json={'correo':usuario.correo,'rol':'Mesero','sucursales':[datos['sucursal']]})
+    assert respuesta.status_code == 409
+
+
 def test_no_se_elimina_ultimo_gerente(client,datos):
     assert client.patch('/vinculos-laborales/'+str(datos['vinculo']),json={'activo':False}).status_code==409
     assert client.patch('/vinculos-laborales/'+str(datos['vinculo']),json={'rol':'Mesero'}).status_code==409

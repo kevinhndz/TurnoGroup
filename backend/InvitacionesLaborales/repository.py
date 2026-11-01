@@ -49,6 +49,14 @@ class InvitacionLaboralRepository():
         return db.query(Usuarios).filter(Usuarios.correo == correo).first()
 
     @staticmethod
+    def buscar_otra_empresa(db, id_usuario, id_empresa=None):
+        db.query(Usuarios).filter(Usuarios.id == id_usuario).with_for_update().first()
+        consulta = db.query(VinculosLaborales).filter(VinculosLaborales.id_usuario == id_usuario)
+        if id_empresa is not None:
+            consulta = consulta.filter(VinculosLaborales.id_empresa != id_empresa)
+        return consulta.first()
+
+    @staticmethod
     def revocar_anteriores(db, correo, id_empresa, ahora):
         db.query(InvitacionesLaborales).filter(
             InvitacionesLaborales.correo == correo, InvitacionesLaborales.id_empresa == id_empresa,

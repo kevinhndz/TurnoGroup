@@ -115,6 +115,13 @@ class SesionService():
         vinculo = repo.buscar_vinculo_autorizado(db, usuario.id, json.id_vinculo_laboral)
         if not vinculo:
             raise HTTPException(403, "El vinculo no esta autorizado")
+        if sesion.id_vinculo_laboral and sesion.id_vinculo_laboral != vinculo.id:
+            raise HTTPException(403, "La sesion pertenece a una sola empresa")
+        if vinculo.rol != "Gerente":
+            asignada = repo.buscar_sucursal_autorizada(db, vinculo)
+            id_asignada = sesion.id_sucursal or (asignada.id if asignada else None)
+            if json.id_sucursal != id_asignada:
+                raise HTTPException(403, "Solo el gerente puede cambiar de sucursal")
         sucursal = repo.buscar_sucursal_autorizada(db, vinculo, json.id_sucursal)
         if json.id_sucursal is not None and not sucursal:
             raise HTTPException(403, "La sucursal no esta autorizada")

@@ -33,14 +33,16 @@ class InvitacionLaboralService:
         if (
             len(ids) != len(set(ids))
             or any(id <= 0 for id in ids)
-            or (json.rol != "Gerente" and not ids)
+            or (json.rol != "Gerente" and len(ids) != 1)
         ):
-            raise HTTPException(422, "Indica sucursales validas sin repetir")
+            raise HTTPException(422, "Indica una sola sucursal para administrador o mesero, sin repetir")
         for id_sucursal in ids:
             if not repo.buscar_sucursal(db, id_sucursal, empresa.id):
                 raise HTTPException(404, "No se encontro la sucursal")
         correo = str(json.correo).lower()
         usuario = repo.buscar_usuario(db, correo)
+        if usuario and repo.buscar_otra_empresa(db, usuario.id, empresa.id):
+            raise HTTPException(409, "El usuario ya pertenece a otra empresa")
         existente = repo.buscar_vinculo(db, usuario.id, empresa.id) if usuario else None
         if existente and existente.activo:
             raise HTTPException(409, "El usuario ya tiene un vinculo activo")
@@ -134,6 +136,10 @@ class InvitacionLaboralService:
         if not invitante or not invitante.activo or invitante.rol != "Gerente":
             raise HTTPException(400, "La invitacion no es valida")
         sucursales = repo.sucursales_invitacion(db, look_up.id)
+        if look_up.rol != "Gerente" and len(sucursales) != 1:
+            raise HTTPException(400, "Solicita una invitacion con una sola sucursal")
+        if repo.buscar_otra_empresa(db, usuario.id, empresa.id):
+            raise HTTPException(409, "El usuario ya pertenece a otra empresa")
         for id_sucursal in sucursales:
             if not repo.buscar_sucursal(db, id_sucursal, empresa.id):
                 raise HTTPException(400, "La invitacion no es valida")

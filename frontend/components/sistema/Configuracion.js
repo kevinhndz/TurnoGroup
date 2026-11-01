@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { api, listarTodo } from '../../lib/api';
 import { camposEmpresa } from '../../lib/modulos';
@@ -12,6 +11,8 @@ import Crud from './Crud';
 import Icon from '../Icon';
 import PrepararMesas from './PrepararMesas';
 import DesactivarCuenta from './DesactivarCuenta';
+import Cuenta from './Cuenta';
+import Suscripcion from './Suscripcion';
 
 export function Negocio({ crear = false, despues }) {
   const { sesion, actualizar } = usarSesion();
@@ -344,43 +345,80 @@ export function Impuestos() {
   );
 }
 
-export default function Configuracion({ pestañaInicial = 'negocio' }) {
+export default function Configuracion({ pestañaInicial = 'cuenta' }) {
+  const { sesion } = usarSesion();
+  const gerente = sesion.rol_empresa === 'Gerente';
   const [pestaña, setPestaña] = useState(pestañaInicial);
   const pestañas = [
-    ['negocio', 'Negocio'],
-    ['servicios', 'Servicios'],
-    ['pagos', 'Métodos de pago'],
-    ['impuestos', 'Impuestos'],
-    ['descuentos', 'Descuentos'],
+    ['cuenta', 'Mi cuenta y acceso'],
+    ...(gerente
+      ? [
+          ['negocio', 'Negocio'],
+          ['servicios', 'Servicios'],
+          ['pagos', 'Métodos de pago'],
+          ['impuestos', 'Impuestos'],
+          ['descuentos', 'Descuentos'],
+          ['suscripcion', 'Plan y facturación'],
+          ['cancelacion', 'Cancelación y cuenta'],
+        ]
+      : []),
   ];
+  const grupos = [
+    ['Mi cuenta', ['cuenta']],
+    ...(gerente
+      ? [
+          ['Negocio y catálogo', ['negocio', 'impuestos', 'descuentos']],
+          ['Atención por sucursal', ['servicios', 'pagos']],
+          ['Plan y facturación', ['suscripcion', 'cancelacion']],
+        ]
+      : []),
+  ];
+  const grupo = grupos.find(([, ids]) => ids.includes(pestaña)) || grupos[0];
   return (
     <>
       <div className="tg-section-heading">
         <div>
           <span className="tg-eyebrow">A TU MANERA</span>
           <h1>Configuración</h1>
-          <p>Prepara la forma de trabajar de tu empresa y de cada sucursal.</p>
+          <p>Elige qué quieres configurar: tu cuenta, tu negocio o tu suscripción.</p>
         </div>
-        <Link className="tg-button tg-secondary" href="/configuracion-inicial">
-          Abrir asistente
-        </Link>
       </div>
       <nav className="tg-tabs" aria-label="Configuración">
-        {pestañas.map(([id, titulo]) => (
+        {grupos.map(([titulo, ids]) => (
           <button
-            key={id}
-            onClick={() => setPestaña(id)}
-            aria-current={pestaña === id ? 'page' : undefined}
+            key={titulo}
+            onClick={() => setPestaña(ids[0])}
+            aria-current={grupo[0] === titulo ? 'page' : undefined}
           >
             {titulo}
           </button>
         ))}
       </nav>
+      {grupo[1].length > 1 && (
+        <nav className="tg-tabs" aria-label={`Opciones de ${grupo[0]}`}>
+          {pestañas
+            .filter(([id]) => grupo[1].includes(id))
+            .map(([id, titulo]) => (
+              <button
+                key={id}
+                onClick={() => setPestaña(id)}
+                aria-current={pestaña === id ? 'page' : undefined}
+              >
+                {titulo}
+              </button>
+            ))}
+        </nav>
+      )}
       <div key={pestaña}>
-        {pestaña === 'negocio' ? (
+        {pestaña === 'cuenta' || !gerente ? (
+          <Cuenta />
+        ) : pestaña === 'suscripcion' ? (
+          <Suscripcion />
+        ) : pestaña === 'cancelacion' ? (
+          <DesactivarCuenta />
+        ) : pestaña === 'negocio' ? (
           <>
             <Negocio />
-            <DesactivarCuenta />
           </>
         ) : pestaña === 'servicios' ? (
           <OpcionesSucursal />

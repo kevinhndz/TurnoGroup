@@ -12,6 +12,7 @@ import { useDatos } from './Datos';
 import { api, listarTodo } from '../../lib/api';
 import Icon from '../Icon';
 import AltaInicial from './AltaInicial';
+import { useRouter } from 'next/navigation';
 
 const pasos = [
   'Negocio',
@@ -24,13 +25,13 @@ const pasos = [
 ];
 
 export default function Asistente() {
-  const { registro } = usarSesion();
+  const { registro, cargando } = usarSesion();
+  const router = useRouter();
+  useEffect(() => {
+    if (!cargando && !registro) router.replace('/panel/configuracion');
+  }, [cargando, registro, router]);
   if (registro) return <AltaInicial />;
-  return (
-    <AccesoPrivado>
-      <Interior />
-    </AccesoPrivado>
-  );
+  return <p role="status">Abriendo configuración…</p>;
 }
 
 function Interior() {

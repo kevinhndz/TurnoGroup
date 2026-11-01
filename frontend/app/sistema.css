@@ -1,9 +1,16 @@
 /* Pantallas de acceso y espacio de trabajo. */
+:root {
+  --tg-surface: #fffdfa;
+  --tg-panel: #ffffff;
+  --tg-canvas: #fbf8f3;
+  --tg-ink: #292823;
+  --tg-border: #e9e2d9;
+}
 .tg-app,
 .tg-auth,
 .tg-wizard {
-  background: #fbf8f3;
-  color: #292823;
+  background: var(--tg-canvas);
+  color: var(--tg-ink);
   min-height: 100dvh;
   font-size: 13px;
 }
@@ -3030,4 +3037,81 @@
 .tg-card-folder.is-keyboard .tg-folder-back,
 .tg-card-folder.is-keyboard .tg-credit-rotor {
   transition-duration: 0.01ms;
+}
+
+.tg-profile {
+  position: relative;
+  flex-shrink: 0;
+}
+.tg-profile summary {
+  cursor: pointer;
+  list-style: none;
+  border-radius: 8px;
+  padding: 6px;
+}
+.tg-profile summary::-webkit-details-marker {
+  display: none;
+}
+.tg-profile summary:focus-visible {
+  outline: 2px solid #b65c3e;
+  outline-offset: 3px;
+}
+.tg-profile-menu {
+  position: absolute;
+  z-index: 60;
+  right: 0;
+  top: calc(100% + 10px);
+  width: 200px;
+  padding: 8px;
+  background: var(--tg-panel);
+  color: var(--tg-ink);
+  border: 1px solid var(--tg-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 35px #0002;
+}
+.tg-profile-menu a,
+.tg-profile-menu button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+  background: transparent;
+  color: inherit;
+  border-radius: 6px;
+}
+.tg-profile-menu a:hover,
+.tg-profile-menu button:hover {
+  background: var(--tg-canvas);
+}
+.tg-branch-name {
+  max-width: 180px;
+  overflow-wrap: anywhere;
+  color: inherit;
+  font-size: 11px;
+}
+.tg-document-preview {
+  width: 100%;
+  height: min(62dvh, 650px);
+  border: 1px solid var(--tg-border);
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: white;
+}
+.tg-modal:has(.tg-document-preview),
+.tg-modal:has(.tg-table-scroll) {
+  width: min(960px, calc(100vw - 24px));
+}
+.tg-tabs {
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .tg-app-header {
+    gap: 10px;
+  }
+  .tg-profile .tg-user > span:last-child {
+    display: none;
+  }
+  .tg-branch-name {
+    max-width: 110px;
+  }
 }

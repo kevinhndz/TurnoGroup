@@ -51,45 +51,31 @@ export function SelectorContexto() {
     return <span className="tg-badge">Administración de plataforma</span>;
   return (
     <div className="tg-context">
-      <label>
-        <span>Empresa</span>
-        <select
-          aria-label="Empresa activa"
-          value={vinculo?.id || ''}
-          disabled={ocupado || !vinculos.length}
-          onChange={(event) => {
-            const nuevo = vinculos.find((item) => item.id === Number(event.target.value));
-            if (nuevo) elegir(nuevo.id, nuevo.sucursales[0]?.id || null);
-          }}
-        >
-          <option value="" disabled>
-            Seleccionar empresa
-          </option>
-          {vinculos.map((item) => (
-            <option value={item.id} key={item.id}>
-              {item.nombre_empresa || 'Empresa'} · {item.rol}
+      {sesion.rol_empresa === 'Gerente' ? (
+        <label>
+          <span>Sucursal</span>
+          <select
+            aria-label="Sucursal activa"
+            value={sesion.id_sucursal || ''}
+            disabled={ocupado || !vinculo?.sucursales.length}
+            onChange={(event) => elegir(vinculo.id, event.target.value)}
+          >
+            <option value="" disabled>
+              Seleccionar sucursal
             </option>
-          ))}
-        </select>
-      </label>
-      <label>
-        <span>Sucursal</span>
-        <select
-          aria-label="Sucursal activa"
-          value={sesion.id_sucursal || ''}
-          disabled={ocupado || !vinculo?.sucursales.length}
-          onChange={(event) => elegir(vinculo.id, event.target.value)}
-        >
-          <option value="" disabled>
-            Seleccionar sucursal
-          </option>
-          {vinculo?.sucursales.map((item) => (
-            <option value={item.id} key={item.id}>
-              {item.nombre}
-            </option>
-          ))}
-        </select>
-      </label>
+            {vinculo?.sucursales.map((item) => (
+              <option value={item.id} key={item.id}>
+                {item.nombre}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : (
+        <span className="tg-branch-name">
+          {vinculo?.sucursales.find((item) => item.id === sesion.id_sucursal)?.nombre ||
+            'Sin sucursal asignada'}
+        </span>
+      )}
       {error && <small role="alert">{error}</small>}
     </div>
   );
@@ -192,12 +178,9 @@ function Interior({ children }) {
               ? [
                   ['Sucursales', '/panel/sucursales'],
                   ['Empleados', '/panel/equipo'],
-                  ['Configuración', '/panel/configuracion'],
-                  ['Configuración inicial', '/configuracion-inicial'],
                   ...(sesion.finanzas_habilitadas
                     ? [['Finanzas', '/panel/finanzas']]
                     : []),
-                  ['Plan y facturación', '/panel/suscripcion'],
                 ]
               : []),
           ],
@@ -289,7 +272,7 @@ function Interior({ children }) {
         </nav>
         <div className="tg-sidebar-bottom">
           <Link href="/invitacion">Aceptar invitación</Link>
-          <Link href="/panel/cuenta">Mi cuenta</Link>
+          <Link href="/panel/configuracion">Configuración</Link>
           <button onClick={salir} disabled={saliendo}>
             {saliendo ? 'Saliendo…' : 'Cerrar sesión'}
           </button>
@@ -316,15 +299,38 @@ function Interior({ children }) {
           </div>
           {!superadmin && <CarritoPendiente />}
           <SelectorContexto />
-          <Link href="/panel/cuenta" className="tg-user">
-            <span className="tg-avatar">
-              {sesion.usuario.nombre.slice(0, 1).toUpperCase()}
-            </span>
-            <span>
-              <strong>{sesion.usuario.nombre}</strong>
-              <small>{sesion.rol_empresa || sesion.usuario.rol_plataforma}</small>
-            </span>
-          </Link>
+          <details
+            className="tg-profile"
+            onKeyDown={(event) => {
+              if (event.key === 'Escape') {
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector('summary').focus();
+              }
+            }}
+          >
+            <summary className="tg-user">
+              <span className="tg-avatar">
+                {sesion.usuario.nombre.slice(0, 1).toUpperCase()}
+              </span>
+              <span>
+                <strong>{sesion.usuario.nombre}</strong>
+                <small>{sesion.rol_empresa || sesion.usuario.rol_plataforma}</small>
+              </span>
+            </summary>
+            <div className="tg-profile-menu">
+              <Link
+                href="/panel/configuracion"
+                onClick={(event) => {
+                  event.currentTarget.closest('details').open = false;
+                }}
+              >
+                Configuración
+              </Link>
+              <button onClick={salir} disabled={saliendo}>
+                {saliendo ? 'Saliendo…' : 'Cerrar sesión'}
+              </button>
+            </div>
+          </details>
         </header>
         <main
           id="contenido"

@@ -4,7 +4,6 @@ from decimal import Decimal
 from sqlalchemy import func
 from backend.Pedidos.repository import PedidoRepository as repo
 from backend.Pedidos.tabla import Pedidos, DetallesPedidos
-from backend.Cajas.repository import CajaRepository as repo_caja
 from core.operaciones import ahora, moneda, exigir, alcance, paginar
 
 
@@ -86,6 +85,16 @@ class PedidoService:
                 "La mesa ya tiene un pedido abierto",
                 409,
             )
+        if json.id_mesa is not None:
+            estado = next(
+                (
+                    mesa["estado"]
+                    for mesa in PedidoService.mesas_service(db, contexto, excluir)
+                    if mesa["id"] == json.id_mesa
+                ),
+                None,
+            )
+            exigir(estado == "Disponible", "La mesa ya no esta disponible", 409)
         productos = {
             item.id: (item, especial)
             for item, especial in repo.productos(
@@ -158,7 +167,7 @@ class PedidoService:
                 sort_keys=True,
             ).encode()
         ).hexdigest()
-        repo_caja.bloquear_sucursal(db, empresa, sucursal)
+        repo.bloquear_sucursal(db, empresa, sucursal)
         look_up = repo.por_operacion(db, empresa, clave)
         if look_up:
             exigir(
@@ -208,18 +217,10 @@ class PedidoService:
             repo.pago(db, sucursal, id_metodo) is not None,
             "El metodo de pago no esta habilitado",
         )
-        caja = repo_caja.buscar_abierta(db, empresa, sucursal)
-        exigir(
-            caja is not None,
-            "El cajero debe abrir la caja antes de registrar cobros",
-            409,
-        )
-        pedido.id_caja = caja.id
         pedido.id_metodo_pago = id_metodo
         pedido.id_usuario_cobro = contexto["usuario"].id
         pedido.fecha_pago = ahora()
-        if pedido.fecha_entrega:
-            pedido.estado = "Cerrado"
+        pedido.estado = "Cerrado"
 
     @staticmethod
     def accion_service(id, accion, json, db, contexto):
@@ -236,13 +237,6 @@ class PedidoService:
             if look_up.fecha_pago:
                 look_up.estado = "Cerrado"
         elif accion == "cancelar":
-            if look_up.id_caja:
-                caja = repo_caja.buscar_caja(db, look_up.id_caja, empresa, sucursal)
-                exigir(
-                    caja and caja.fecha_cierre is None,
-                    "No se puede cancelar un cobro de una caja cerrada",
-                    409,
-                )
             look_up.estado = "Cancelado"
             look_up.fecha_cancelacion = ahora()
             look_up.motivo_cancelacion = json.motivo
@@ -254,7 +248,7 @@ class PedidoService:
     @staticmethod
     def editar_service(id, json, db, contexto):
         empresa, sucursal = alcance(contexto)
-        repo_caja.bloquear_sucursal(db, empresa, sucursal)
+        repo.bloquear_sucursal(db, empresa, sucursal)
         look_up = repo.buscar(db, id, empresa, sucursal, True)
         exigir(look_up is not None, "No se encontro el pedido", 404)
         exigir(
@@ -345,7 +339,7 @@ class PedidoService:
                 for servicio, tipo in datos["servicios"]
             ],
             "pagos": [
-                {"id_metodo_pago": metodo.id, "nombre_visible": metodo.nombre_visible}
+                {"id_metodo_pago": metodo.id, "nombre_visible": metodo.nombre_visible, "clave_concepto": metodo.clave_concepto}
                 for pago, metodo in datos["pagos"]
             ],
             "mesas": [
@@ -368,3 +362,58 @@ class PedidoService:
                 for descuento in datos["descuentos"]
             ],
         }
+
+    @staticmethod
+    def mesas_service(db, contexto, excluir=None):
+        from backend.Mesas.tabla import Mesas
+        from backend.Reservas.tabla import Reservas
+
+        empresa, sucursal = alcance(contexto)
+        instante = ahora()
+        consulta = db.query(Pedidos.id_mesa).filter(
+            Pedidos.id_empresa == empresa,
+            Pedidos.id_sucursal == sucursal,
+            Pedidos.estado == "Abierto",
+        )
+        if excluir:
+            consulta = consulta.filter(Pedidos.id != excluir)
+        ocupadas = {id for id, in consulta.all() if id}
+        reservadas = {
+            id
+            for id, in db.query(Reservas.id_mesa)
+            .filter(
+                Reservas.id_empresa == empresa,
+                Reservas.id_sucursal == sucursal,
+                Reservas.estado == "Confirmada",
+                Reservas.inicio <= instante,
+                Reservas.fin > instante,
+            )
+            .all()
+        }
+        return [
+            {
+                "id": mesa.id,
+                "nombre": mesa.nombre,
+                "capacidad": mesa.capacidad,
+                "estado": (
+                    "Ocupada"
+                    if mesa.id in ocupadas
+                    else "Reservada" if mesa.id in reservadas else "Disponible"
+                ),
+            }
+            for mesa in db.query(Mesas)
+            .filter(Mesas.id_sucursal == sucursal, Mesas.activo.is_(True))
+            .order_by(Mesas.id)
+            .all()
+        ]
+
+    @staticmethod
+    def consultar_operacion_service(clave_operacion, db, contexto):
+        empresa, sucursal = alcance(contexto)
+        look_up = repo.por_operacion(db, empresa, str(clave_operacion))
+        exigir(
+            look_up is not None and look_up.id_sucursal == sucursal,
+            "No se encontro el pedido",
+            404,
+        )
+        return PedidoService.respuesta(db, look_up)

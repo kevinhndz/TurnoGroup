@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, SecretStr
 
 class Revisar_Json_Crear_Invitacion_Laboral(BaseModel):
     correo: EmailStr
-    rol: Literal["Gerente", "Administrador", "Mesero", "Cajero"]
+    rol: Literal["Gerente", "Administrador", "Mesero"]
     sucursales: list[int] = Field(default_factory=list, max_length=100)
 
     model_config = ConfigDict(extra="forbid")

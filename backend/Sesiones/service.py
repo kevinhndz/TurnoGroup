@@ -90,7 +90,7 @@ class SesionService():
         if sesion.id_vinculo_laboral is None:
             return contexto
         vinculo = repo.buscar_vinculo_autorizado(db, usuario.id, sesion.id_vinculo_laboral)
-        if not vinculo or vinculo.rol not in ("Gerente", "Administrador", "Mesero", "Cajero"):
+        if not vinculo or vinculo.rol not in ("Gerente", "Administrador", "Mesero"):
             raise HTTPException(403, "El vinculo no esta autorizado")
         contexto.update(vinculo=vinculo, id_empresa=vinculo.id_empresa, rol=vinculo.rol)
         if sesion.id_sucursal is not None:

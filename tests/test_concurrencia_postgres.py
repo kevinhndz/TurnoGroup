@@ -53,7 +53,7 @@ def base_concurrente():
                 codigo_moneda="HNL",
                 zona_horaria="America/Tegucigalpa",
             )
-            usuario = Usuarios(nombre="Cajero", correo="concurrente@example.com")
+            usuario = Usuarios(nombre="Mesero", correo="concurrente@example.com")
             servicio = TiposServicio(
                 clave_concepto="comer_aqui", nombre_visible="Comer aqui"
             )
@@ -126,6 +126,8 @@ def test_dos_solicitudes_no_duplican_operaciones(base_concurrente, operacion):
                         clave_operacion=clave,
                         id_tipo_servicio=ids["servicio"],
                         id_metodo_pago=ids["pago"],
+                        cliente="Cliente de prueba",
+                        telefono="9999-1234",
                         detalles=[{"id_producto": ids["producto"], "cantidad": 1}],
                     )
                     return PedidoService.crear_service(cuerpo, db, contexto)["id"]

@@ -4,10 +4,14 @@ from core.config import revision
 from database.almacen import abrir_puerta_bd
 from backend.Sesiones.service import SesionService
 
-ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero", "Cajero")
+ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
 
 RUTAS_CON_PERMISO = {
+    ('GET','/pedidos/operaciones/{clave_operacion}'),
+    ('GET', '/bitacora/'),
+    ('GET', '/pedidos/mesas'),
+    ('POST', '/mesas/preparar'),
     ('GET', '/pedidos/catalogo'),
     ('POST', '/invitaciones-laborales/registrar'),
     ('POST', '/productos/importar'),
@@ -143,6 +147,9 @@ def obtener_sesion(request: Request, db: Session = Depends(abrir_puerta_bd)):
     revisar_solicitud_sesion(request)
     if not hasattr(request.state, "sesion_validada"):
         request.state.sesion_validada = SesionService.consultar_sesion_service(request.cookies.get("sesion_turnogroup"), db)
+    sesion,usuario=request.state.sesion_validada
+    if usuario.rol_plataforma=='Superadministrador':
+        db.info['actor_bitacora']={'empresa':None,'sucursal':None,'usuario':usuario.id,'plataforma':True}
     return request.state.sesion_validada
 
 
@@ -151,6 +158,7 @@ def obtener_contexto(request: Request, db: Session = Depends(abrir_puerta_bd)):
         return request.state.contexto
     sesion, usuario = obtener_sesion(request, db)
     contexto = SesionService.obtener_contexto_service(sesion, usuario, db)
+    db.info['actor_bitacora'] = {'empresa':contexto['id_empresa'],'sucursal':contexto['id_sucursal'],'usuario':usuario.id,'plataforma':usuario.rol_plataforma=='Superadministrador'}
     request.state.contexto = contexto
     return contexto
 
@@ -220,6 +228,8 @@ def autorizar_ruta(request: Request, db: Session = Depends(abrir_puerta_bd)):
         raise HTTPException(403, "No estas autorizado")
     if ruta == "/invitaciones-laborales/aceptar" and not superadministrador:
         return
+    if superadministrador and ruta == '/bitacora/' and metodo == 'GET':
+        return
     if superadministrador:
         if ruta.startswith("/empresas") or ruta.startswith(("/tipos-servicio/", "/metodos-pago/")):
             return
@@ -250,13 +260,15 @@ def autorizar_ruta(request: Request, db: Session = Depends(abrir_puerta_bd)):
         if not SuscripcionService.vigente(suscripcion):
             raise HTTPException(403, "La suscripcion no esta vigente. El gerente debe revisar la facturacion")
 
+    if modulo == 'bitacora' and rol in ROLES_EMPRESA:
+        return
     if modulo in ("pedidos", "reservas"):
         obtener_sucursal(contexto)
         if rol in ROLES_EMPRESA:
             return
     elif modulo == "cajas":
         obtener_sucursal(contexto)
-        if rol == "Cajero" or (metodo == "GET" and rol == "Gerente"):
+        if rol in ROLES_EMPRESA:
             return
     elif modulo in ("finanzas", "suscripciones"):
         if rol == "Gerente":

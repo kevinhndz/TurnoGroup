@@ -13,6 +13,7 @@ class GuardiaSeguridad(BaseSettings):
     COOKIE_SEGURA: bool = True
     SESION_HORAS: int = Field(default=8, ge=1, le=24)
     ORIGENES_PERMITIDOS: list[str] = ["http://localhost:3000"]
+    URL_FRONTEND: str = "http://localhost:3000"
     SMTP_SERVIDOR: str = ""
     SMTP_PUERTO: int = 587
     SMTP_USUARIO: str = ""

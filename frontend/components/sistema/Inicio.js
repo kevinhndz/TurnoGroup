@@ -83,11 +83,11 @@ export default function Inicio() {
       {!superadmin && !sesion.id_empresa ? (
         <section className="tg-card">
           <Vacio
-            titulo="Prepara tu espacio de trabajo"
-            detalle="Completa la configuración del negocio o acepta la invitación de tu equipo."
+            titulo="Únete a tu equipo"
+            detalle="Acepta tu invitación para entrar al espacio de tu empresa."
           >
-            <Link href="/configuracion-inicial" className="tg-button tg-primary">
-              Continuar configuración
+            <Link href="/invitacion" className="tg-button tg-primary">
+              Aceptar invitación
             </Link>
           </Vacio>
         </section>

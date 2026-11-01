@@ -272,7 +272,8 @@ export default function Equipo() {
           <hr />
           <h3>Sucursales asignadas</h3>
           <p className="tg-muted">
-            Cada cambio se guarda al marcar o desmarcar una sucursal.
+            Administrador y mesero tienen una sola sucursal. Para trasladarlos, retira la
+            anterior y asigna la nueva.
           </p>
           <div className="tg-check-list">
             {datos.datos?.sucursales.map((sucursal) => {
@@ -284,7 +285,13 @@ export default function Equipo() {
                   <input
                     type="checkbox"
                     checked={tiene}
-                    disabled={ocupado || !sucursal.activo}
+                    disabled={
+                      ocupado ||
+                      !sucursal.activo ||
+                      (seleccionado.rol !== 'Gerente' &&
+                        !tiene &&
+                        seleccionado.asignaciones_sucursales.length > 0)
+                    }
                     onChange={() => asignar(sucursal, tiene)}
                   />
                   {sucursal.nombre}
@@ -310,8 +317,8 @@ function Invitar({ sucursales, terminar }) {
       onSubmit={async (event) => {
         event.preventDefault();
         const correo = new FormData(event.currentTarget).get('correo');
-        if (rol !== 'Gerente' && !seleccion.length) {
-          setError('Selecciona al menos una sucursal para este rol.');
+        if (rol !== 'Gerente' && seleccion.length !== 1) {
+          setError('Selecciona una sola sucursal para este rol.');
           return;
         }
         setOcupado(true);
@@ -334,7 +341,13 @@ function Invitar({ sucursales, terminar }) {
         <input type="email" name="correo" autoComplete="email" required />
       </Campo>
       <Campo label="Rol">
-        <select value={rol} onChange={(event) => setRol(event.target.value)}>
+        <select
+          value={rol}
+          onChange={(event) => {
+            setRol(event.target.value);
+            setSeleccion([]);
+          }}
+        >
           {roles.map((item) => (
             <option key={item}>{item}</option>
           ))}
@@ -347,12 +360,15 @@ function Invitar({ sucursales, terminar }) {
           {sucursales.map((item) => (
             <label className="tg-check" key={item.id}>
               <input
-                type="checkbox"
+                type={rol === 'Gerente' ? 'checkbox' : 'radio'}
+                name="sucursal-invitada"
                 checked={seleccion.includes(item.id)}
                 onChange={(event) =>
                   setSeleccion(
                     event.target.checked
-                      ? [...seleccion, item.id]
+                      ? rol === 'Gerente'
+                        ? [...seleccion, item.id]
+                        : [item.id]
                       : seleccion.filter((id) => id !== item.id),
                   )
                 }

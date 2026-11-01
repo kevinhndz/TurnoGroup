@@ -7,6 +7,7 @@ import { Mensaje, Modal } from './Controles';
 import { api, fechaLocal, dinero } from '../../lib/api';
 import TarjetaSuscripcion from './TarjetaSuscripcion';
 import SobreTarjetas from './SobreTarjetas';
+import DescargarComprobante from './DescargarComprobante';
 
 export default function Suscripcion() {
   const { actualizar, sesion } = usarSesion();
@@ -159,13 +160,7 @@ export default function Suscripcion() {
                   <h2>Historial de facturación</h2>
                   <p>Los documentos de esta versión son comprobantes de prueba.</p>
                 </div>
-                <a
-                  className="tg-button tg-secondary"
-                  href="/api/backend/suscripciones/comprobantes/excel"
-                  download="comprobantes-prueba.xlsx"
-                >
-                  Descargar Excel
-                </a>
+                <DescargarComprobante comprobantes={d.comprobantes || []} />
               </div>
               {!d.comprobantes?.length ? (
                 <>
@@ -205,21 +200,7 @@ export default function Suscripcion() {
                           </td>
                           <td>{dinero(item.importe, 'USD')}</td>
                           <td>
-                            <a
-                              className="tg-button tg-secondary"
-                              href={`/api/backend/suscripciones/comprobantes/${item.id}/pdf`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Ver / imprimir PDF
-                            </a>
-                            <a
-                              className="tg-link-button"
-                              href={`/api/backend/suscripciones/comprobantes/${item.id}/pdf`}
-                              download={`comprobante-${item.id}.pdf`}
-                            >
-                              Descargar PDF
-                            </a>
+                            <DescargarComprobante comprobantes={[item]} individual />
                           </td>
                         </tr>
                       ))}

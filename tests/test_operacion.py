@@ -470,6 +470,7 @@ def test_alta_negocio_revierte_todo_si_falla_ultimo_paso(
         "productos": [{"nombre": "Producto inicial", "precio": 45, "sucursales": [1]}],
     }
     client.cookies.clear()
+    cuerpo["tarjeta_suscripcion"] = {"tarjeta_prueba":"visa", "titular":"Propietario nuevo", "mes":12, "anio":2099}
     assert client.post("/usuarios/registro-negocio", json=cuerpo).status_code == 422
     assert db.query(Empresas).count() == empresas
     assert db.query(Usuarios).count() == usuarios

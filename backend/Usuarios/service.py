@@ -68,6 +68,7 @@ class UsuarioService():
                     raise RecursoDuplicadoError("Ya existe un usuario con ese correo")
 
         if cambios.get("estado") is False:
+            look_up.fecha_desactivacion_voluntaria = None
             UsuarioService.revisar_ultimo_superadministrador(look_up, db)
             UsuarioService.revocar_accesos_service(id, db)
         for campo, valor in cambios.items():
@@ -87,6 +88,7 @@ class UsuarioService():
         UsuarioService.revisar_ultimo_superadministrador(look_up, db)
         UsuarioService.revocar_accesos_service(id, db)
         look_up.estado = False
+        look_up.fecha_desactivacion_voluntaria = None
         db.commit()
         db.refresh(look_up)
         return look_up
@@ -221,6 +223,10 @@ class UsuarioService():
             principal = next(sucursales[item.id_local] for item in json.sucursales if item.es_principal)
             db.add(Sesiones(id_usuario=usuario.id, id_vinculo_laboral=vinculo.id, id_sucursal=principal.id, token_protegido=proteger_token_sesion(token), fecha_inicio=ahora, vencimiento=vencimiento))
             respuesta = RespuestaSesion(usuario=usuario, vencimiento=vencimiento, id_empresa=empresa.id, id_sucursal=principal.id, rol_empresa="Gerente", finanzas_habilitadas=json.finanzas_habilitadas, mesas_habilitadas=any(item.es_principal and any(opcion.habilitado and opcion.mesas_habilitadas for opcion in item.servicios.values()) for item in json.sucursales), reservas_habilitadas=any(item.es_principal and any(opcion.habilitado and opcion.reservas_habilitadas for opcion in item.servicios.values()) for item in json.sucursales))
+            from backend.Suscripciones.service import SuscripcionService
+            db.flush()
+            SuscripcionService.agregar_tarjeta_service(json.tarjeta_suscripcion, db, empresa.id, confirmar=False)
+            SuscripcionService.crear_comprobante_registro(db, empresa.id, confirmar=False)
             db.commit()
             return respuesta, token, vencimiento
         except Exception:

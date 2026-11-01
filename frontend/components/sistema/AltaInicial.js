@@ -387,7 +387,7 @@ export default function AltaInicial() {
                 className="tg-button tg-secondary"
                 onClick={() => setImportando(true)}
               >
-                Importar archivo CSV
+                Importar productos
               </button>
               {importando && (
                 <Modal titulo="Revisar importación" cerrar={() => setImportando(false)}>

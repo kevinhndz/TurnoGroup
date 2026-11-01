@@ -82,7 +82,11 @@ async function comunicar(request, { params }) {
       body = await request.text();
       if (
         body.length >
-        (ruta[0] === 'productos' && ruta.at(-1) === 'imagen' ? 7_100_000 : 1_000_000)
+        (ruta[0] === 'productos' && ruta.at(-1) === 'imagen'
+          ? 7_100_000
+          : ruta[0] === 'productos' && ruta.at(-1) === 'revisar-archivo'
+            ? 1_400_000
+            : 1_000_000)
       ) {
         return Response.json(
           { detail: 'La solicitud es demasiado grande' },

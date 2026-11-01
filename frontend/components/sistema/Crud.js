@@ -157,7 +157,7 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
       {modulo === 'productos' && editable && (
         <div className="tg-form-actions">
           <button className="tg-button tg-secondary" onClick={() => setImportando(true)}>
-            Importar archivo CSV
+            Importar productos
           </button>
         </div>
       )}

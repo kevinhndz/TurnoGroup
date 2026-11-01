@@ -1,6 +1,6 @@
 from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional
+from typing import Optional, Literal
 
 
 class Revisar_Json_Nuevo_Producto(BaseModel):
@@ -45,4 +45,11 @@ class Revisar_Json_Imagen_Producto(BaseModel):
 class Revisar_Json_Importar_Productos(BaseModel):
     productos: list[Revisar_Json_Nuevo_Producto] = Field(min_length=1, max_length=1000)
     asignar_sucursal: bool = True
+    model_config = ConfigDict(extra="forbid")
+
+
+class Revisar_Json_Archivo_Productos(BaseModel):
+    formato: Literal["csv", "excel"]
+    nombre_archivo: str = Field(min_length=1, max_length=255)
+    contenido: str = Field(min_length=1, max_length=1_340_000)
     model_config = ConfigDict(extra="forbid")

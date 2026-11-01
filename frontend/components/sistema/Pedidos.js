@@ -224,32 +224,59 @@ export default function Pedidos() {
           >
             {detalle.estado}
           </span>
-          <div className="tg-review-config">
-            <p>
-              {tipo(detalle.id_tipo_servicio)}
-              {detalle.id_mesa ? ` · Mesa #${detalle.id_mesa}` : ''}
-            </p>
-            <p>
-              {metodo(detalle.id_metodo_pago)} ·{' '}
-              {detalle.fecha_pago ? 'Cobro registrado' : 'Pendiente de cobro'}
-            </p>
-            <p>{detalle.fecha_entrega ? 'Entregado' : 'Pendiente de entrega'}</p>
-            <p>
-              Registrado por usuario #{detalle.id_usuario} ·{' '}
-              {fechaLocal(detalle.fecha_registro)}
-            </p>
-            {detalle.cliente && (
-              <p>
-                {detalle.cliente} · {detalle.telefono}
-              </p>
+          <dl className="tg-order-info">
+            <div>
+              <dt>Registrado por</dt>
+              <dd>{detalle.registrado_por || 'Persona no disponible'}</dd>
+            </div>
+            <div>
+              <dt>Fecha y hora</dt>
+              <dd>{fechaLocal(detalle.fecha_registro)}</dd>
+            </div>
+            <div>
+              <dt>Nombre del cliente</dt>
+              <dd>{detalle.cliente || 'Sin nombre registrado'}</dd>
+            </div>
+            <div>
+              <dt>Teléfono del cliente</dt>
+              <dd>{detalle.telefono || 'Sin teléfono registrado'}</dd>
+            </div>
+            <div>
+              <dt>Modalidad de atención</dt>
+              <dd>
+                {tipo(detalle.id_tipo_servicio)}
+                {detalle.id_mesa
+                  ? ` · ${detalle.nombre_mesa || `Mesa #${detalle.id_mesa}`}`
+                  : ''}
+              </dd>
+            </div>
+            <div>
+              <dt>Método de pago</dt>
+              <dd>
+                {metodo(detalle.id_metodo_pago)} ·{' '}
+                {detalle.fecha_pago ? 'Cobro registrado' : 'Pendiente de cobro'}
+              </dd>
+            </div>
+            <div>
+              <dt>Entrega</dt>
+              <dd>{detalle.fecha_entrega ? 'Entregado' : 'Pendiente de entrega'}</dd>
+            </div>
+            {detalle.direccion && (
+              <div>
+                <dt>Dirección de entrega</dt>
+                <dd>{detalle.direccion}</dd>
+              </div>
             )}
-            {detalle.direccion && <p>{detalle.direccion}</p>}
-          </div>
+          </dl>
+          <h3>Detalle de productos</h3>
           <div className="tg-review-lines">
             {detalle.detalles.map((item, indice) => (
               <div key={indice}>
                 <span>
                   {item.cantidad} × {item.nombre}
+                  <small>
+                    Precio unitario: {dinero(item.precio_unitario, detalle.moneda)}
+                  </small>
                   <small>{item.nota}</small>
                 </span>
                 <strong>
@@ -258,12 +285,20 @@ export default function Pedidos() {
               </div>
             ))}
           </div>
-          <p>Subtotal: {dinero(detalle.subtotal, detalle.moneda)}</p>
-          <p>Descuento: {dinero(detalle.descuento, detalle.moneda)}</p>
-          <p>
-            Impuesto {detalle.impuesto_incluido ? 'incluido' : ''}:{' '}
-            {dinero(detalle.impuesto, detalle.moneda)}
-          </p>
+          <div className="tg-order-totals">
+            <p>
+              <span>Subtotal</span>
+              <strong>{dinero(detalle.subtotal, detalle.moneda)}</strong>
+            </p>
+            <p>
+              <span>Descuento</span>
+              <strong>{dinero(detalle.descuento, detalle.moneda)}</strong>
+            </p>
+            <p>
+              <span>Impuesto {detalle.impuesto_incluido ? 'incluido' : ''}: </span>
+              <strong>{dinero(detalle.impuesto, detalle.moneda)}</strong>
+            </p>
+          </div>
           <div className="tg-subtotal">
             <span>Total</span>
             <strong>{dinero(detalle.total, detalle.moneda)}</strong>

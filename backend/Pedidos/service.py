@@ -42,6 +42,9 @@ class PedidoService:
         ]:
             salida[campo] = str(getattr(pedido, campo))
         if detalle:
+            salida["registrado_por"] = repo.nombre_usuario(db, pedido.id_usuario)
+            mesa = repo.mesa(db, pedido.id_mesa, pedido.id_sucursal) if pedido.id_mesa else None
+            salida["nombre_mesa"] = mesa.nombre if mesa else None
             salida["detalles"] = [
                 {
                     "id_producto": item.id_producto,

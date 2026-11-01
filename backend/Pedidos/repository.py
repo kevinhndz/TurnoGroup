@@ -14,6 +14,12 @@ from backend.Empresas.tabla import Empresas
 
 class PedidoRepository:
     @staticmethod
+    def nombre_usuario(db, id_usuario):
+        from backend.Usuarios.tabla import Usuarios
+        usuario = db.get(Usuarios, id_usuario)
+        return usuario.nombre if usuario else "Persona no disponible"
+
+    @staticmethod
     def bloquear_sucursal(db, id_empresa, id_sucursal):
         return (
             db.query(Sucursales)

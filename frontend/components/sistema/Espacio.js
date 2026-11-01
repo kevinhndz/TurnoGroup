@@ -66,7 +66,7 @@ export function SelectorContexto() {
             </option>
             {vinculo?.sucursales.map((item) => (
               <option value={item.id} key={item.id}>
-                {etiquetaSucursal(item)}
+                Sucursal #{item.id} · {item.direccion || item.nombre}
               </option>
             ))}
           </select>

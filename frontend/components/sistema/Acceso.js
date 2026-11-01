@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usarSesion } from './Sesion';
-import { Campo, Mensaje } from './Controles';
+import { Campo, Mensaje, Modal } from './Controles';
 import { api } from '../../lib/api';
 import Icon from '../Icon';
 
@@ -18,7 +18,7 @@ const textos = {
   registro: [
     'Tu siguiente turno empieza aquí',
     'Crea tu cuenta',
-    'Completa tus datos y los siete pasos. Tu cuenta se creará al confirmar la revisión final.',
+    'Completa tus datos y los ocho pasos. Tu cuenta se creará al confirmar la suscripción.',
     'Continuar a la configuración',
   ],
   recuperar: [
@@ -44,6 +44,9 @@ export default function Acceso({ modo = 'login' }) {
   const [aviso, setAviso] = useState('');
   const [terminado, setTerminado] = useState(false);
   const [codigo, setCodigo] = useState('');
+  const [reactivacion, setReactivacion] = useState(false);
+  const formulario = useRef(null);
+  const confirmarReactivacion = useRef(false);
   useEffect(() => {
     setCodigo(new URLSearchParams(window.location.search).get('codigo') || '');
   }, []);
@@ -96,6 +99,7 @@ export default function Acceso({ modo = 'login' }) {
         const sesion = await iniciar({
           correo: datos.get('correo'),
           clave: datos.get('clave'),
+          reactivar: confirmarReactivacion.current,
         });
         const volver = new URLSearchParams(window.location.search).get('volver');
         const destino =
@@ -112,13 +116,46 @@ export default function Acceso({ modo = 'login' }) {
       }
     } catch (fallo) {
       setError(fallo.message);
+      if (fallo.codigo === 'CUENTA_DESACTIVADA') setReactivacion(true);
     } finally {
       setEnviando(false);
+      confirmarReactivacion.current = false;
     }
   }
 
   return (
     <main id="contenido" className="tg-auth">
+      {reactivacion && (
+        <Modal
+          titulo="¿Quieres reactivar tu cuenta?"
+          cerrar={() => setReactivacion(false)}
+        >
+          <p>
+            Conservamos tus datos y la configuración de tu negocio. La renovación
+            automática seguirá cancelada hasta que la actives en Plan y facturación.
+          </p>
+          <div className="tg-form-actions">
+            <button
+              className="tg-button tg-secondary"
+              disabled={enviando}
+              onClick={() => setReactivacion(false)}
+            >
+              Volver
+            </button>
+            <button
+              className="tg-button tg-primary"
+              disabled={enviando}
+              onClick={() => {
+                confirmarReactivacion.current = true;
+                setReactivacion(false);
+                formulario.current?.requestSubmit();
+              }}
+            >
+              Sí, reactivar mi cuenta
+            </button>
+          </div>
+        </Modal>
+      )}
       <aside className="tg-auth-story">
         <Link href="/" className="tg-brand">
           Turno Group
@@ -151,7 +188,7 @@ export default function Acceso({ modo = 'login' }) {
           <p className="tg-muted">{detalle}</p>
           <Mensaje error={error} aviso={aviso} />
           {!terminado && (
-            <form onSubmit={enviar} className="tg-form">
+            <form ref={formulario} onSubmit={enviar} className="tg-form">
               {modo === 'registro' && (
                 <Campo label="Tu nombre">
                   <input

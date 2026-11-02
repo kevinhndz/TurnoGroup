@@ -9,7 +9,11 @@ export async function api(ruta, { method = 'GET', body, signal } = {}) {
   });
   const datos = respuesta.status === 204 ? null : await respuesta.json();
   if (!respuesta.ok) {
-    const error = new Error(typeof datos?.detail === 'string' ? datos.detail : 'No se pudo completar la solicitud.');
+    const error = new Error(
+      typeof datos?.detail === 'string'
+        ? datos.detail
+        : 'No se pudo completar la solicitud.',
+    );
     error.estado = respuesta.status;
     throw error;
   }

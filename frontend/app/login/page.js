@@ -32,7 +32,9 @@ export default function Login() {
   return (
     <main id="contenido" className="acceso">
       <aside className="acceso-historia">
-        <Link href="/" className="brand">Turno Group</Link>
+        <Link href="/" className="brand">
+          Turno Group
+        </Link>
         <h2>Más tiempo para quienes se sientan a tu mesa.</h2>
         <p>El orden detrás de un buen servicio.</p>
       </aside>
@@ -43,9 +45,23 @@ export default function Login() {
         {error && <p role="alert">{error}</p>}
         <form onSubmit={entrar}>
           <label htmlFor="correo">Correo electrónico</label>
-          <input id="correo" name="correo" type="email" autoComplete="email" maxLength={254} required />
+          <input
+            id="correo"
+            name="correo"
+            type="email"
+            autoComplete="email"
+            maxLength={254}
+            required
+          />
           <label htmlFor="clave">Contraseña</label>
-          <input id="clave" name="clave" type="password" autoComplete="current-password" maxLength={128} required />
+          <input
+            id="clave"
+            name="clave"
+            type="password"
+            autoComplete="current-password"
+            maxLength={128}
+            required
+          />
           <button className="button button-primary" disabled={enviando}>
             {enviando ? 'Entrando…' : 'Entrar a mi negocio'}
           </button>

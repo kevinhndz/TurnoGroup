@@ -1,6 +1,7 @@
 'use client';
 
 import { useId, useRef } from 'react';
+import Link from 'next/link';
 import Icon from './Icon';
 
 export default function ActionButton({
@@ -38,6 +39,13 @@ export default function ActionButton({
         'La política de privacidad estará disponible antes de la apertura del registro. Esta página no solicita ni guarda datos personales.',
     },
   }[intent];
+  if (intent === 'acceso') {
+    return (
+      <Link href="/login" className={className}>
+        {children}
+      </Link>
+    );
+  }
   return (
     <>
       <button className={className} onClick={() => dialog.current.showModal()}>

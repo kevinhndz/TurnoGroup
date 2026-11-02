@@ -1,6 +1,12 @@
 export const runtime = 'nodejs';
 
-const permitidas = new Set(['sesiones/iniciar', 'sesiones/actual', 'sesiones/cerrar']);
+const permitidas = new Map([
+  ['sesiones/iniciar', 'POST'],
+  ['sesiones/actual', 'GET'],
+  ['sesiones/cerrar', 'POST'],
+  ['recuperaciones-clave/solicitar', 'POST'],
+  ['recuperaciones-clave/restablecer', 'POST'],
+]);
 
 async function comunicar(request, { params }) {
   const { ruta } = await params;
@@ -8,6 +14,11 @@ async function comunicar(request, { params }) {
 
   if (!permitidas.has(camino)) {
     return Response.json({ detail: 'Ruta no disponible' }, { status: 404 });
+  }
+  if (permitidas.get(camino) !== request.method) {
+    return Response.json({ detail: 'Metodo no permitido' }, {
+      status: 405, headers: { Allow: permitidas.get(camino) },
+    });
   }
 
   if (request.method !== 'GET') {

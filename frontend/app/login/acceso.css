@@ -32,6 +32,19 @@
   gap: 14px;
   margin-top: 28px;
 }
+.acceso-formulario > form,
+.acceso-formulario > p,
+.acceso-formulario > h1 {
+  max-width: 560px;
+}
+.acceso-formulario input:focus-visible {
+  outline: 2px solid #a74027;
+  outline-offset: 3px;
+}
+.acceso-formulario button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
 .acceso-formulario input {
   width: 100%;
   min-width: 0;

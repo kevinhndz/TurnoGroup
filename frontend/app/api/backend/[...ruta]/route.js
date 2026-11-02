@@ -16,9 +16,13 @@ async function comunicar(request, { params }) {
     return Response.json({ detail: 'Ruta no disponible' }, { status: 404 });
   }
   if (permitidas.get(camino) !== request.method) {
-    return Response.json({ detail: 'Metodo no permitido' }, {
-      status: 405, headers: { Allow: permitidas.get(camino) },
-    });
+    return Response.json(
+      { detail: 'Metodo no permitido' },
+      {
+        status: 405,
+        headers: { Allow: permitidas.get(camino) },
+      },
+    );
   }
 
   if (request.method !== 'GET') {

@@ -66,6 +66,9 @@ export default function Login() {
             {enviando ? 'Entrando…' : 'Entrar a mi negocio'}
           </button>
         </form>
+        <p>
+          <Link href="/recuperar-clave">Olvidé mi contraseña</Link>
+        </p>
       </section>
     </main>
   );

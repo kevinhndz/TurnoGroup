@@ -1,13 +1,20 @@
 export async function api(ruta, { method = 'GET', body, signal } = {}) {
-  const respuesta = await fetch(`/api/backend${ruta}`, {
-    method,
-    headers: { 'Content-Type': 'application/json', 'X-Solicitud': 'TurnoGroup' },
-    credentials: 'same-origin',
-    cache: 'no-store',
-    signal,
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  const datos = respuesta.status === 204 ? null : await respuesta.json();
+  let respuesta;
+  try {
+    respuesta = await fetch(`/api/backend${ruta}`, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'X-Solicitud': 'TurnoGroup' },
+      credentials: 'same-origin',
+      cache: 'no-store',
+      signal,
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+  } catch (fallo) {
+    if (fallo.name === 'AbortError') throw fallo;
+    throw new Error('No hay conexión. Intenta nuevamente.');
+  }
+  const datos =
+    respuesta.status === 204 ? null : await respuesta.json().catch(() => null);
   if (!respuesta.ok) {
     const error = new Error(
       typeof datos?.detail === 'string'

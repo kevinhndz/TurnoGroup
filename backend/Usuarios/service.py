@@ -4,10 +4,36 @@ from sqlalchemy.orm import Session
 from backend.Usuarios.tabla import Usuarios
 from backend.Usuarios.repository import UsuarioRepository as repo
 from backend.Usuarios.schema import Revisar_Json_Nuevo_Usuario, Revisar_Json_Editar_Usuario
+from backend.Usuarios.tabla import Usuarios
+from backend.Empresas.tabla import Empresas
+from backend.Sucursales.tabla import Sucursales
+from backend.VinculosLaborales.tabla import VinculosLaborales
 from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 
 
 class UsuarioService():
+
+    @staticmethod
+    def registrar_negocio_service(json, db):
+        correo = str(json.correo).lower()
+        if repo.buscar_usuario_por_correo(db, correo):
+            raise RecursoDuplicadoError("Ya existe un usuario con ese correo")
+        if db.query(Empresas).filter(Empresas.nombre == json.nombre_empresa).first():
+            raise RecursoDuplicadoError("Ya existe una empresa con ese nombre")
+        usuario = Usuarios(correo=correo, nombre=json.nombre_usuario,
+                           clave_protegida=encriptar_contrasena(json.clave.get_secret_value()))
+        empresa = Empresas(nombre=json.nombre_empresa, tipo_negocio="Restaurante",
+                           codigo_pais="HN", zona_horaria="America/Tegucigalpa", codigo_moneda="HNL")
+        db.add_all([usuario, empresa])
+        db.flush()
+        sucursal = Sucursales(id_empresa=empresa.id, nombre=json.nombre_empresa,
+                              direccion=json.direccion, es_principal=True)
+        db.add(sucursal)
+        db.flush()
+        db.add(VinculosLaborales(id_usuario=usuario.id, id_empresa=empresa.id, rol="Gerente"))
+        db.commit()
+        return {"usuario": {"id": usuario.id, "correo": usuario.correo, "nombre": usuario.nombre},
+                "empresa": {"id": empresa.id, "nombre": empresa.nombre}, "sucursal": {"id": sucursal.id, "direccion": sucursal.direccion}}
 
     @staticmethod
     def crear_usuario_service(json: Revisar_Json_Nuevo_Usuario, db: Session):

@@ -62,6 +62,17 @@
 .acceso-formulario [role='alert'] {
   color: #9c3524;
 }
+.acceso-resumen {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+  max-width: 560px;
+}
+.acceso-resumen p {
+  border-left: 3px solid #b0472f;
+  padding: 12px 16px;
+  background: #f2ebe2;
+}
 @media (max-width: 700px) {
   .acceso {
     grid-template-columns: 1fr;

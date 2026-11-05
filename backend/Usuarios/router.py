@@ -8,6 +8,7 @@ from backend.Usuarios.schema import (
     Revisar_Json_Rol_Plataforma,
     Revisar_Json_Editar_Usuario,
     Revisar_Json_Nuevo_Usuario,
+    Revisar_Json_Registro_Negocio,
 )
 from backend.Usuarios.service import UsuarioService as service
 from core.schema import RespuestaPaginada
@@ -23,6 +24,11 @@ router = APIRouter(
              dependencies=[Depends(revisar_solicitud_sesion)])
 def crear_usuario(json: Revisar_Json_Nuevo_Usuario, db: Session = Depends(abrir_puerta_bd)):
     return service.crear_usuario_service(json, db)
+
+
+@router.post("/registro-negocio", status_code=201)
+def registrar_negocio(json: Revisar_Json_Registro_Negocio, db: Session = Depends(abrir_puerta_bd)):
+    return service.registrar_negocio_service(json, db)
 
 
 @router.get("/", response_model=RespuestaPaginada[NuevoUsuarioRespuesta])

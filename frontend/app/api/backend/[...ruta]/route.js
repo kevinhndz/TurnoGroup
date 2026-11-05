@@ -6,6 +6,7 @@ const permitidas = new Map([
   ['sesiones/cerrar', 'POST'],
   ['recuperaciones-clave/solicitar', 'POST'],
   ['recuperaciones-clave/restablecer', 'POST'],
+  ['usuarios/registro-negocio', 'POST'],
 ]);
 
 async function comunicar(request, { params }) {

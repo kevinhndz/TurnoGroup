@@ -8,6 +8,7 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero", "Cajero")
 
 
 RUTAS_CON_PERMISO = {
+    ('POST', '/usuarios/registro-negocio'),
     ('DELETE', '/disponibilidad-productos/{id_producto}/{id_sucursal}'),
     ('DELETE', '/vinculos-laborales/{id}/sucursales/{id_sucursal}'),
     ('GET', '/categorias-gastos/'),

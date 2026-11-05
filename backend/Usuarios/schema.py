@@ -11,6 +11,16 @@ class Revisar_Json_Nuevo_Usuario(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
+class Revisar_Json_Registro_Negocio(BaseModel):
+    correo: EmailStr
+    clave: SecretStr = Field(min_length=12, max_length=128)
+    nombre_usuario: str = Field(min_length=1, max_length=100)
+    nombre_empresa: str = Field(min_length=4, max_length=45)
+    direccion: str = Field(min_length=5, max_length=255)
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
 class NuevoUsuarioRespuesta(BaseModel):
     id: int
     correo: EmailStr

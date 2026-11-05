@@ -39,9 +39,9 @@ export default function ActionButton({
         'La política de privacidad estará disponible antes de la apertura del registro. Esta página no solicita ni guarda datos personales.',
     },
   }[intent];
-  if (intent === 'acceso') {
+  if (intent === 'acceso' || intent === 'registro') {
     return (
-      <Link href="/login" className={className}>
+      <Link href={intent === 'acceso' ? '/login' : '/registro'} className={className}>
         {children}
       </Link>
     );

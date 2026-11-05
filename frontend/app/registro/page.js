@@ -46,12 +46,29 @@ export default function Registro() {
       </Link>
       <h1>Crea tu cuenta</h1>
       <p>Registra tu negocio para comenzar la configuración inicial.</p>
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p role="alert" aria-live="polite">
+          {error}
+        </p>
+      )}
       <form onSubmit={registrar}>
         <label htmlFor="nombre_usuario">Tu nombre</label>
-        <input id="nombre_usuario" name="nombre_usuario" autoComplete="name" required maxLength={100} />
+        <input
+          id="nombre_usuario"
+          name="nombre_usuario"
+          autoComplete="name"
+          required
+          maxLength={100}
+        />
         <label htmlFor="correo">Correo electrónico</label>
-        <input id="correo" name="correo" type="email" autoComplete="email" required maxLength={254} />
+        <input
+          id="correo"
+          name="correo"
+          type="email"
+          autoComplete="email"
+          required
+          maxLength={254}
+        />
         <label htmlFor="clave">Contraseña</label>
         <input
           id="clave"
@@ -82,7 +99,14 @@ export default function Registro() {
           required
         />
         <label htmlFor="direccion">Dirección de la sucursal principal</label>
-        <input id="direccion" name="direccion" autoComplete="street-address" minLength={5} maxLength={255} required />
+        <input
+          id="direccion"
+          name="direccion"
+          autoComplete="street-address"
+          minLength={5}
+          maxLength={255}
+          required
+        />
         <button className="button button-primary" disabled={enviando}>
           {enviando ? 'Creando…' : 'Crear cuenta'}
         </button>

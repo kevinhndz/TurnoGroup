@@ -12,6 +12,11 @@ export default function ConfiguracionInicial() {
         Tu cuenta y la sucursal principal ya fueron creadas. En los siguientes avances
         podrás completar categorías, productos, servicios y métodos de pago.
       </p>
+      <div className="acceso-resumen" aria-label="Pasos pendientes">
+        <p><strong>Cuenta creada</strong><br />Tu acceso de gerente ya está registrado.</p>
+        <p><strong>Sucursal principal</strong><br />La dirección inicial quedó guardada.</p>
+        <p><strong>Siguiente paso</strong><br />Inicia sesión para continuar con tu negocio.</p>
+      </div>
       <Link className="button button-primary" href="/login">
         Ir a iniciar sesión
       </Link>

@@ -7,7 +7,10 @@ const permitidas = new Map([
   ['recuperaciones-clave/solicitar', 'POST'],
   ['recuperaciones-clave/restablecer', 'POST'],
   ['usuarios/registro-negocio', 'POST'],
+  ['categorias', 'GET'],
+  ['productos', 'GET'],
 ]);
+const colecciones = new Set(['categorias', 'productos']);
 
 async function comunicar(request, { params }) {
   const { ruta } = await params;
@@ -37,7 +40,8 @@ async function comunicar(request, { params }) {
   }
 
   try {
-    const url = new URL(`/${camino}`, process.env.BACKEND_URL || 'http://127.0.0.1:8000');
+    const sufijo = colecciones.has(camino) ? '/' : '';
+    const url = new URL(`/${camino}${sufijo}`, process.env.BACKEND_URL || 'http://127.0.0.1:8000');
     const headers = new Headers({ 'X-Solicitud': 'TurnoGroup' });
     const cookie = request.headers
       .get('cookie')

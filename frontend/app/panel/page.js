@@ -66,6 +66,10 @@ export default function Panel() {
           <button className="button button-primary" disabled={cerrando} onClick={salir}>
             {cerrando ? 'Cerrando sesión…' : 'Cerrar sesión'}
           </button>
+          <nav className="panel-enlaces" aria-label="Módulos">
+            <Link href="/panel/categorias">Administrar categorías</Link>
+            <Link href="/panel/productos">Administrar productos</Link>
+          </nav>
         </>
       )}
     </main>

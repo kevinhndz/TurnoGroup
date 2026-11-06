@@ -41,7 +41,10 @@ async function comunicar(request, { params }) {
 
   try {
     const sufijo = colecciones.has(camino) ? '/' : '';
-    const url = new URL(`/${camino}${sufijo}`, process.env.BACKEND_URL || 'http://127.0.0.1:8000');
+    const url = new URL(
+      `/${camino}${sufijo}`,
+      process.env.BACKEND_URL || 'http://127.0.0.1:8000',
+    );
     const headers = new Headers({ 'X-Solicitud': 'TurnoGroup' });
     const cookie = request.headers
       .get('cookie')

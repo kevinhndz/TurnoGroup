@@ -76,7 +76,7 @@ export default function Productos() {
           {guardando ? 'Guardando…' : 'Agregar producto'}
         </button>
       </form>
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert" aria-live="polite">{error}</p>}
       {!datos && !error && <p role="status">Cargando productos…</p>}
       {datos && (
         <ul className="catalogo-lista">

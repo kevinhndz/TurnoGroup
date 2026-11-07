@@ -52,7 +52,7 @@ export default function Categorias() {
           {guardando ? 'Guardando…' : 'Agregar categoría'}
         </button>
       </form>
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert" aria-live="polite">{error}</p>}
       {!datos && !error && <p role="status">Cargando categorías…</p>}
       {datos && (
         <ul className="catalogo-lista">

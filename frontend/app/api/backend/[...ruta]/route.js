@@ -7,8 +7,8 @@ const permitidas = new Map([
   ['recuperaciones-clave/solicitar', 'POST'],
   ['recuperaciones-clave/restablecer', 'POST'],
   ['usuarios/registro-negocio', 'POST'],
-  ['categorias', 'GET'],
-  ['productos', 'GET'],
+  ['categorias', 'GET,POST'],
+  ['productos', 'GET,POST'],
 ]);
 const colecciones = new Set(['categorias', 'productos']);
 
@@ -19,7 +19,7 @@ async function comunicar(request, { params }) {
   if (!permitidas.has(camino)) {
     return Response.json({ detail: 'Ruta no disponible' }, { status: 404 });
   }
-  if (permitidas.get(camino) !== request.method) {
+  if (!permitidas.get(camino).split(',').includes(request.method)) {
     return Response.json(
       { detail: 'Metodo no permitido' },
       {

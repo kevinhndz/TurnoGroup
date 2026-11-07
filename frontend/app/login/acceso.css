@@ -100,6 +100,23 @@
   border: 1px solid #e0d5c8;
   background: #fff;
 }
+.catalogo-form {
+  display: grid;
+  gap: 10px;
+  max-width: 620px;
+  margin: 24px 0;
+  padding: 18px;
+  border: 1px solid #e0d5c8;
+  background: #fff;
+}
+.catalogo-form input,
+.catalogo-form select {
+  border: 1px solid #d8cbbd;
+  border-radius: 5px;
+  padding: 12px;
+  background: #fff;
+  font: inherit;
+}
 @media (max-width: 700px) {
   .acceso {
     grid-template-columns: 1fr;

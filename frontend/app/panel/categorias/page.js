@@ -17,12 +17,23 @@ export default function Categorias() {
   const categorias = datos?.data || [];
   async function crear(event) {
     event.preventDefault();
-    setGuardando(true); setError('');
+    setGuardando(true);
+    setError('');
     try {
-      await api('/categorias', { method: 'POST', body: { nombre: new FormData(event.currentTarget).get('nombre'), orden_presentacion: 1 } });
+      await api('/categorias', {
+        method: 'POST',
+        body: {
+          nombre: new FormData(event.currentTarget).get('nombre'),
+          orden_presentacion: 1,
+        },
+      });
       event.currentTarget.reset();
       setDatos(await api('/categorias'));
-    } catch (fallo) { setError(fallo.message); } finally { setGuardando(false); }
+    } catch (fallo) {
+      setError(fallo.message);
+    } finally {
+      setGuardando(false);
+    }
   }
   return (
     <main id="contenido" className="acceso-formulario catalogo">
@@ -37,7 +48,9 @@ export default function Categorias() {
       <form className="catalogo-form" onSubmit={crear}>
         <label htmlFor="nombre-categoria">Nueva categoría</label>
         <input id="nombre-categoria" name="nombre" maxLength={60} required />
-        <button className="button button-primary" disabled={guardando}>{guardando ? 'Guardando…' : 'Agregar categoría'}</button>
+        <button className="button button-primary" disabled={guardando}>
+          {guardando ? 'Guardando…' : 'Agregar categoría'}
+        </button>
       </form>
       {error && <p role="alert">{error}</p>}
       {!datos && !error && <p role="status">Cargando categorías…</p>}

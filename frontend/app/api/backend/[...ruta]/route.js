@@ -11,20 +11,29 @@ const permitidas = new Map([
   ['productos', 'GET,POST'],
 ]);
 const colecciones = new Set(['categorias', 'productos']);
+function permisoCatalogo(camino) {
+  const partes = camino.split('/');
+  if (!['categorias', 'productos'].includes(partes[0]) || !/^\d+$/.test(partes[1] || ''))
+    return null;
+  if (partes.length === 2) return 'GET,PATCH';
+  if (partes.length === 3 && partes[2] === 'desactivar') return 'POST';
+  return null;
+}
 
 async function comunicar(request, { params }) {
   const { ruta } = await params;
   const camino = ruta.join('/');
 
-  if (!permitidas.has(camino)) {
+  const permitidos = permitidas.get(camino) || permisoCatalogo(camino);
+  if (!permitidos) {
     return Response.json({ detail: 'Ruta no disponible' }, { status: 404 });
   }
-  if (!permitidas.get(camino).split(',').includes(request.method)) {
+  if (!permitidos.split(',').includes(request.method)) {
     return Response.json(
       { detail: 'Metodo no permitido' },
       {
         status: 405,
-        headers: { Allow: permitidas.get(camino) },
+        headers: { Allow: permitidos },
       },
     );
   }

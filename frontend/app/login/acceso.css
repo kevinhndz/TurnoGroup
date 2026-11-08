@@ -117,6 +117,31 @@
   background: #fff;
   font: inherit;
 }
+.catalogo-lista button {
+  margin-left: 8px;
+  border: 1px solid #d8cbbd;
+  border-radius: 4px;
+  padding: 5px 8px;
+  background: #fcf9f4;
+  cursor: pointer;
+}
+.fila-edicion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+.fila-edicion input {
+  min-width: 120px;
+  border: 1px solid #d8cbbd;
+  border-radius: 4px;
+  padding: 7px;
+}
+.catalogo-lista button:focus-visible,
+.fila-edicion input:focus-visible {
+  outline: 2px solid #a74027;
+  outline-offset: 2px;
+}
 @media (max-width: 700px) {
   .acceso {
     grid-template-columns: 1fr;

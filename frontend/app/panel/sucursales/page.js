@@ -8,6 +8,7 @@ import '../../login/acceso.css';
 export default function Sucursales() {
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
+  const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
     api('/sucursales')
@@ -16,6 +17,30 @@ export default function Sucursales() {
   }, []);
 
   const sucursales = datos?.data || [];
+
+  async function crear(event) {
+    event.preventDefault();
+    setGuardando(true);
+    setError('');
+    const formulario = new FormData(event.currentTarget);
+    try {
+      await api('/sucursales', {
+        method: 'POST',
+        body: {
+          nombre: formulario.get('nombre'),
+          direccion: formulario.get('direccion'),
+          telefono: formulario.get('telefono') || null,
+          es_principal: formulario.get('es_principal') === 'on',
+        },
+      });
+      event.currentTarget.reset();
+      setDatos(await api('/sucursales'));
+    } catch (fallo) {
+      setError(fallo.message);
+    } finally {
+      setGuardando(false);
+    }
+  }
 
   return (
     <main id="contenido" className="acceso-formulario catalogo">
@@ -27,6 +52,18 @@ export default function Sucursales() {
       </p>
       <h1>Sucursales</h1>
       <p>Consulta los locales asociados a tu empresa.</p>
+      <form className="catalogo-form" onSubmit={crear}>
+        <label htmlFor="nombre-sucursal">Nueva sucursal</label>
+        <input id="nombre-sucursal" name="nombre" placeholder="Nombre" required />
+        <input name="direccion" placeholder="Direccion" required />
+        <input name="telefono" placeholder="Telefono (opcional)" />
+        <label>
+          <input name="es_principal" type="checkbox" /> Es la sucursal principal
+        </label>
+        <button className="button button-primary" disabled={guardando}>
+          {guardando ? 'Guardando…' : 'Agregar sucursal'}
+        </button>
+      </form>
       {error && <p role="alert">{error}</p>}
       {!datos && !error && <p role="status">Cargando sucursales…</p>}
       {datos && (

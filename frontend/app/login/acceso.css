@@ -100,6 +100,11 @@
   border: 1px solid #e0d5c8;
   background: #fff;
 }
+.catalogo-lista li small {
+  display: block;
+  margin-top: 5px;
+  color: #6f665d;
+}
 .catalogo-form {
   display: grid;
   gap: 10px;

@@ -69,6 +69,7 @@ export default function Panel() {
           <nav className="panel-enlaces" aria-label="Módulos">
             <Link href="/panel/categorias">Administrar categorías</Link>
             <Link href="/panel/productos">Administrar productos</Link>
+            <Link href="/panel/sucursales">Administrar sucursales</Link>
           </nav>
         </>
       )}

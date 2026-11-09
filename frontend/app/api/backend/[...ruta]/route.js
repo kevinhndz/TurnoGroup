@@ -9,8 +9,9 @@ const permitidas = new Map([
   ['usuarios/registro-negocio', 'POST'],
   ['categorias', 'GET,POST'],
   ['productos', 'GET,POST'],
+  ['sucursales', 'GET,POST'],
 ]);
-const colecciones = new Set(['categorias', 'productos']);
+const colecciones = new Set(['categorias', 'productos', 'sucursales']);
 function permisoCatalogo(camino) {
   const partes = camino.split('/');
   if (!['categorias', 'productos'].includes(partes[0]) || !/^\d+$/.test(partes[1] || ''))

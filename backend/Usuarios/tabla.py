@@ -14,4 +14,5 @@ class Usuarios(miclaseBase, PoderAuditor):
     nombre = Column(String(100), nullable=False)
     rol_plataforma = Column(String(30), nullable=False, default="Usuario", server_default="Usuario")
     estado = Column(Boolean, default=True, nullable=False)
+    fecha_desactivacion_voluntaria = Column(DateTime, nullable=True)
     fecha_registro = Column(DateTime, default=datetime.utcnow, nullable=False)

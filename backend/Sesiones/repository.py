@@ -13,6 +13,10 @@ class SesionRepository():
         return db.query(Sesiones).filter(Sesiones.token_protegido == token_protegido).first()
 
     @staticmethod
+    def buscar_sesion_con_usuario(db, token_protegido):
+        return db.query(Sesiones, Usuarios).join(Usuarios, Usuarios.id == Sesiones.id_usuario).filter(Sesiones.token_protegido == token_protegido).first()
+
+    @staticmethod
     def guardar_nueva_sesion(db, nueva_sesion):
         db.add(nueva_sesion)
         db.commit()

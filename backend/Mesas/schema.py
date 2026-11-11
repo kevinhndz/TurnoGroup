@@ -17,6 +17,12 @@ class Revisar_Json_Editar_Mesa(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
+class Revisar_Json_Preparar_Mesas(BaseModel):
+    cantidad: int = Field(ge=1, le=200)
+    capacidad: int | None = Field(default=None, ge=1, le=1000)
+    model_config = ConfigDict(extra="forbid")
+
+
 class RespuestaMesa(BaseModel):
     id: int
     id_sucursal: int

@@ -5,7 +5,7 @@ from typing import List, Literal
 class Revisar_Json_Crear_Vinculo_Laboral(BaseModel):
     id_usuario: int = Field(gt=0)
     id_empresa: int = Field(gt=0)
-    rol: Literal["Gerente", "Administrador", "Mesero", "Cajero"]
+    rol: Literal["Gerente", "Administrador", "Mesero"]
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -25,6 +25,8 @@ class RespuestaAsignacionSucursal(BaseModel):
 
 
 class RespuestaVinculoLaboral(BaseModel):
+    nombre_usuario: str | None = None
+    correo_usuario: str | None = None
     activo: bool
     id: int
     id_usuario: int
@@ -35,11 +37,13 @@ class RespuestaVinculoLaboral(BaseModel):
 
 
 class RespuestaVinculoLaboralDetalle(RespuestaVinculoLaboral):
-    asignaciones_sucursales: List[RespuestaAsignacionSucursal] = Field(default_factory=list)
+    asignaciones_sucursales: List[RespuestaAsignacionSucursal] = Field(
+        default_factory=list
+    )
 
 
 class Revisar_Json_Editar_Vinculo_Laboral(BaseModel):
-    rol: Literal["Gerente", "Administrador", "Mesero", "Cajero"] | None = None
+    rol: Literal["Gerente", "Administrador", "Mesero"] | None = None
     activo: bool | None = None
 
     model_config = ConfigDict(extra="forbid")

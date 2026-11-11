@@ -1,4 +1,8 @@
 'use client';
+<<<<<<< HEAD
+=======
+import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
+>>>>>>> pruebas-frontend
 
 import { useState } from 'react';
 import { usarSesion } from './Sesion';
@@ -17,6 +21,10 @@ const horaInput = (valor) => {
 export default function Reservas() {
   const { sesion, reservasHabilitadas } = usarSesion();
   const [pagina, setPagina] = useState(1);
+<<<<<<< HEAD
+=======
+  const filtros = useFiltrosListado();
+>>>>>>> pruebas-frontend
   const [estado, setEstado] = useState('Confirmada');
   const [edicion, setEdicion] = useState(null);
   const [error, setError] = useState('');
@@ -26,12 +34,20 @@ export default function Reservas() {
     if (!reservasHabilitadas || !sesion.id_sucursal) return null;
     const [lista, mesas] = await Promise.all([
       api(
+<<<<<<< HEAD
         `/reservas/?pagina_actual=${pagina}&limite=10${estado ? `&estado=${estado}` : ''}`,
+=======
+        `/reservas/?pagina_actual=${pagina}&limite=10&${filtros.parametros}${estado ? `&estado=${estado}` : ''}`,
+>>>>>>> pruebas-frontend
       ),
       listarTodo('/mesas/'),
     ]);
     return { lista, mesas: mesas.filter((item) => item.activo) };
+<<<<<<< HEAD
   }, [pagina, estado, sesion.id_sucursal, reservasHabilitadas]);
+=======
+  }, [pagina, estado, sesion.id_sucursal, reservasHabilitadas, filtros.parametros]);
+>>>>>>> pruebas-frontend
   if (!reservasHabilitadas)
     return (
       <Vacio
@@ -78,6 +94,16 @@ export default function Reservas() {
       </div>
       <Mensaje error={error || datos.error} aviso={aviso} />
       <div className="tg-card tg-table-card">
+<<<<<<< HEAD
+=======
+        <div className="tg-toolbar">
+          <FiltrosListado
+            filtros={filtros}
+            cambiar={() => setPagina(1)}
+            nombre="Buscar reserva por cliente o teléfono"
+          />
+        </div>
+>>>>>>> pruebas-frontend
         <nav className="tg-tabs tg-orders-tabs" aria-label="Estado de reservas">
           {[
             ['Confirmada', 'Confirmadas'],

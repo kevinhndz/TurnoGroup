@@ -8,6 +8,10 @@ import { AccesoPrivado, usarSesion } from './Sesion';
 import { Mensaje } from './Controles';
 import { api } from '../../lib/api';
 import CarritoPendiente from './CarritoPendiente';
+<<<<<<< HEAD
+=======
+import { etiquetaSucursal } from '../../lib/sucursales';
+>>>>>>> pruebas-frontend
 
 export function SelectorContexto() {
   const { sesion, cambiarContexto, version } = usarSesion();
@@ -65,15 +69,25 @@ export function SelectorContexto() {
             </option>
             {vinculo?.sucursales.map((item) => (
               <option value={item.id} key={item.id}>
+<<<<<<< HEAD
                 {item.nombre}
+=======
+                Sucursal #{item.id} · {item.direccion || item.nombre}
+>>>>>>> pruebas-frontend
               </option>
             ))}
           </select>
         </label>
       ) : (
         <span className="tg-branch-name">
+<<<<<<< HEAD
           {vinculo?.sucursales.find((item) => item.id === sesion.id_sucursal)?.nombre ||
             'Sin sucursal asignada'}
+=======
+          {etiquetaSucursal(
+            vinculo?.sucursales.find((item) => item.id === sesion.id_sucursal),
+          )}
+>>>>>>> pruebas-frontend
         </span>
       )}
       {error && <small role="alert">{error}</small>}
@@ -123,7 +137,11 @@ function Interior({ children }) {
           icono: 'chart',
           enlaces: [
             ['Resumen', '/panel'],
+<<<<<<< HEAD
             ['Bitácora', '/panel/bitacora'],
+=======
+            ['Registros', '/panel/bitacora'],
+>>>>>>> pruebas-frontend
           ],
         },
         {
@@ -142,7 +160,11 @@ function Interior({ children }) {
           icono: 'chart',
           enlaces: [
             ['Resumen', '/panel'],
+<<<<<<< HEAD
             ['Bitácora', '/panel/bitacora'],
+=======
+            ['Registros', '/panel/bitacora'],
+>>>>>>> pruebas-frontend
           ],
         },
         {
@@ -271,7 +293,10 @@ function Interior({ children }) {
             })}
         </nav>
         <div className="tg-sidebar-bottom">
+<<<<<<< HEAD
           <Link href="/invitacion">Aceptar invitación</Link>
+=======
+>>>>>>> pruebas-frontend
           <Link href="/panel/configuracion">Configuración</Link>
           <button onClick={salir} disabled={saliendo}>
             {saliendo ? 'Saliendo…' : 'Cerrar sesión'}

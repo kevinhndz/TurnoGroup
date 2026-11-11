@@ -10,6 +10,10 @@ import { camposEmpresa, modulos } from '../../lib/modulos';
 import { dinero } from '../../lib/api';
 import ImportarProductos from './ImportarProductos';
 import TarjetaSuscripcion from './TarjetaSuscripcion';
+<<<<<<< HEAD
+=======
+import { etiquetaSucursal } from '../../lib/sucursales';
+>>>>>>> pruebas-frontend
 
 const pasos = [
   'Negocio',
@@ -236,7 +240,14 @@ export default function AltaInicial() {
                   })),
                 )
               }
+<<<<<<< HEAD
               inicial={{ es_principal: registro.sucursales.length === 0 }}
+=======
+              inicial={{
+                nombre: registro.negocio?.nombre || '',
+                es_principal: registro.sucursales.length === 0,
+              }}
+>>>>>>> pruebas-frontend
             />
           )}
           {(paso === 3 || paso === 4) && sucursal && (
@@ -248,7 +259,11 @@ export default function AltaInicial() {
                 >
                   {registro.sucursales.map((item) => (
                     <option key={item.id_local} value={item.id_local}>
+<<<<<<< HEAD
                       {item.nombre}
+=======
+                      {etiquetaSucursal(item)}
+>>>>>>> pruebas-frontend
                     </option>
                   ))}
                 </select>
@@ -775,10 +790,24 @@ function ListaRegistro({
                   (item) =>
                     item.id_local !== edicion.id_local &&
                     item.nombre.toLocaleLowerCase('es') ===
+<<<<<<< HEAD
                       body.nombre.toLocaleLowerCase('es'),
                 )
               )
                 throw new Error('Ya agregaste un registro con ese nombre.');
+=======
+                      body.nombre.toLocaleLowerCase('es') &&
+                    (singular !== 'sucursal' ||
+                      item.direccion?.trim().toLocaleLowerCase('es') ===
+                        body.direccion?.trim().toLocaleLowerCase('es')),
+                )
+              )
+                throw new Error(
+                  singular === 'sucursal'
+                    ? 'Ya agregaste una sucursal con ese nombre y dirección.'
+                    : 'Ya agregaste un registro con ese nombre.',
+                );
+>>>>>>> pruebas-frontend
               const nuevo = {
                 ...edicion,
                 ...body,

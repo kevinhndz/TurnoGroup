@@ -1,6 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+<<<<<<< HEAD
+=======
+import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
+>>>>>>> pruebas-frontend
 import { useEffect, useState } from 'react';
 import { usarSesion } from './Sesion';
 import { useDatos } from './Datos';
@@ -11,7 +15,11 @@ export default function Pedidos() {
   const { sesion } = usarSesion();
   const [estado, setEstado] = useState('');
   const [pagina, setPagina] = useState(1);
+<<<<<<< HEAD
   const [busqueda, setBusqueda] = useState('');
+=======
+  const filtros = useFiltrosListado();
+>>>>>>> pruebas-frontend
   const [detalle, setDetalle] = useState(null);
   const [accion, setAccion] = useState(null);
   const [error, setError] = useState('');
@@ -21,13 +29,21 @@ export default function Pedidos() {
     if (!sesion.id_sucursal) return null;
     const [lista, tipos, metodos] = await Promise.all([
       api(
+<<<<<<< HEAD
         `/pedidos/?pagina_actual=${pagina}&limite=10${estado ? `&estado=${estado}` : ''}`,
+=======
+        `/pedidos/?pagina_actual=${pagina}&limite=10&${filtros.parametros}${estado ? `&estado=${estado}` : ''}`,
+>>>>>>> pruebas-frontend
       ),
       listarTodo('/tipos-servicio/'),
       listarTodo('/metodos-pago/'),
     ]);
     return { lista, tipos, metodos };
+<<<<<<< HEAD
   }, [pagina, estado, sesion.id_sucursal]);
+=======
+  }, [pagina, estado, sesion.id_sucursal, filtros.parametros]);
+>>>>>>> pruebas-frontend
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('pedido');
     if (id && /^\d+$/.test(id))
@@ -75,6 +91,7 @@ export default function Pedidos() {
       setOcupado(false);
     }
   }
+<<<<<<< HEAD
   const filas = (d?.lista.data || []).filter(
     (item) =>
       !busqueda ||
@@ -82,6 +99,9 @@ export default function Pedidos() {
         .toLocaleLowerCase('es')
         .includes(busqueda.toLocaleLowerCase('es')),
   );
+=======
+  const filas = d?.lista.data || [];
+>>>>>>> pruebas-frontend
   const tipo = (id) => d?.tipos.find((item) => item.id === id)?.nombre_visible || '—';
   const metodo = (id) => d?.metodos.find((item) => item.id === id)?.nombre_visible || '—';
   return (
@@ -118,6 +138,7 @@ export default function Pedidos() {
           ))}
         </nav>
         <div className="tg-toolbar">
+<<<<<<< HEAD
           <Campo label="Buscar número o cliente en esta página">
             <input
               type="search"
@@ -126,6 +147,13 @@ export default function Pedidos() {
               placeholder="Ej. TG-12…"
             />
           </Campo>
+=======
+          <FiltrosListado
+            filtros={filtros}
+            cambiar={() => setPagina(1)}
+            nombre="Buscar número, cliente o teléfono"
+          />
+>>>>>>> pruebas-frontend
           <button className="tg-link-button" onClick={datos.recargar}>
             Actualizar
           </button>
@@ -224,6 +252,7 @@ export default function Pedidos() {
           >
             {detalle.estado}
           </span>
+<<<<<<< HEAD
           <div className="tg-review-config">
             <p>
               {tipo(detalle.id_tipo_servicio)}
@@ -245,11 +274,64 @@ export default function Pedidos() {
             )}
             {detalle.direccion && <p>{detalle.direccion}</p>}
           </div>
+=======
+          <dl className="tg-order-info">
+            <div>
+              <dt>Registrado por</dt>
+              <dd>{detalle.registrado_por || 'Persona no disponible'}</dd>
+            </div>
+            <div>
+              <dt>Fecha y hora</dt>
+              <dd>{fechaLocal(detalle.fecha_registro)}</dd>
+            </div>
+            <div>
+              <dt>Nombre del cliente</dt>
+              <dd>{detalle.cliente || 'Sin nombre registrado'}</dd>
+            </div>
+            <div>
+              <dt>Teléfono del cliente</dt>
+              <dd>{detalle.telefono || 'Sin teléfono registrado'}</dd>
+            </div>
+            <div>
+              <dt>Modalidad de atención</dt>
+              <dd>
+                {tipo(detalle.id_tipo_servicio)}
+                {detalle.id_mesa
+                  ? ` · ${detalle.nombre_mesa || `Mesa #${detalle.id_mesa}`}`
+                  : ''}
+              </dd>
+            </div>
+            <div>
+              <dt>Método de pago</dt>
+              <dd>
+                {metodo(detalle.id_metodo_pago)} ·{' '}
+                {detalle.fecha_pago ? 'Cobro registrado' : 'Pendiente de cobro'}
+              </dd>
+            </div>
+            <div>
+              <dt>Entrega</dt>
+              <dd>{detalle.fecha_entrega ? 'Entregado' : 'Pendiente de entrega'}</dd>
+            </div>
+            {detalle.direccion && (
+              <div>
+                <dt>Dirección de entrega</dt>
+                <dd>{detalle.direccion}</dd>
+              </div>
+            )}
+          </dl>
+          <h3>Detalle de productos</h3>
+>>>>>>> pruebas-frontend
           <div className="tg-review-lines">
             {detalle.detalles.map((item, indice) => (
               <div key={indice}>
                 <span>
                   {item.cantidad} × {item.nombre}
+<<<<<<< HEAD
+=======
+                  <small>
+                    Precio unitario: {dinero(item.precio_unitario, detalle.moneda)}
+                  </small>
+>>>>>>> pruebas-frontend
                   <small>{item.nota}</small>
                 </span>
                 <strong>
@@ -258,12 +340,29 @@ export default function Pedidos() {
               </div>
             ))}
           </div>
+<<<<<<< HEAD
           <p>Subtotal: {dinero(detalle.subtotal, detalle.moneda)}</p>
           <p>Descuento: {dinero(detalle.descuento, detalle.moneda)}</p>
           <p>
             Impuesto {detalle.impuesto_incluido ? 'incluido' : ''}:{' '}
             {dinero(detalle.impuesto, detalle.moneda)}
           </p>
+=======
+          <div className="tg-order-totals">
+            <p>
+              <span>Subtotal</span>
+              <strong>{dinero(detalle.subtotal, detalle.moneda)}</strong>
+            </p>
+            <p>
+              <span>Descuento</span>
+              <strong>{dinero(detalle.descuento, detalle.moneda)}</strong>
+            </p>
+            <p>
+              <span>Impuesto {detalle.impuesto_incluido ? 'incluido' : ''}: </span>
+              <strong>{dinero(detalle.impuesto, detalle.moneda)}</strong>
+            </p>
+          </div>
+>>>>>>> pruebas-frontend
           <div className="tg-subtotal">
             <span>Total</span>
             <strong>{dinero(detalle.total, detalle.moneda)}</strong>

@@ -1,3 +1,5 @@
+from core.listados import pagina_listado
+from backend.Usuarios.tabla import Usuarios
 from sqlalchemy.orm import Session
 from backend.VinculosLaborales.tabla import AsignacionesSucursales, VinculosLaborales
 
@@ -19,15 +21,10 @@ class VinculoLaboralRepository():
         return nuevo_vinculo
 
     @staticmethod
-    def listar_vinculos_laborales(db: Session, id_empresa: int, pagina_actual: int, limite: int):
-        salto = (pagina_actual - 1) * limite
-        total = db.query(VinculosLaborales).filter(
-            VinculosLaborales.id_empresa == id_empresa
-        ).count()
-        lista_vinculos = db.query(VinculosLaborales).filter(
-            VinculosLaborales.id_empresa == id_empresa
-        ).order_by(VinculosLaborales.id).offset(salto).limit(limite).all()
-        return total, lista_vinculos
+    def listar_vinculos_laborales(db: Session, id_empresa: int, pagina_actual: int, limite: int, filtros=None):
+        consulta = db.query(VinculosLaborales).filter(VinculosLaborales.id_empresa == id_empresa)
+        consulta = consulta.join(Usuarios, Usuarios.id == VinculosLaborales.id_usuario)
+        return pagina_listado(consulta, VinculosLaborales, pagina_actual, limite, filtros, columnas=[Usuarios.nombre, Usuarios.correo])
 
     @staticmethod
     def buscar_vinculo_por_id(db: Session, id: int, id_empresa: int) -> VinculosLaborales | None:

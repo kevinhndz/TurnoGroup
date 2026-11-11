@@ -1,3 +1,4 @@
+from core.listados import filtros_listado
 from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
 from fastapi import APIRouter, Depends, Path, Query
 from fastapi.responses import FileResponse
@@ -34,11 +35,9 @@ def ver_productos(
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     id_sucursal: int | None = Depends(obtener_sucursal_catalogo),
-    db: Session = Depends(abrir_puerta_bd),
-):
+    db: Session = Depends(abrir_puerta_bd), filtros=Depends(filtros_listado)):
     return service.listar_productos_service(
-        id_empresa, pagina_actual, limite, db, id_sucursal
-    )
+        id_empresa, pagina_actual, limite, db, id_sucursal, filtros=filtros)
 
 
 @router.post("/revisar-archivo")

@@ -1,3 +1,4 @@
+from core.listados import pagina_listado
 from sqlalchemy.orm import Session
 from backend.Categorias.tabla import Categorias
 
@@ -19,10 +20,9 @@ class CategoriaRepository():
         return nueva_categoria
 
     @staticmethod
-    def listar_categorias(db: Session, id_empresa: int, pagina_actual: int, limite: int, id_sucursal=None):
+    def listar_categorias(db: Session, id_empresa: int, pagina_actual: int, limite: int, id_sucursal=None, filtros=None):
         consulta = CategoriaRepository.consulta_catalogo(db, id_empresa, id_sucursal)
-        salto = (pagina_actual - 1) * limite
-        return consulta.count(), consulta.order_by(Categorias.id).offset(salto).limit(limite).all()
+        return pagina_listado(consulta, Categorias, pagina_actual, limite, filtros)
 
     @staticmethod
     def buscar_categoria_por_id(db: Session, id: int, id_empresa: int, id_sucursal=None) -> Categorias | None:

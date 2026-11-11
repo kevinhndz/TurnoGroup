@@ -81,7 +81,11 @@ class ReservaService:
         return respuesta
 
     @staticmethod
+<<<<<<< HEAD
     def listar_service(db, contexto, pagina, limite, estado):
+=======
+    def listar_service(db, contexto, pagina, limite, estado, filtros=None):
+>>>>>>> pruebas-frontend
         empresa, sucursal = alcance(contexto)
         exigir(
             repo.habilitado(db, sucursal),
@@ -89,7 +93,11 @@ class ReservaService:
             403,
         )
         return paginar(
+<<<<<<< HEAD
             repo.listar(db, empresa, sucursal, estado),
+=======
+            repo.listar(db, empresa, sucursal, estado, filtros),
+>>>>>>> pruebas-frontend
             pagina,
             limite,
             ReservaService.respuesta,

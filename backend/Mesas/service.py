@@ -31,14 +31,13 @@ class MesaService:
 
     @staticmethod
     def listar_mesas_service(
-        id_sucursal: int, pagina_actual: int, limite: int, id_empresa: int, db: Session
-    ):
+        id_sucursal: int, pagina_actual: int, limite: int, id_empresa: int, db: Session, filtros=None):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
 
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal")
 
-        total, lista_mesas = repo.listar_mesas(db, id_sucursal, pagina_actual, limite)
+        total, lista_mesas = repo.listar_mesas(db, id_sucursal, pagina_actual, limite, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
 
         return {

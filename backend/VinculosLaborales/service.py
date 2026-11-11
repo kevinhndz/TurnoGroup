@@ -35,6 +35,8 @@ class VinculoLaboralService:
         usuario = repo_usuario.buscar_usuario_por_id(db, json.id_usuario)
         if usuario is None:
             raise RecursoNoEncontradoError("No se encontro el usuario")
+        if InvitacionLaboralRepository.buscar_otra_empresa(db, usuario.id, id_empresa):
+            raise HTTPException(409, "El usuario ya pertenece a otra empresa")
 
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
@@ -53,15 +55,13 @@ class VinculoLaboralService:
 
     @staticmethod
     def listar_vinculos_laborales_service(
-        id_empresa: int, pagina_actual: int, limite: int, db: Session
-    ):
+        id_empresa: int, pagina_actual: int, limite: int, db: Session, filtros=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
         total, lista_vinculos = repo.listar_vinculos_laborales(
-            db, id_empresa, pagina_actual, limite
-        )
+            db, id_empresa, pagina_actual, limite, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
         from backend.Usuarios.tabla import Usuarios
 
@@ -117,6 +117,8 @@ class VinculoLaboralService:
     def asignar_sucursal_service(
         id: int, id_sucursal: int, id_empresa: int, db: Session
     ):
+        from backend.InvitacionesLaborales.repository import InvitacionLaboralRepository
+        InvitacionLaboralRepository.bloquear_empresa(db, id_empresa)
         look_up = repo.buscar_vinculo_por_id(db, id, id_empresa)
 
         if look_up is None:
@@ -135,6 +137,8 @@ class VinculoLaboralService:
         )
         if asignacion_existente is not None:
             raise RecursoDuplicadoError("La sucursal ya esta asignada a este vinculo")
+        if look_up.rol != "Gerente" and repo.listar_asignaciones_sucursales(db, look_up.id):
+            raise HTTPException(409, "Este rol solo puede tener una sucursal. Retira la anterior antes de asignar otra")
 
         nueva_asignacion = AsignacionesSucursales(
             id_vinculo_laboral=look_up.id, id_sucursal=id_sucursal
@@ -185,6 +189,8 @@ class VinculoLaboralService:
         if not look_up:
             raise RecursoNoEncontradoError("No se encontro el vinculo laboral")
         cambios = json.model_dump(exclude_unset=True)
+        if cambios.get("rol", look_up.rol) != "Gerente" and len(repo.listar_asignaciones_sucursales(db, look_up.id)) > 1:
+            raise HTTPException(409, "Deja una sola sucursal antes de asignar este rol")
         if not cambios or any(valor is None for valor in cambios.values()):
             raise HTTPException(422, "Indica los campos validos que deseas editar")
         if (

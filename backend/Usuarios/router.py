@@ -1,3 +1,4 @@
+from core.listados import filtros_listado
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Query, HTTPException, Response
 from utils.autorizacion import obtener_sesion, revisar_solicitud_sesion
@@ -37,9 +38,8 @@ def registrar_negocio(json: Revisar_Json_Registro_Negocio, db: Session = Depends
 def ver_usuarios(
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
-    db: Session = Depends(abrir_puerta_bd)
-):
-    return service.listar_usuarios_service(pagina_actual, limite, db)
+    db: Session = Depends(abrir_puerta_bd), filtros=Depends(filtros_listado)):
+    return service.listar_usuarios_service(pagina_actual, limite, db, filtros=filtros)
 
 
 @router.get("/{id}", response_model=NuevoUsuarioRespuesta)

@@ -1,3 +1,4 @@
+from core.listados import pagina_listado
 from sqlalchemy.orm import Session
 from backend.Descuentos.tabla import Descuentos
 
@@ -19,13 +20,9 @@ class DescuentoRepository():
         return nuevo_descuento
 
     @staticmethod
-    def listar_descuentos(db: Session, id_empresa: int, pagina_actual: int, limite: int):
-        salto = (pagina_actual - 1) * limite
-        total = db.query(Descuentos).filter(Descuentos.id_empresa == id_empresa).count()
-        lista_descuentos = db.query(Descuentos).filter(
-            Descuentos.id_empresa == id_empresa
-        ).order_by(Descuentos.id).offset(salto).limit(limite).all()
-        return total, lista_descuentos
+    def listar_descuentos(db: Session, id_empresa: int, pagina_actual: int, limite: int, filtros=None):
+        consulta = db.query(Descuentos).filter(Descuentos.id_empresa == id_empresa)
+        return pagina_listado(consulta, Descuentos, pagina_actual, limite, filtros)
 
     @staticmethod
     def buscar_descuento_por_id(db: Session, id: int, id_empresa: int) -> Descuentos | None:

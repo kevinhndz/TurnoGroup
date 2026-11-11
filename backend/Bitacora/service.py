@@ -7,7 +7,11 @@ from core.operaciones import alcance, paginar
 
 class BitacoraService:
     @staticmethod
+<<<<<<< HEAD
     def listar_service(db, contexto, pagina, limite, solo_sucursal=True):
+=======
+    def listar_service(db, contexto, pagina, limite, solo_sucursal=True, filtros=None):
+>>>>>>> pruebas-frontend
         from core.operaciones import exigir
 
         if contexto["rol_plataforma"] == "Superadministrador":
@@ -22,7 +26,11 @@ class BitacoraService:
         else:
             empresa, sucursal = alcance(contexto)
         return paginar(
+<<<<<<< HEAD
             repo.listar(db, empresa, sucursal),
+=======
+            repo.listar(db, empresa, sucursal, filtros),
+>>>>>>> pruebas-frontend
             pagina,
             limite,
             lambda fila: {

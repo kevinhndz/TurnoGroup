@@ -12,6 +12,11 @@ class GuardiaSeguridad(BaseSettings):
     ALTA_PUBLICA_HABILITADA: bool = True
     COOKIE_SEGURA: bool = True
     SESION_HORAS: int = Field(default=8, ge=1, le=24)
+    LIMITE_LOGIN: int = Field(default=5, ge=1, le=100)
+    LIMITE_RECUPERACION: int = Field(default=3, ge=1, le=100)
+    LIMITE_INVITACION: int = Field(default=10, ge=1, le=100)
+    LIMITE_IMPORTACION: int = Field(default=10, ge=1, le=100)
+    VENTANA_RATE_LIMIT_SEGUNDOS: int = Field(default=60, ge=10, le=3600)
     ORIGENES_PERMITIDOS: list[str] = ["http://localhost:3000"]
     URL_FRONTEND: str = "http://localhost:3000"
     SMTP_SERVIDOR: str = ""

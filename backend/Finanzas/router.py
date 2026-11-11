@@ -1,10 +1,6 @@
 from datetime import date
 from typing import Literal
-<<<<<<< HEAD
-from fastapi import APIRouter, Depends
-=======
 from fastapi import APIRouter, Depends, Query
->>>>>>> pruebas-frontend
 from sqlalchemy.orm import Session
 from database.almacen import abrir_puerta_bd
 from utils.autorizacion import obtener_contexto
@@ -13,8 +9,6 @@ from backend.Finanzas.service import FinanzasService as service
 router = APIRouter(prefix="/finanzas", tags=["Finanzas"])
 
 
-<<<<<<< HEAD
-=======
 @router.get("/dashboard")
 def dashboard(
     periodo: Literal["dia", "semana", "mes", "anio"] = "mes",
@@ -27,7 +21,6 @@ def dashboard(
     return service.dashboard_service(db, contexto, periodo, anio, solo_sucursal, desde, hasta)
 
 
->>>>>>> pruebas-frontend
 @router.get("/ventas")
 def ventas(
     desde: date,

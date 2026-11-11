@@ -8,11 +8,7 @@ from core.operaciones import exigir
 
 class FinanzasService:
     @staticmethod
-<<<<<<< HEAD
-    def resumen_service(db, contexto, desde, hasta, periodo, solo_sucursal):
-=======
     def resumen_service(db, contexto, desde, hasta, periodo, solo_sucursal, filas=None):
->>>>>>> pruebas-frontend
         empresa = contexto["id_empresa"]
         SuscripcionService.exigir_finanzas(db, empresa)
         exigir(
@@ -36,12 +32,8 @@ class FinanzasService:
         )
         sucursal = contexto["id_sucursal"] if solo_sucursal else None
         exigir(not solo_sucursal or sucursal, "Selecciona una sucursal", 403)
-<<<<<<< HEAD
-        filas = repo.ventas(db, empresa, inicio, fin, sucursal)
-=======
         if filas is None:
             filas = repo.ventas(db, empresa, inicio, fin, sucursal)
->>>>>>> pruebas-frontend
         grupos = {}
         locales = {}
         for pedido in filas:
@@ -95,8 +87,6 @@ class FinanzasService:
                 {"id_sucursal": int(k), **convertir(v)} for k, v in locales.items()
             ],
         }
-<<<<<<< HEAD
-=======
 
     @staticmethod
     def dashboard_service(db, contexto, periodo, anio, solo_sucursal, desde=None, hasta=None):
@@ -176,4 +166,3 @@ class FinanzasService:
             "periodos": {clave: str(valor) for clave, valor in repo.totales_periodos(db, empresa, sucursal, {clave: limites(*rango) for clave, rango in rangos.items()}).items()},
         })
         return respuesta
->>>>>>> pruebas-frontend

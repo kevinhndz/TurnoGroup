@@ -10,23 +10,17 @@ from backend.Descuentos.tabla import Descuentos
 from backend.ConfiguracionImpuestos.tabla import ConfiguracionImpuestos
 from backend.Sucursales.tabla import Sucursales
 from backend.Empresas.tabla import Empresas
-<<<<<<< HEAD
-=======
 from core.listados import filtrar_listado
->>>>>>> pruebas-frontend
 
 
 class PedidoRepository:
     @staticmethod
-<<<<<<< HEAD
-=======
     def nombre_usuario(db, id_usuario):
         from backend.Usuarios.tabla import Usuarios
         usuario = db.get(Usuarios, id_usuario)
         return usuario.nombre if usuario else "Persona no disponible"
 
     @staticmethod
->>>>>>> pruebas-frontend
     def bloquear_sucursal(db, id_empresa, id_sucursal):
         return (
             db.query(Sucursales)
@@ -57,21 +51,13 @@ class PedidoRepository:
         )
 
     @staticmethod
-<<<<<<< HEAD
-    def listar(db, id_empresa, id_sucursal, estado):
-=======
     def listar(db, id_empresa, id_sucursal, estado, filtros=None):
->>>>>>> pruebas-frontend
         consulta = db.query(Pedidos).filter(
             Pedidos.id_empresa == id_empresa, Pedidos.id_sucursal == id_sucursal
         )
         if estado:
             consulta = consulta.filter(Pedidos.estado == estado)
-<<<<<<< HEAD
-        return consulta.order_by(Pedidos.id.desc())
-=======
         return filtrar_listado(consulta.order_by(Pedidos.id.desc()), Pedidos, filtros)
->>>>>>> pruebas-frontend
 
     @staticmethod
     def detalles(db, id):
@@ -85,11 +71,7 @@ class PedidoRepository:
     @staticmethod
     def productos(db, ids, id_empresa, id_sucursal):
         return (
-<<<<<<< HEAD
-            db.query(Productos, DisponibilidadProductos.precio_especial)
-=======
             db.query(Productos)
->>>>>>> pruebas-frontend
             .join(
                 DisponibilidadProductos,
                 DisponibilidadProductos.id_producto == Productos.id,
@@ -188,11 +170,7 @@ class PedidoRepository:
         from backend.Sucursales.tabla import Sucursales
 
         productos = (
-<<<<<<< HEAD
-            db.query(Productos, DisponibilidadProductos.precio_especial)
-=======
             db.query(Productos)
->>>>>>> pruebas-frontend
             .join(
                 DisponibilidadProductos,
                 DisponibilidadProductos.id_producto == Productos.id,

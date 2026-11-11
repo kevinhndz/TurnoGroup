@@ -1,11 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-<<<<<<< HEAD
-=======
 import { etiquetaSucursal } from '../../lib/sucursales';
 import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
->>>>>>> pruebas-frontend
 import { api, listarTodo } from '../../lib/api';
 import { useDatos } from './Datos';
 import { Campo, Mensaje, Modal, Vacio } from './Controles';
@@ -15,10 +12,7 @@ const roles = ['Gerente', 'Administrador', 'Mesero'];
 
 export default function Equipo() {
   const [pagina, setPagina] = useState(1);
-<<<<<<< HEAD
-=======
   const filtros = useFiltrosListado();
->>>>>>> pruebas-frontend
   const [invitacion, setInvitacion] = useState(false);
   const [seleccionado, setSeleccionado] = useState(null);
   const [error, setError] = useState('');
@@ -26,14 +20,6 @@ export default function Equipo() {
   const [ocupado, setOcupado] = useState(false);
   const datos = useDatos(async () => {
     const [vinculos, invitaciones, sucursales] = await Promise.all([
-<<<<<<< HEAD
-      api(`/vinculos-laborales/?pagina_actual=${pagina}&limite=10`),
-      api(`/invitaciones-laborales/?pagina_actual=${pagina}&limite=10`),
-      listarTodo('/sucursales/'),
-    ]);
-    return { vinculos, invitaciones, sucursales };
-  }, [pagina]);
-=======
       api(`/vinculos-laborales/?pagina_actual=${pagina}&limite=10&${filtros.parametros}`),
       api(
         `/invitaciones-laborales/?pagina_actual=${pagina}&limite=10&${filtros.parametros}`,
@@ -42,7 +28,6 @@ export default function Equipo() {
     ]);
     return { vinculos, invitaciones, sucursales };
   }, [pagina, filtros.parametros]);
->>>>>>> pruebas-frontend
 
   async function abrir(vinculo) {
     setError('');
@@ -99,14 +84,11 @@ export default function Equipo() {
         </button>
       </div>
       <Mensaje error={error || datos.error} aviso={aviso} />
-<<<<<<< HEAD
-=======
       <FiltrosListado
         filtros={filtros}
         cambiar={() => setPagina(1)}
         nombre="Buscar empleado por nombre o correo"
       />
->>>>>>> pruebas-frontend
       <div className="tg-card tg-table-card">
         <div className="tg-toolbar">
           <h2>Vínculos laborales</h2>
@@ -114,13 +96,6 @@ export default function Equipo() {
             Actualizar
           </button>
         </div>
-<<<<<<< HEAD
-        <p className="tg-table-note">
-          Cada persona se identifica aquí por su número de usuario; el servicio de
-          vínculos todavía no devuelve su nombre.
-        </p>
-=======
->>>>>>> pruebas-frontend
         {datos.cargando ? (
           <p className="tg-loading-inline" role="status">
             Cargando equipo…
@@ -325,11 +300,7 @@ export default function Equipo() {
                     }
                     onChange={() => asignar(sucursal, tiene)}
                   />
-<<<<<<< HEAD
-                  {sucursal.nombre}
-=======
                   {etiquetaSucursal(sucursal)}
->>>>>>> pruebas-frontend
                   {!sucursal.activo && ' (desactivada)'}
                 </label>
               );
@@ -408,11 +379,7 @@ function Invitar({ sucursales, terminar }) {
                   )
                 }
               />
-<<<<<<< HEAD
-              {item.nombre}
-=======
               {etiquetaSucursal(item)}
->>>>>>> pruebas-frontend
             </label>
           ))}
         </div>

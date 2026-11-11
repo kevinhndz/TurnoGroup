@@ -1,8 +1,5 @@
 from uuid import UUID
-<<<<<<< HEAD
-=======
 from core.listados import filtros_listado
->>>>>>> pruebas-frontend
 from typing import Literal
 from fastapi import APIRouter, Depends, Query, Path
 from typing import Annotated
@@ -70,21 +67,14 @@ def crear(
 
 @router.get("/")
 def listar(
-<<<<<<< HEAD
-=======
     filtros=Depends(filtros_listado),
->>>>>>> pruebas-frontend
     estado: Literal["Abierto", "Cerrado", "Cancelado"] | None = None,
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     contexto=Depends(obtener_contexto),
     db: Session = Depends(abrir_puerta_bd),
 ):
-<<<<<<< HEAD
-    return service.listar_service(db, contexto, pagina_actual, limite, estado)
-=======
     return service.listar_service(db, contexto, pagina_actual, limite, estado, filtros)
->>>>>>> pruebas-frontend
 
 
 @router.get("/{id}")

@@ -4,8 +4,6 @@ from backend.Empresas.tabla import Empresas
 
 class FinanzasRepository:
     @staticmethod
-<<<<<<< HEAD
-=======
     def totales_periodos(db, id_empresa, id_sucursal, periodos):
         from sqlalchemy import case, and_, func
         columnas = [func.coalesce(func.sum(case((and_(Pedidos.fecha_pago >= inicio, Pedidos.fecha_pago < fin), Pedidos.total), else_=0)), 0).label(clave) for clave, (inicio, fin) in periodos.items()]
@@ -30,7 +28,6 @@ class FinanzasRepository:
         return db.query(Sucursales).filter(Sucursales.id_empresa == id_empresa).all()
 
     @staticmethod
->>>>>>> pruebas-frontend
     def empresa(db, id_empresa):
         return db.get(Empresas, id_empresa)
 

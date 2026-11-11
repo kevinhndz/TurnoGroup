@@ -61,8 +61,6 @@ def crear_excel(filas):
     salida = BytesIO()
     libro.save(salida)
     return salida.getvalue()
-<<<<<<< HEAD
-=======
 
 
 def crear_historial_pdf(filas):
@@ -85,4 +83,3 @@ def crear_historial_pdf(filas):
         ])
     SimpleDocTemplate(salida, pagesize=A4).build(contenido)
     return salida.getvalue()
->>>>>>> pruebas-frontend

@@ -72,8 +72,6 @@ def exportar_excel(id_empresa=Depends(obtener_empresa), db: Session = Depends(ab
     return Response(crear_excel(repo.comprobantes(db, id_empresa)), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": 'attachment; filename="comprobantes-prueba.xlsx"'})
 
 
-<<<<<<< HEAD
-=======
 @router.get("/comprobantes/pdf")
 def exportar_historial_pdf(id_empresa=Depends(obtener_empresa), db: Session = Depends(abrir_puerta_bd)):
     from backend.Suscripciones.repository import SuscripcionRepository as repo
@@ -81,7 +79,6 @@ def exportar_historial_pdf(id_empresa=Depends(obtener_empresa), db: Session = De
     return Response(crear_historial_pdf(repo.comprobantes(db, id_empresa)), media_type="application/pdf", headers={"Content-Disposition": 'inline; filename="historial-facturacion.pdf"'})
 
 
->>>>>>> pruebas-frontend
 @router.get("/comprobantes/{id}/pdf")
 def exportar_pdf(id: Annotated[int, Path(gt=0)], id_empresa=Depends(obtener_empresa), db: Session = Depends(abrir_puerta_bd)):
     from backend.Suscripciones.repository import SuscripcionRepository as repo
@@ -90,8 +87,6 @@ def exportar_pdf(id: Annotated[int, Path(gt=0)], id_empresa=Depends(obtener_empr
     look_up = repo.buscar_comprobante(db, id_empresa, id)
     exigir(look_up is not None, "No se encontro el comprobante", 404)
     return Response(crear_pdf(look_up), media_type="application/pdf", headers={"Content-Disposition": f'inline; filename="comprobante-prueba-{id}.pdf"'})
-<<<<<<< HEAD
-=======
 
 
 @router.get("/comprobantes/{id}/excel")
@@ -102,4 +97,3 @@ def exportar_comprobante_excel(id: Annotated[int, Path(gt=0)], id_empresa=Depend
     look_up = repo.buscar_comprobante(db, id_empresa, id)
     exigir(look_up is not None, "No se encontro el comprobante", 404)
     return Response(crear_excel([look_up]), media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": f'attachment; filename="comprobante-prueba-{id}.xlsx"'})
->>>>>>> pruebas-frontend

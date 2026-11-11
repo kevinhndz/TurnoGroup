@@ -5,12 +5,6 @@ import { usarSesion } from './Sesion';
 import Icon from '../Icon';
 import { api, dinero } from '../../lib/api';
 import { Mensaje, Modal } from './Controles';
-<<<<<<< HEAD
-
-export default function CarritoPendiente() {
-  const { sesion } = usarSesion();
-  const [pendiente, setPendiente] = useState(null);
-=======
 import PedidoNuevo from './PedidoNuevo';
 
 export default function CarritoPendiente() {
@@ -19,7 +13,6 @@ export default function CarritoPendiente() {
   const [respaldo, setRespaldo] = useState(null);
   const [checkout, setCheckout] = useState(false);
   const [bloqueado, setBloqueado] = useState(false);
->>>>>>> pruebas-frontend
   const [abierto, setAbierto] = useState(false);
   const [catalogo, setCatalogo] = useState(null);
   const [error, setError] = useState('');
@@ -86,10 +79,7 @@ export default function CarritoPendiente() {
       vigente = false;
     };
   }, [abierto, prefijo]);
-<<<<<<< HEAD
-=======
   const pendiente = encontrado || (abierto ? respaldo : null);
->>>>>>> pruebas-frontend
   if (!pendiente) return null;
   const editar = pendiente.clave.slice(prefijo.length);
   const lineas = pendiente.dato.lineas || [];
@@ -131,8 +121,6 @@ export default function CarritoPendiente() {
       setError('No se pudo actualizar el carrito en este navegador.');
     }
   }
-<<<<<<< HEAD
-=======
   function cerrar() {
     if (bloqueado) return;
     setAbierto(false);
@@ -156,19 +144,14 @@ export default function CarritoPendiente() {
       }),
     );
   }
->>>>>>> pruebas-frontend
   return (
     <div className="tg-resume-cart">
       <button
         className="tg-button tg-primary"
-<<<<<<< HEAD
-        onClick={() => setAbierto(true)}
-=======
         onClick={() => {
           setRespaldo(pendiente);
           setAbierto(true);
         }}
->>>>>>> pruebas-frontend
         aria-haspopup="dialog"
       >
         <Icon name="cart" size={18} />
@@ -177,124 +160,11 @@ export default function CarritoPendiente() {
       <button
         className="tg-icon-button"
         aria-label="Descartar carrito"
-<<<<<<< HEAD
-        onClick={() => {
-          if (
-            window.confirm(
-              '¿Descartar este carrito? El pedido guardado, si existe, no se modifica.',
-            )
-          ) {
-            sessionStorage.removeItem(pendiente.clave);
-            window.dispatchEvent(new Event('turno-carrito'));
-          }
-        }}
-=======
         onClick={descartar}
->>>>>>> pruebas-frontend
       >
         <Icon name="close" size={18} />
       </button>
       {abierto && (
-<<<<<<< HEAD
-        <Modal
-          titulo={`Tu carrito · ${pendiente.cantidad} productos`}
-          cerrar={() => setAbierto(false)}
-        >
-          <div className="tg-cart-peek">
-            <p>Revisa tu pedido sin salir de esta página.</p>
-            <Mensaje error={error} />
-            {cargando ? (
-              <p role="status">Cargando productos…</p>
-            ) : (
-              catalogo && (
-                <>
-                  <div className="tg-cart-peek-lines">
-                    {lineas.map((item) => {
-                      const producto = catalogo.productos.find(
-                        (p) => p.id === item.id_producto,
-                      );
-                      return (
-                        <article key={item.id_producto}>
-                          {producto?.ruta_imagen ? (
-                            <img
-                              src={`/api/backend/productos/${producto.id}/imagen`}
-                              alt={producto.nombre}
-                              width="64"
-                              height="64"
-                            />
-                          ) : (
-                            <span className="tg-tile-icon">
-                              <Icon name="coffee" />
-                            </span>
-                          )}
-                          <div>
-                            <strong>
-                              {producto?.nombre || 'Producto no disponible'}
-                            </strong>
-                            <small>
-                              {producto
-                                ? dinero(producto.precio_local, moneda)
-                                : 'Revisa el catálogo al continuar'}
-                            </small>
-                            <div className="tg-quantity">
-                              <button
-                                aria-label={`Quitar una unidad de ${producto?.nombre || 'producto'}`}
-                                disabled={!!pendiente.dato.claveOperacion}
-                                onClick={() =>
-                                  cambiar(item.id_producto, item.cantidad - 1)
-                                }
-                              >
-                                −
-                              </button>
-                              <span>{item.cantidad}</span>
-                              <button
-                                aria-label={`Añadir una unidad de ${producto?.nombre || 'producto'}`}
-                                disabled={
-                                  item.cantidad >= 99 ||
-                                  !!pendiente.dato.claveOperacion ||
-                                  !producto
-                                }
-                                onClick={() =>
-                                  cambiar(item.id_producto, item.cantidad + 1)
-                                }
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                          <strong>
-                            {producto
-                              ? dinero(
-                                  Number(producto.precio_local) * item.cantidad,
-                                  moneda,
-                                )
-                              : '—'}
-                          </strong>
-                        </article>
-                      );
-                    })}
-                  </div>
-                  <footer>
-                    <div className="tg-subtotal">
-                      <span>Subtotal estimado</span>
-                      <strong>{dinero(total, moneda)}</strong>
-                    </div>
-                    <p>Los descuentos y el total final se revisan al continuar.</p>
-                    <Link
-                      className="tg-button tg-primary"
-                      href={
-                        editar === 'nuevo'
-                          ? '/nuevo-pedido'
-                          : `/nuevo-pedido?editar=${editar}`
-                      }
-                      onClick={() => setAbierto(false)}
-                    >
-                      Continuar pedido <Icon name="arrow" size={16} />
-                    </Link>
-                  </footer>
-                </>
-              )
-=======
         <Modal titulo={`Tu carrito · ${pendiente.cantidad} productos`} cerrar={cerrar}>
           <div className="tg-cart-peek">
             {checkout ? (
@@ -413,7 +283,6 @@ export default function CarritoPendiente() {
                   )
                 )}
               </>
->>>>>>> pruebas-frontend
             )}
           </div>
         </Modal>

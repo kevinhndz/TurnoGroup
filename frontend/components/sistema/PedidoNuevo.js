@@ -9,16 +9,12 @@ import { api, dinero } from '../../lib/api';
 import Icon from '../Icon';
 import SelectorMesas from './SelectorMesas';
 
-<<<<<<< HEAD
-export default function PedidoNuevo({ editar = null }) {
-=======
 export default function PedidoNuevo({
   editar = null,
   incrustado = false,
   alCerrar,
   alOcupado,
 }) {
->>>>>>> pruebas-frontend
   const { sesion } = usarSesion();
   return (
     <AccesoPrivado>
@@ -26,27 +22,18 @@ export default function PedidoNuevo({
         <Contenido
           key={`${sesion.id_empresa}:${sesion.id_sucursal}:${editar}`}
           editar={editar}
-<<<<<<< HEAD
-=======
           incrustado={incrustado}
           alCerrar={alCerrar}
           alOcupado={alOcupado}
->>>>>>> pruebas-frontend
         />
       )}
     </AccesoPrivado>
   );
 }
 
-<<<<<<< HEAD
-function Contenido({ editar }) {
-  const { sesion, mesasHabilitadas } = usarSesion();
-  const [paso, setPaso] = useState('catalogo');
-=======
 function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
   const { sesion, mesasHabilitadas } = usarSesion();
   const [paso, setPaso] = useState(incrustado ? 'revision' : 'catalogo');
->>>>>>> pruebas-frontend
   const [categoria, setCategoria] = useState('todas');
   const [busqueda, setBusqueda] = useState('');
   const [carrito, setCarrito] = useState([]);
@@ -54,13 +41,10 @@ function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
   const [nota, setNota] = useState(null);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
-<<<<<<< HEAD
-=======
   useEffect(() => {
     alOcupado?.(enviando);
     return () => alOcupado?.(false);
   }, [enviando, alOcupado]);
->>>>>>> pruebas-frontend
   const [verificandoOperacion, setVerificandoOperacion] = useState(false);
   const [cotizacion, setCotizacion] = useState(null);
   const [calculando, setCalculando] = useState(false);
@@ -393,12 +377,6 @@ function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
     }
   }
 
-<<<<<<< HEAD
-  return (
-    <div className="tg-wizard tg-orders">
-      <header className="tg-order-header">
-        <Link href="/panel">← Volver al panel</Link>
-=======
   const Contenedor = incrustado ? 'div' : 'main';
   return (
     <div className={`tg-wizard tg-orders ${incrustado ? 'tg-inline-checkout' : ''}`}>
@@ -415,7 +393,6 @@ function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
         ) : (
           <Link href="/panel">← Volver al panel</Link>
         )}
->>>>>>> pruebas-frontend
         <h2>
           {paso === 'revision'
             ? 'Revisar pedido'
@@ -428,11 +405,7 @@ function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
         <span className="tg-badge">{d.sucursal.nombre}</span>
         <span className="tg-order-attendant">Atendido por: {sesion.usuario.nombre}</span>
       </header>
-<<<<<<< HEAD
-      <main id="contenido" className="tg-order-main">
-=======
       <Contenedor id={incrustado ? undefined : 'contenido'} className="tg-order-main">
->>>>>>> pruebas-frontend
         <Mensaje error={error} />
         {paso === 'catalogo' && (
           <>
@@ -755,15 +728,9 @@ function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
                 type="button"
                 className="tg-link-button"
                 disabled={enviando}
-<<<<<<< HEAD
-                onClick={() => setPaso('catalogo')}
-              >
-                ← Volver al catálogo
-=======
                 onClick={() => (incrustado ? alCerrar?.() : setPaso('catalogo'))}
               >
                 {incrustado ? '← Volver al carrito' : '← Volver al catálogo'}
->>>>>>> pruebas-frontend
               </button>
               <div className="tg-review-lines">
                 {lineas.map((item) => (
@@ -843,23 +810,6 @@ function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
               >
                 Ver pedido
               </Link>
-<<<<<<< HEAD
-              <Link
-                className="tg-button tg-secondary"
-                href="/nuevo-pedido"
-                onClick={() => {
-                  claveOperacion.current = null;
-                  setPaso('catalogo');
-                  setCreado(null);
-                  setCotizacion(null);
-                }}
-              >
-                Nuevo pedido
-              </Link>
-              <Link className="tg-button tg-secondary" href="/panel">
-                Volver al panel
-              </Link>
-=======
               {!incrustado && (
                 <Link
                   className="tg-button tg-secondary"
@@ -883,7 +833,6 @@ function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
                   Volver al panel
                 </Link>
               )}
->>>>>>> pruebas-frontend
             </div>
           </section>
         )}
@@ -915,11 +864,7 @@ function Contenido({ editar, incrustado, alCerrar, alOcupado }) {
             </form>
           </Modal>
         )}
-<<<<<<< HEAD
-      </main>
-=======
       </Contenedor>
->>>>>>> pruebas-frontend
     </div>
   );
 }

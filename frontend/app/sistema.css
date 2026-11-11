@@ -1,6 +1,4 @@
 /* Pantallas de acceso y espacio de trabajo. */
-<<<<<<< HEAD
-=======
 .tg-cart-peek footer > .tg-button + .tg-button {
   margin-top: 10px;
 }
@@ -377,7 +375,6 @@
     grid-template-columns: 1fr;
   }
 }
->>>>>>> pruebas-frontend
 .tg-modal:has(.tg-cart-peek) {
   margin: 0 0 0 auto;
   width: min(460px, 100vw);

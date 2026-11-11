@@ -57,11 +57,8 @@ def test_facturacion_exclusiva_del_gerente(client, db, datos, rol):
     assert client.get('/suscripciones/actual').status_code == 403
     assert client.post('/suscripciones/tarjetas', json=tarjeta()).status_code == 403
     assert client.get('/suscripciones/comprobantes/excel').status_code == 403
-<<<<<<< HEAD
-=======
     assert client.get('/suscripciones/comprobantes/pdf').status_code == 403
     assert client.get('/suscripciones/comprobantes/1/excel').status_code == 403
->>>>>>> pruebas-frontend
     assert client.post('/suscripciones/desactivar-cuenta', json={'clave':'x','confirmacion':'DESACTIVAR'}).status_code == 403
 
 
@@ -80,8 +77,6 @@ def test_registro_no_factura_cobros_inexistentes_y_exporta(client, db, datos):
     hoja = load_workbook(BytesIO(xlsx.content)).active
     assert hoja.cell(3,7).value == 0
     assert 'SIN VALIDEZ FISCAL' in hoja['A1'].value
-<<<<<<< HEAD
-=======
     historial = client.get('/suscripciones/comprobantes/pdf')
     assert historial.status_code == 200 and historial.content.startswith(b'%PDF-')
     individual = client.get(f'/suscripciones/comprobantes/{id}/excel')
@@ -109,7 +104,6 @@ def test_historial_pdf_y_excel_no_incluyen_otra_empresa(client, db, datos, monke
     hoja = load_workbook(BytesIO(client.get('/suscripciones/comprobantes/excel').content)).active
     assert hoja.max_row == 3
     assert hoja.cell(3, 1).value == f'TG-PRUEBA-{propio["id"]:06}'
->>>>>>> pruebas-frontend
 
 
 def preparar_clave(db, datos):

@@ -24,11 +24,6 @@ function FormularioInvitacion() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [ocupado, setOcupado] = useState(false);
-<<<<<<< HEAD
-  const [codigo, setCodigo] = usarCodigoInvitacion();
-  if (sesion.usuario.rol_plataforma === 'Superadministrador')
-    return <p>Las invitaciones laborales se aceptan con una cuenta de usuario.</p>;
-=======
   const [codigo] = usarCodigoInvitacion();
   if (sesion.usuario.rol_plataforma === 'Superadministrador')
     return <p>Las invitaciones laborales se aceptan con una cuenta de usuario.</p>;
@@ -49,7 +44,6 @@ function FormularioInvitacion() {
         </Link>
       </section>
     );
->>>>>>> pruebas-frontend
   return (
     <section className="tg-card tg-narrow">
       <span className="tg-eyebrow">BIENVENIDO AL EQUIPO</span>
@@ -63,10 +57,6 @@ function FormularioInvitacion() {
         className="tg-form"
         onSubmit={async (event) => {
           event.preventDefault();
-<<<<<<< HEAD
-          const codigo = new FormData(event.currentTarget).get('codigo');
-=======
->>>>>>> pruebas-frontend
           setOcupado(true);
           setError('');
           try {
@@ -88,25 +78,10 @@ function FormularioInvitacion() {
           }
         }}
       >
-<<<<<<< HEAD
-        <Campo label="Código de invitación">
-          <input
-            name="codigo"
-            value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
-            autoComplete="off"
-            required
-            minLength={40}
-            maxLength={128}
-          />
-        </Campo>
-        <button className="tg-button tg-primary" disabled={ocupado}>
-=======
         {!codigo && (
           <Mensaje error="Abre el enlace de la invitación que recibiste por correo para continuar." />
         )}
         <button className="tg-button tg-primary" disabled={ocupado || !codigo}>
->>>>>>> pruebas-frontend
           {ocupado ? 'Revisando invitación…' : 'Unirme a la empresa'}
         </button>
       </form>
@@ -120,11 +95,7 @@ function RegistroInvitado() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [ocupado, setOcupado] = useState(false);
-<<<<<<< HEAD
-  const [codigo, setCodigo] = usarCodigoInvitacion();
-=======
   const [codigo] = usarCodigoInvitacion();
->>>>>>> pruebas-frontend
   return (
     <main id="contenido" className="tg-loading">
       <section className="tg-card tg-narrow">
@@ -133,13 +104,8 @@ function RegistroInvitado() {
         </Link>
         <h1>Únete al equipo</h1>
         <p>
-<<<<<<< HEAD
-          Crea tu acceso con el código que te envió el gerente. No necesitas registrar un
-          negocio.
-=======
           Escribe tu nombre y crea una contraseña. El enlace del correo ya incluye tu
           invitación y el rol que te asignó el gerente.
->>>>>>> pruebas-frontend
         </p>
         <Mensaje error={error} />
         <form
@@ -164,24 +130,10 @@ function RegistroInvitado() {
             }
           }}
         >
-<<<<<<< HEAD
-          <Campo label="Código de invitación">
-            <input
-              name="codigo"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              required
-              minLength={40}
-              maxLength={128}
-              autoComplete="off"
-            />
-          </Campo>
-=======
           <input type="hidden" name="codigo" value={codigo} />
           {!codigo && (
             <Mensaje error="Abre el enlace de la invitación que recibiste por correo para crear tu acceso." />
           )}
->>>>>>> pruebas-frontend
           <Campo label="Tu nombre">
             <input name="nombre" required maxLength={100} autoComplete="name" />
           </Campo>
@@ -195,11 +147,7 @@ function RegistroInvitado() {
               autoComplete="new-password"
             />
           </Campo>
-<<<<<<< HEAD
-          <button disabled={ocupado} className="tg-button tg-primary">
-=======
           <button disabled={ocupado || !codigo} className="tg-button tg-primary">
->>>>>>> pruebas-frontend
             {ocupado ? 'Creando acceso…' : 'Crear acceso y aceptar invitación'}
           </button>
         </form>

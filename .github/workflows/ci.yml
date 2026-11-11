@@ -1,0 +1,84 @@
+# Nombre visible del flujo en la pestaña Actions.
+name: Integracion continua
+
+# Ejecuta el flujo cuando se abre o actualiza un PR y cuando cambia main.
+on:
+  # Revisa cada pull request antes de fusionarlo.
+  pull_request:
+    # Solo necesitamos validar cambios que lleguen a main.
+    branches: [main]
+  # Vuelve a comprobar la rama principal despues de cada merge.
+  push:
+    # La rama protegida del proyecto.
+    branches: [main]
+
+# Variables seguras de prueba para no usar la base real en CI.
+env:
+  # SQLite permite cargar la aplicacion sin credenciales externas.
+  DATABASE_URL: sqlite:///./ci.db
+  # Clave ficticia usada unicamente durante estas pruebas.
+  SECRET_KEY: ci-solamente-no-usar-en-produccion
+  # Las pruebas no necesitan cookies HTTPS.
+  COOKIE_SEGURA: "false"
+
+# Permisos minimos que necesita el flujo.
+permissions:
+  # Permite leer el codigo del repositorio.
+  contents: read
+
+# Trabajos que debe completar el PR.
+jobs:
+  # Comprueba backend y frontend en el mismo entorno limpio.
+  validar:
+    # Usa un servidor Linux administrado por GitHub.
+    runs-on: ubuntu-latest
+    # Pasos ejecutados en orden; si uno falla, el trabajo falla.
+    steps:
+      # Descarga el codigo de la rama del PR.
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+
+      # Instala la version de Python del backend.
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          # Version estable y compatible con el proyecto.
+          python-version: "3.13"
+
+      # Instala las dependencias necesarias para ejecutar las pruebas.
+      - name: Instalar dependencias Python
+        run: python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      # Revisa que los archivos Python no tengan errores de sintaxis.
+      - name: Compilar Python
+        run: python -m compileall -q backend core utils main.py
+
+      # Ejecuta todas las pruebas automatizadas del backend.
+      - name: Ejecutar pruebas
+        run: pytest -q
+
+      # Instala Node y npm para revisar el frontend.
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          # Usa la version LTS actual de Node.
+          node-version: "22"
+          # Activa la cache basada en package-lock.json.
+          cache: npm
+          # Indica donde vive el package-lock del frontend.
+          cache-dependency-path: frontend/package-lock.json
+
+      # Instala exactamente las dependencias guardadas en el lockfile.
+      - name: Instalar dependencias frontend
+        working-directory: frontend
+        run: npm ci
+
+      # Comprueba que el frontend respete el formato definido.
+      - name: Revisar formato frontend
+        working-directory: frontend
+        run: npm run format:check
+
+      # Comprueba que Next.js pueda generar la aplicacion.
+      - name: Compilar frontend
+        working-directory: frontend
+        run: npm run build

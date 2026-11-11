@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from core.config import revision
 from database.almacen import abrir_puerta_bd
 from backend.Sesiones.service import SesionService
+from utils.rate_limiting import limitar_por_ip
 
 ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
-
+# Rutas conocidas por la capa de autorizacion.
 RUTAS_CON_PERMISO = {
     ('GET', '/finanzas/dashboard'),
     ('POST', '/productos/revisar-archivo'),
@@ -145,6 +146,7 @@ RUTAS_CON_PERMISO = {
 }
 
 
+# Validaciones generales de cada solicitud.
 def revisar_solicitud_sesion(request: Request):
     if revision.COOKIE_SEGURA and request.url.scheme != "https":
         raise HTTPException(400, "Esta operacion requiere HTTPS")
@@ -156,6 +158,7 @@ def revisar_solicitud_sesion(request: Request):
             raise HTTPException(403, "Falta el encabezado X-Solicitud")
 
 
+# Sesion y contexto de empresa o sucursal.
 def obtener_sesion(request: Request, db: Session = Depends(abrir_puerta_bd)):
     revisar_solicitud_sesion(request)
     if not hasattr(request.state, "sesion_validada"):
@@ -210,9 +213,13 @@ def permiso_usuario(json: dict = Depends(el_vigilante)) -> dict:
     return json
 
 
+# Reglas de acceso por ruta y rol.
 def autorizar_ruta(request: Request, db: Session = Depends(abrir_puerta_bd)):
     ruta = request.scope["route"].path
     metodo = request.method
+
+    aplicar_rate_limit(request, ruta, metodo)
+
     if (metodo, ruta) not in RUTAS_CON_PERMISO:
         obtener_sesion(request, db)
         raise HTTPException(403, "Esta ruta no tiene permisos definidos")
@@ -318,3 +325,22 @@ def autorizar_ruta(request: Request, db: Session = Depends(abrir_puerta_bd)):
             raise HTTPException(404, "No se encontro el recurso")
         return
     raise HTTPException(403, "No estas autorizado")
+
+
+def aplicar_rate_limit(request: Request, ruta: str, metodo: str) -> None:
+    """Aplica limites a las operaciones que un atacante puede repetir."""
+    if metodo != "POST":
+        return
+
+    ventana = revision.VENTANA_RATE_LIMIT_SEGUNDOS
+    if ruta == "/sesiones/iniciar":
+        limitar_por_ip(request, "login", revision.LIMITE_LOGIN, ventana)
+    elif ruta in ("/recuperaciones-clave/solicitar", "/recuperaciones-clave/restablecer"):
+        limitar_por_ip(request, "recuperacion", revision.LIMITE_RECUPERACION, ventana)
+    elif ruta in (
+        "/invitaciones-laborales/registrar",
+        "/invitaciones-laborales/aceptar",
+    ):
+        limitar_por_ip(request, "invitacion", revision.LIMITE_INVITACION, ventana)
+    elif ruta in ("/productos/revisar-archivo", "/productos/importar"):
+        limitar_por_ip(request, "importacion", revision.LIMITE_IMPORTACION, ventana)

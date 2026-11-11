@@ -1,4 +1,5 @@
 from backend.Reservas.tabla import Reservas
+from core.listados import filtrar_listado
 from backend.Mesas.tabla import Mesas
 from backend.ServiciosSucursales.tabla import ServiciosSucursales
 from backend.TiposServicio.tabla import TiposServicio
@@ -59,10 +60,10 @@ class ReservaRepository:
         )
 
     @staticmethod
-    def listar(db, id_empresa, id_sucursal, estado):
+    def listar(db, id_empresa, id_sucursal, estado, filtros=None):
         consulta = db.query(Reservas).filter(
             Reservas.id_empresa == id_empresa, Reservas.id_sucursal == id_sucursal
         )
         if estado:
             consulta = consulta.filter(Reservas.estado == estado)
-        return consulta.order_by(Reservas.inicio.desc(), Reservas.id.desc())
+        return filtrar_listado(consulta.order_by(Reservas.inicio.desc(), Reservas.id.desc()), Reservas, filtros)

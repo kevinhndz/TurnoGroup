@@ -42,6 +42,9 @@ class PedidoService:
         ]:
             salida[campo] = str(getattr(pedido, campo))
         if detalle:
+            salida["registrado_por"] = repo.nombre_usuario(db, pedido.id_usuario)
+            mesa = repo.mesa(db, pedido.id_mesa, pedido.id_sucursal) if pedido.id_mesa else None
+            salida["nombre_mesa"] = mesa.nombre if mesa else None
             salida["detalles"] = [
                 {
                     "id_producto": item.id_producto,
@@ -96,8 +99,8 @@ class PedidoService:
             )
             exigir(estado == "Disponible", "La mesa ya no esta disponible", 409)
         productos = {
-            item.id: (item, especial)
-            for item, especial in repo.productos(
+            item.id: item
+            for item in repo.productos(
                 db, {fila.id_producto for fila in json.detalles}, empresa, sucursal
             )
         }
@@ -108,8 +111,8 @@ class PedidoService:
                 "Un producto ya no esta disponible en esta sucursal",
                 409,
             )
-            producto, especial = productos[item.id_producto]
-            precio = moneda(especial if especial is not None else producto.precio)
+            producto = productos[item.id_producto]
+            precio = moneda(producto.precio)
             detalles.append(
                 {
                     "id_producto": producto.id,
@@ -280,10 +283,10 @@ class PedidoService:
         return PedidoService.respuesta(db, look_up)
 
     @staticmethod
-    def listar_service(db, contexto, pagina, limite, estado):
+    def listar_service(db, contexto, pagina, limite, estado, filtros=None):
         empresa, sucursal = alcance(contexto)
         respuesta = paginar(
-            repo.listar(db, empresa, sucursal, estado),
+            repo.listar(db, empresa, sucursal, estado, filtros),
             pagina,
             limite,
             lambda fila: PedidoService.respuesta(db, fila, False),
@@ -318,11 +321,9 @@ class PedidoService:
                     **NuevoProductoRespuesta.model_validate(producto).model_dump(
                         mode="json"
                     ),
-                    "precio_local": str(
-                        especial if especial is not None else producto.precio
-                    ),
+                    "precio_local": str(producto.precio),
                 }
-                for producto, especial in datos["productos"]
+                for producto in datos["productos"]
             ],
             "categorias": [
                 {"id": categoria.id, "nombre": categoria.nombre, "activo": True}

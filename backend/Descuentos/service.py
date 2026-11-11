@@ -35,13 +35,13 @@ class DescuentoService():
         return repo.guardar_nuevo_descuento(db, nuevo_descuento)
 
     @staticmethod
-    def listar_descuentos_service(id_empresa: int, pagina_actual: int, limite: int, db: Session):
+    def listar_descuentos_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, filtros=None):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        total, lista_descuentos = repo.listar_descuentos(db, id_empresa, pagina_actual, limite)
+        total, lista_descuentos = repo.listar_descuentos(db, id_empresa, pagina_actual, limite, filtros=filtros)
         total_paginas = (total + limite - 1) // limite
 
         return {

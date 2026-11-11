@@ -10,6 +10,7 @@ import { camposEmpresa, modulos } from '../../lib/modulos';
 import { dinero } from '../../lib/api';
 import ImportarProductos from './ImportarProductos';
 import TarjetaSuscripcion from './TarjetaSuscripcion';
+import { etiquetaSucursal } from '../../lib/sucursales';
 
 const pasos = [
   'Negocio',
@@ -236,7 +237,10 @@ export default function AltaInicial() {
                   })),
                 )
               }
-              inicial={{ es_principal: registro.sucursales.length === 0 }}
+              inicial={{
+                nombre: registro.negocio?.nombre || '',
+                es_principal: registro.sucursales.length === 0,
+              }}
             />
           )}
           {(paso === 3 || paso === 4) && sucursal && (
@@ -248,7 +252,7 @@ export default function AltaInicial() {
                 >
                   {registro.sucursales.map((item) => (
                     <option key={item.id_local} value={item.id_local}>
-                      {item.nombre}
+                      {etiquetaSucursal(item)}
                     </option>
                   ))}
                 </select>
@@ -775,10 +779,17 @@ function ListaRegistro({
                   (item) =>
                     item.id_local !== edicion.id_local &&
                     item.nombre.toLocaleLowerCase('es') ===
-                      body.nombre.toLocaleLowerCase('es'),
+                      body.nombre.toLocaleLowerCase('es') &&
+                    (singular !== 'sucursal' ||
+                      item.direccion?.trim().toLocaleLowerCase('es') ===
+                        body.direccion?.trim().toLocaleLowerCase('es')),
                 )
               )
-                throw new Error('Ya agregaste un registro con ese nombre.');
+                throw new Error(
+                  singular === 'sucursal'
+                    ? 'Ya agregaste una sucursal con ese nombre y dirección.'
+                    : 'Ya agregaste un registro con ese nombre.',
+                );
               const nuevo = {
                 ...edicion,
                 ...body,

@@ -1,4 +1,5 @@
 'use client';
+import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
 
 import { useState } from 'react';
 import { usarSesion } from './Sesion';
@@ -16,6 +17,7 @@ export default function Disponibilidad() {
   const [aviso, setAviso] = useState('');
   const [busqueda, setBusqueda] = useState('');
   const [pagina, setPagina] = useState(1);
+  const filtros = useFiltrosListado();
   const gerente = sesion.rol_empresa === 'Gerente';
   const editable = gerente || sesion.rol_empresa === 'Administrador';
   const datos = useDatos(async () => {
@@ -36,9 +38,18 @@ export default function Disponibilidad() {
       />
     );
   const resultados =
-    datos.datos?.productos.filter((item) =>
-      item.nombre.toLocaleLowerCase('es').includes(busqueda.toLocaleLowerCase('es')),
-    ) || [];
+    datos.datos?.productos
+      .filter((item) =>
+        item.nombre.toLocaleLowerCase('es').includes(busqueda.toLocaleLowerCase('es')),
+      )
+      .sort((a, b) =>
+        filtros.orden.startsWith('nombre')
+          ? (filtros.orden === 'nombre_desc' ? -1 : 1) *
+            a.nombre.localeCompare(b.nombre, 'es')
+          : filtros.orden === 'antiguos'
+            ? a.id - b.id
+            : b.id - a.id,
+      ) || [];
   const filas = resultados.slice((pagina - 1) * 12, pagina * 12);
   const paginas = Math.max(1, Math.ceil(resultados.length / 12));
 
@@ -75,6 +86,7 @@ export default function Disponibilidad() {
       <Mensaje error={error || datos.error} aviso={aviso} />
       <section className="tg-card tg-table-card">
         <div className="tg-toolbar">
+          <FiltrosListado filtros={filtros} cambiar={() => setPagina(1)} soloOrden />
           <Campo label="Buscar producto">
             <input
               type="search"
@@ -106,8 +118,7 @@ export default function Disponibilidad() {
               <thead>
                 <tr>
                   <th>Producto</th>
-                  <th>Precio maestro</th>
-                  <th>Precio del local</th>
+                  <th>Precio</th>
                   <th>Estado en el local</th>
                   {editable && <th>Acciones</th>}
                 </tr>
@@ -128,14 +139,6 @@ export default function Disponibilidad() {
                         )}
                       </td>
                       <td>{dinero(producto.precio, datos.datos.moneda)}</td>
-                      <td>
-                        {asignacion
-                          ? dinero(
-                              asignacion.precio_especial ?? producto.precio,
-                              datos.datos.moneda,
-                            )
-                          : '—'}
-                      </td>
                       <td>
                         <span
                           className={`tg-status ${asignacion?.disponible && producto.disponible ? 'is-active' : ''}`}
@@ -195,7 +198,8 @@ export default function Disponibilidad() {
       {edicion && (
         <Modal titulo={edicion.nombre} cerrar={() => setEdicion(null)}>
           <p className="tg-muted">
-            Deja vacío el precio especial para utilizar el precio del catálogo maestro.
+            El precio del producto es el mismo en todas las sucursales. El gerente puede
+            cambiarlo desde Productos.
           </p>
           <Formulario
             campos={[
@@ -204,14 +208,6 @@ export default function Disponibilidad() {
                 label: 'Disponible en esta sucursal',
                 type: 'checkbox',
                 valor: true,
-              },
-              {
-                clave: 'precio_especial',
-                label: `Precio especial (${datos.datos.moneda})`,
-                type: 'number',
-                step: '0.01',
-                min: 0,
-                nullable: true,
               },
             ]}
             inicial={edicion.asignacion || {}}

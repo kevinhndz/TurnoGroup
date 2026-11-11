@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { etiquetaSucursal } from '../../lib/sucursales';
+import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
 import { api, listarTodo } from '../../lib/api';
 import { useDatos } from './Datos';
 import { Campo, Mensaje, Modal, Vacio } from './Controles';
@@ -10,6 +12,7 @@ const roles = ['Gerente', 'Administrador', 'Mesero'];
 
 export default function Equipo() {
   const [pagina, setPagina] = useState(1);
+  const filtros = useFiltrosListado();
   const [invitacion, setInvitacion] = useState(false);
   const [seleccionado, setSeleccionado] = useState(null);
   const [error, setError] = useState('');
@@ -17,12 +20,14 @@ export default function Equipo() {
   const [ocupado, setOcupado] = useState(false);
   const datos = useDatos(async () => {
     const [vinculos, invitaciones, sucursales] = await Promise.all([
-      api(`/vinculos-laborales/?pagina_actual=${pagina}&limite=10`),
-      api(`/invitaciones-laborales/?pagina_actual=${pagina}&limite=10`),
+      api(`/vinculos-laborales/?pagina_actual=${pagina}&limite=10&${filtros.parametros}`),
+      api(
+        `/invitaciones-laborales/?pagina_actual=${pagina}&limite=10&${filtros.parametros}`,
+      ),
       listarTodo('/sucursales/'),
     ]);
     return { vinculos, invitaciones, sucursales };
-  }, [pagina]);
+  }, [pagina, filtros.parametros]);
 
   async function abrir(vinculo) {
     setError('');
@@ -79,6 +84,11 @@ export default function Equipo() {
         </button>
       </div>
       <Mensaje error={error || datos.error} aviso={aviso} />
+      <FiltrosListado
+        filtros={filtros}
+        cambiar={() => setPagina(1)}
+        nombre="Buscar empleado por nombre o correo"
+      />
       <div className="tg-card tg-table-card">
         <div className="tg-toolbar">
           <h2>Vínculos laborales</h2>
@@ -86,10 +96,6 @@ export default function Equipo() {
             Actualizar
           </button>
         </div>
-        <p className="tg-table-note">
-          Cada persona se identifica aquí por su número de usuario; el servicio de
-          vínculos todavía no devuelve su nombre.
-        </p>
         {datos.cargando ? (
           <p className="tg-loading-inline" role="status">
             Cargando equipo…
@@ -294,7 +300,7 @@ export default function Equipo() {
                     }
                     onChange={() => asignar(sucursal, tiene)}
                   />
-                  {sucursal.nombre}
+                  {etiquetaSucursal(sucursal)}
                   {!sucursal.activo && ' (desactivada)'}
                 </label>
               );
@@ -373,7 +379,7 @@ function Invitar({ sucursales, terminar }) {
                   )
                 }
               />
-              {item.nombre}
+              {etiquetaSucursal(item)}
             </label>
           ))}
         </div>

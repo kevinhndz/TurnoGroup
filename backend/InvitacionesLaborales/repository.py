@@ -1,3 +1,4 @@
+from core.listados import pagina_listado
 from backend.InvitacionesLaborales.tabla import InvitacionesLaborales, SucursalesInvitacion
 from backend.VinculosLaborales.tabla import VinculosLaborales, AsignacionesSucursales
 from backend.Empresas.tabla import Empresas
@@ -24,9 +25,9 @@ class InvitacionLaboralRepository():
         ).first()
 
     @staticmethod
-    def listar_invitaciones(db, id_empresa, pagina_actual, limite):
+    def listar_invitaciones(db, id_empresa, pagina_actual, limite, filtros=None):
         consulta = db.query(InvitacionesLaborales).filter(InvitacionesLaborales.id_empresa == id_empresa)
-        return consulta.count(), consulta.order_by(InvitacionesLaborales.id).offset((pagina_actual - 1) * limite).limit(limite).all()
+        return pagina_listado(consulta, InvitacionesLaborales, pagina_actual, limite, filtros)
 
     @staticmethod
     def sucursales_invitacion(db, id):
@@ -47,6 +48,14 @@ class InvitacionLaboralRepository():
     @staticmethod
     def buscar_usuario(db, correo):
         return db.query(Usuarios).filter(Usuarios.correo == correo).first()
+
+    @staticmethod
+    def buscar_otra_empresa(db, id_usuario, id_empresa=None):
+        db.query(Usuarios).filter(Usuarios.id == id_usuario).with_for_update().first()
+        consulta = db.query(VinculosLaborales).filter(VinculosLaborales.id_usuario == id_usuario)
+        if id_empresa is not None:
+            consulta = consulta.filter(VinculosLaborales.id_empresa != id_empresa)
+        return consulta.first()
 
     @staticmethod
     def revocar_anteriores(db, correo, id_empresa, ahora):

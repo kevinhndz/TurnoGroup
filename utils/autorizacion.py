@@ -8,6 +8,7 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
 
 RUTAS_CON_PERMISO = {
+    ('GET', '/finanzas/dashboard'),
     ('POST', '/productos/revisar-archivo'),
     ('POST', '/suscripciones/desactivar-cuenta'),
     ('POST', '/suscripciones/tarjetas'),
@@ -17,7 +18,9 @@ RUTAS_CON_PERMISO = {
     ('PATCH', '/suscripciones/renovacion'),
     ('POST', '/suscripciones/comprobantes/registro'),
     ('GET', '/suscripciones/comprobantes/excel'),
+    ('GET', '/suscripciones/comprobantes/pdf'),
     ('GET', '/suscripciones/comprobantes/{id}/pdf'),
+    ('GET', '/suscripciones/comprobantes/{id}/excel'),
     ('GET','/pedidos/operaciones/{clave_operacion}'),
     ('GET', '/bitacora/'),
     ('GET', '/pedidos/mesas'),

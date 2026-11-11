@@ -57,6 +57,8 @@ def test_facturacion_exclusiva_del_gerente(client, db, datos, rol):
     assert client.get('/suscripciones/actual').status_code == 403
     assert client.post('/suscripciones/tarjetas', json=tarjeta()).status_code == 403
     assert client.get('/suscripciones/comprobantes/excel').status_code == 403
+    assert client.get('/suscripciones/comprobantes/pdf').status_code == 403
+    assert client.get('/suscripciones/comprobantes/1/excel').status_code == 403
     assert client.post('/suscripciones/desactivar-cuenta', json={'clave':'x','confirmacion':'DESACTIVAR'}).status_code == 403
 
 
@@ -75,6 +77,33 @@ def test_registro_no_factura_cobros_inexistentes_y_exporta(client, db, datos):
     hoja = load_workbook(BytesIO(xlsx.content)).active
     assert hoja.cell(3,7).value == 0
     assert 'SIN VALIDEZ FISCAL' in hoja['A1'].value
+    historial = client.get('/suscripciones/comprobantes/pdf')
+    assert historial.status_code == 200 and historial.content.startswith(b'%PDF-')
+    individual = client.get(f'/suscripciones/comprobantes/{id}/excel')
+    assert individual.status_code == 200
+    hoja_individual = load_workbook(BytesIO(individual.content)).active
+    assert hoja_individual.max_row == 3
+    assert hoja_individual.cell(3, 1).value == f'TG-PRUEBA-{id:06}'
+
+
+def test_historial_pdf_y_excel_no_incluyen_otra_empresa(client, db, datos, monkeypatch):
+    from backend.Suscripciones import comprobantes
+    ajeno = ComprobantesSuscripcion(id_empresa=datos['otra_empresa'], nombre_empresa='Empresa ajena', concepto='Documento ajeno', periodo_inicio=ahora(), periodo_fin=ahora(), importe=50, detalle='Privado')
+    db.add(ajeno)
+    db.commit()
+    propio = client.post('/suscripciones/comprobantes/registro').json()
+    generador = comprobantes.crear_historial_pdf
+    filas_exportadas = []
+    def revisar(filas):
+        filas_exportadas.extend(item.id for item in filas)
+        return generador(filas)
+    monkeypatch.setattr(comprobantes, 'crear_historial_pdf', revisar)
+    assert client.get('/suscripciones/comprobantes/pdf').status_code == 200
+    assert filas_exportadas == [propio['id']]
+    assert client.get(f'/suscripciones/comprobantes/{ajeno.id}/excel').status_code == 404
+    hoja = load_workbook(BytesIO(client.get('/suscripciones/comprobantes/excel').content)).active
+    assert hoja.max_row == 3
+    assert hoja.cell(3, 1).value == f'TG-PRUEBA-{propio["id"]:06}'
 
 
 def preparar_clave(db, datos):

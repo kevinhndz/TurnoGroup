@@ -24,9 +24,26 @@ function FormularioInvitacion() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [ocupado, setOcupado] = useState(false);
-  const [codigo, setCodigo] = usarCodigoInvitacion();
+  const [codigo] = usarCodigoInvitacion();
   if (sesion.usuario.rol_plataforma === 'Superadministrador')
     return <p>Las invitaciones laborales se aceptan con una cuenta de usuario.</p>;
+  if (sesion.id_empresa)
+    return (
+      <section className="tg-card tg-narrow">
+        <h1>Tu acceso ya está listo</h1>
+        <p>
+          La cuenta <strong>{sesion.usuario.correo}</strong> ya pertenece a una empresa.
+          Puedes entrar directamente a tu panel.
+        </p>
+        <p>
+          Si esta invitación llegó a otro correo, cierra sesión y abre el enlace con esa
+          cuenta.
+        </p>
+        <Link href="/panel" className="tg-button tg-primary">
+          Ir a mi panel
+        </Link>
+      </section>
+    );
   return (
     <section className="tg-card tg-narrow">
       <span className="tg-eyebrow">BIENVENIDO AL EQUIPO</span>
@@ -40,7 +57,6 @@ function FormularioInvitacion() {
         className="tg-form"
         onSubmit={async (event) => {
           event.preventDefault();
-          const codigo = new FormData(event.currentTarget).get('codigo');
           setOcupado(true);
           setError('');
           try {
@@ -62,18 +78,10 @@ function FormularioInvitacion() {
           }
         }}
       >
-        <Campo label="Código de invitación">
-          <input
-            name="codigo"
-            value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
-            autoComplete="off"
-            required
-            minLength={40}
-            maxLength={128}
-          />
-        </Campo>
-        <button className="tg-button tg-primary" disabled={ocupado}>
+        {!codigo && (
+          <Mensaje error="Abre el enlace de la invitación que recibiste por correo para continuar." />
+        )}
+        <button className="tg-button tg-primary" disabled={ocupado || !codigo}>
           {ocupado ? 'Revisando invitación…' : 'Unirme a la empresa'}
         </button>
       </form>
@@ -87,7 +95,7 @@ function RegistroInvitado() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [ocupado, setOcupado] = useState(false);
-  const [codigo, setCodigo] = usarCodigoInvitacion();
+  const [codigo] = usarCodigoInvitacion();
   return (
     <main id="contenido" className="tg-loading">
       <section className="tg-card tg-narrow">
@@ -96,8 +104,8 @@ function RegistroInvitado() {
         </Link>
         <h1>Únete al equipo</h1>
         <p>
-          Crea tu acceso con el código que te envió el gerente. No necesitas registrar un
-          negocio.
+          Escribe tu nombre y crea una contraseña. El enlace del correo ya incluye tu
+          invitación y el rol que te asignó el gerente.
         </p>
         <Mensaje error={error} />
         <form
@@ -122,17 +130,10 @@ function RegistroInvitado() {
             }
           }}
         >
-          <Campo label="Código de invitación">
-            <input
-              name="codigo"
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              required
-              minLength={40}
-              maxLength={128}
-              autoComplete="off"
-            />
-          </Campo>
+          <input type="hidden" name="codigo" value={codigo} />
+          {!codigo && (
+            <Mensaje error="Abre el enlace de la invitación que recibiste por correo para crear tu acceso." />
+          )}
           <Campo label="Tu nombre">
             <input name="nombre" required maxLength={100} autoComplete="name" />
           </Campo>
@@ -146,7 +147,7 @@ function RegistroInvitado() {
               autoComplete="new-password"
             />
           </Campo>
-          <button disabled={ocupado} className="tg-button tg-primary">
+          <button disabled={ocupado || !codigo} className="tg-button tg-primary">
             {ocupado ? 'Creando acceso…' : 'Crear acceso y aceptar invitación'}
           </button>
         </form>

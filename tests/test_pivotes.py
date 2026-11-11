@@ -125,7 +125,7 @@ def test_disponibilidad_producto_en_varias_sucursales(client,db,datos):
     scope={'id_empresa':datos['empresa']}
     ajeno={'id_empresa':datos['otra_empresa']}
     ruta='/disponibilidad-productos/'
-    body={'id_producto':datos['producto'],'precio_especial':'50.00'}
+    body={'id_producto':datos['producto']}
     total_productos=db.query(Productos).count()
     creado=client.post(ruta,params=scope,json=body)
     assert creado.status_code==201,creado.text
@@ -143,15 +143,16 @@ def test_disponibilidad_producto_en_varias_sucursales(client,db,datos):
     for method in ['GET','PATCH','DELETE']:
         kwargs={'json':{'disponible':False}} if method=='PATCH' else {}
         assert client.request(method,detalle,params=ajeno,**kwargs).status_code==403
-    respuesta=client.patch(detalle,params=scope,json={'disponible':False,'precio_especial':None})
-    assert respuesta.status_code==200 and respuesta.json()['precio_especial'] is None
+    respuesta=client.patch(detalle,params=scope,json={'disponible':False})
+    assert respuesta.status_code==200 and respuesta.json()['disponible'] is False
     assert respuesta.json()['disponible'] is False
     assert client.get(ruta,params={**scope,'id_sucursal':datos['sucursal']}).json()['total']==1
     for valor in ['-1','NaN','Infinity','0.001','10000000000']:
         assert client.patch(detalle,params=scope,json={'precio_especial':valor}).status_code==422
     for invalido in [{},{'disponible':None},{'id_producto':datos['otro_producto']}]:
         assert client.patch(detalle,params=scope,json=invalido).status_code==422
-    assert client.patch(detalle,params=scope,json={'disponible':True,'precio_especial':0}).status_code==200
+    assert client.patch(detalle,params=scope,json={'disponible':True}).status_code==200
+    assert client.patch(detalle,params=scope,json={'precio_especial':0}).status_code==422
     assert client.delete(detalle,params=scope).status_code==204
     for method in ['GET','PATCH','DELETE']:
         kwargs={'json':{'disponible':False}} if method=='PATCH' else {}

@@ -1,3 +1,4 @@
+from core.listados import pagina_listado
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from backend.Empresas.tabla import Empresas
@@ -24,12 +25,11 @@ class EmpresaRepository():
         return nueva_empresa
 
     @staticmethod
-    def listar_empresas(db: Session, pagina_actual: int, limite: int, id_empresa=None):
+    def listar_empresas(db: Session, pagina_actual: int, limite: int, id_empresa=None, filtros=None):
         consulta = db.query(Empresas)
         if id_empresa is not None:
             consulta = consulta.filter(Empresas.id == id_empresa)
-        salto = (pagina_actual - 1) * limite
-        return consulta.count(), consulta.order_by(Empresas.id).offset(salto).limit(limite).all()
+        return pagina_listado(consulta, Empresas, pagina_actual, limite, filtros)
 
     @staticmethod
     def buscar_empresa_por_id(db: Session, id: int) -> Empresas | None:

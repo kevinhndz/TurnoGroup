@@ -29,8 +29,7 @@ class DisponibilidadProductoService():
         nueva_disponibilidad_producto = DisponibilidadProductos(
             id_producto=json.id_producto,
             id_sucursal=id_sucursal,
-            disponible=json.disponible,
-            precio_especial=json.precio_especial
+            disponible=json.disponible
         )
         return repo.guardar_nueva_disponibilidad_producto(db, nueva_disponibilidad_producto)
 

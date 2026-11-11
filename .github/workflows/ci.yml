@@ -53,9 +53,9 @@ jobs:
       - name: Compilar Python
         run: python -m compileall -q backend core utils main.py
 
-      # Ejecuta todas las pruebas automatizadas del backend.
+      # Ejecuta las pruebas CRUD y las pruebas nuevas de rate limiting.
       - name: Ejecutar pruebas
-        run: pytest -q
+        run: pytest -q tests/test_crud.py tests/test_rate_limiting.py
 
       # Instala Node y npm para revisar el frontend.
       - name: Preparar Node

@@ -6,25 +6,16 @@ from backend.Sucursales.schema import Revisar_Json_Crear_Sucursal
 from backend.Categorias.schema import Revisar_Json_Nueva_Categoria
 from backend.Productos.schema import Revisar_Json_Nuevo_Producto
 from backend.Descuentos.schema import Revisar_Json_Crear_Descuento
-from backend.ConfiguracionImpuestos.schema import Revisar_Json_Crear_Configuracion_Impuestos
+from backend.ConfiguracionImpuestos.schema import (
+    Revisar_Json_Crear_Configuracion_Impuestos,
+)
 from backend.Suscripciones.schema import Revisar_Json_Tarjeta_Suscripcion
-
 
 
 class Revisar_Json_Nuevo_Usuario(BaseModel):
     clave: SecretStr = Field(min_length=12, max_length=128)
     correo: EmailStr
     nombre: str = Field(min_length=1, max_length=100)
-
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
-
-
-class Revisar_Json_Registro_Negocio(BaseModel):
-    correo: EmailStr
-    clave: SecretStr = Field(min_length=12, max_length=128)
-    nombre_usuario: str = Field(min_length=1, max_length=100)
-    nombre_empresa: str = Field(min_length=4, max_length=45)
-    direccion: str = Field(min_length=5, max_length=255)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -53,8 +44,6 @@ class Revisar_Json_Rol_Plataforma(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-
-
 class ServicioRegistro(BaseModel):
     habilitado: bool = False
     mesas_habilitadas: bool = False
@@ -63,10 +52,12 @@ class ServicioRegistro(BaseModel):
 
 
 class SucursalRegistro(Revisar_Json_Crear_Sucursal):
-    cantidad_mesas: int = Field(default=0,ge=0,le=200)
+    cantidad_mesas: int = Field(default=0, ge=0, le=200)
     id_local: int = Field(gt=0)
     servicios: dict[Literal["comer_aqui", "para_llevar", "domicilio"], ServicioRegistro]
-    pagos: list[Literal["efectivo", "transferencia", "tarjeta"]] = Field(min_length=1, max_length=3)
+    pagos: list[Literal["efectivo", "transferencia", "tarjeta"]] = Field(
+        min_length=1, max_length=3
+    )
 
 
 class CategoriaRegistro(Revisar_Json_Nueva_Categoria):
@@ -85,6 +76,8 @@ class Revisar_Json_Registro_Negocio(BaseModel):
     sucursales: list[SucursalRegistro] = Field(min_length=1, max_length=100)
     categorias: list[CategoriaRegistro] = Field(default_factory=list, max_length=500)
     productos: list[ProductoRegistro] = Field(default_factory=list, max_length=1000)
-    descuentos: list[Revisar_Json_Crear_Descuento] = Field(default_factory=list, max_length=100)
+    descuentos: list[Revisar_Json_Crear_Descuento] = Field(
+        default_factory=list, max_length=100
+    )
     impuesto: Revisar_Json_Crear_Configuracion_Impuestos | None = None
     model_config = ConfigDict(extra="forbid")

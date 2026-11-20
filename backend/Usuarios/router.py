@@ -12,33 +12,31 @@ from backend.Usuarios.schema import (
     Revisar_Json_Registro_Negocio,
 )
 from backend.Usuarios.service import UsuarioService as service
-from backend.Usuarios.schema import Revisar_Json_Registro_Negocio
 from backend.Sesiones.schema import RespuestaSesion
 from core.schema import RespuestaPaginada
 
+router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
-router = APIRouter(
-    prefix="/usuarios",
-    tags=["Usuarios"]
+
+@router.post(
+    "/",
+    response_model=NuevoUsuarioRespuesta,
+    status_code=201,
+    dependencies=[Depends(revisar_solicitud_sesion)],
 )
-
-
-@router.post("/", response_model=NuevoUsuarioRespuesta, status_code=201,
-             dependencies=[Depends(revisar_solicitud_sesion)])
-def crear_usuario(json: Revisar_Json_Nuevo_Usuario, db: Session = Depends(abrir_puerta_bd)):
+def crear_usuario(
+    json: Revisar_Json_Nuevo_Usuario, db: Session = Depends(abrir_puerta_bd)
+):
     return service.crear_usuario_service(json, db)
-
-
-@router.post("/registro-negocio", status_code=201)
-def registrar_negocio(json: Revisar_Json_Registro_Negocio, db: Session = Depends(abrir_puerta_bd)):
-    return service.registrar_negocio_service(json, db)
 
 
 @router.get("/", response_model=RespuestaPaginada[NuevoUsuarioRespuesta])
 def ver_usuarios(
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
-    db: Session = Depends(abrir_puerta_bd), filtros=Depends(filtros_listado)):
+    db: Session = Depends(abrir_puerta_bd),
+    filtros=Depends(filtros_listado),
+):
     return service.listar_usuarios_service(pagina_actual, limite, db, filtros=filtros)
 
 
@@ -52,19 +50,23 @@ def editar_usuario(
     id: Annotated[int, Path(gt=0)],
     json: Revisar_Json_Editar_Usuario,
     db: Session = Depends(abrir_puerta_bd),
-    sesion=Depends(obtener_sesion)
+    sesion=Depends(obtener_sesion),
 ):
     if sesion[1].id != id and sesion[1].rol_plataforma != "Superadministrador":
         raise HTTPException(403, "Solo puedes editar tu propio perfil")
-    if "estado" in json.model_fields_set and sesion[1].rol_plataforma != "Superadministrador":
+    if (
+        "estado" in json.model_fields_set
+        and sesion[1].rol_plataforma != "Superadministrador"
+    ):
         raise HTTPException(403, "El estado requiere permisos de administracion")
     return service.editar_usuario_service(json, id, db)
 
 
 @router.post("/{id}/desactivar", response_model=NuevoUsuarioRespuesta)
 def desactivar_usuario(
-    id: Annotated[int, Path(gt=0)], db: Session = Depends(abrir_puerta_bd),
-    sesion=Depends(obtener_sesion)
+    id: Annotated[int, Path(gt=0)],
+    db: Session = Depends(abrir_puerta_bd),
+    sesion=Depends(obtener_sesion),
 ):
     if sesion[1].id != id and sesion[1].rol_plataforma != "Superadministrador":
         raise HTTPException(403, "Solo puedes desactivar tu propio perfil")
@@ -72,16 +74,23 @@ def desactivar_usuario(
 
 
 @router.patch("/{id}/rol-plataforma", response_model=NuevoUsuarioRespuesta)
-def cambiar_rol_plataforma(id: Annotated[int, Path(gt=0)], json: Revisar_Json_Rol_Plataforma,
-                           db: Session = Depends(abrir_puerta_bd)):
+def cambiar_rol_plataforma(
+    id: Annotated[int, Path(gt=0)],
+    json: Revisar_Json_Rol_Plataforma,
+    db: Session = Depends(abrir_puerta_bd),
+):
     return service.cambiar_rol_plataforma_service(json, id, db)
 
 
 @router.post("/registro-negocio", status_code=201, response_model=RespuestaSesion)
-def completar_registro_negocio(json: Revisar_Json_Registro_Negocio,
-                               response: Response,
-                               db: Session = Depends(abrir_puerta_bd)):
+def completar_registro_negocio(
+    json: Revisar_Json_Registro_Negocio,
+    response: Response,
+    db: Session = Depends(abrir_puerta_bd),
+):
     from backend.Sesiones.router import poner_cookie
+
     respuesta, token, vencimiento = service.registrar_negocio_service(json, db)
+    # Guardo el token solo en la cookie para que JavaScript no pueda leerlo.
     poner_cookie(response, token, vencimiento)
     return respuesta

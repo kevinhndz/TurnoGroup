@@ -8,6 +8,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class GuardiaSeguridad(BaseSettings):
 
     DATABASE_URL: str
+    # Puedo indicar otra CA si el proveedor cambia su certificado.
+    DATABASE_SSL_ROOT_CERT: str = ""
     ALGORITHM: Literal["HS256"] = "HS256"
     ALTA_PUBLICA_HABILITADA: bool = True
     COOKIE_SEGURA: bool = True
@@ -64,13 +66,3 @@ if rama_pruebas:
         raise RuntimeError(
             "La rama de pruebas solo puede usar PostgreSQL local de pruebas"
         )
-
-
-"""
-
-Pydantic con BaseSettings actua como un contrato estricto: si falta un dato o viene mal tipeado por error humano, la app se niega a iniciar 
-y te dice exactamente que falta. Garantiza que si el sistema arranco, tenemos 100% de seguridad de que la configuracion es correcta.
-
-Evita que al arrancar hayan problemas porque falto "algo" ese "algo" pasa por revision 
-
-"""

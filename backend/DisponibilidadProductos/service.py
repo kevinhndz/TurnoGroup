@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from backend.DisponibilidadProductos.repository import DisponibilidadProductoRepository as repo
+from backend.DisponibilidadProductos.repository import (
+    DisponibilidadProductoRepository as repo,
+)
 from backend.DisponibilidadProductos.schema import (
     Revisar_Json_Crear_Disponibilidad_Producto,
     Revisar_Json_Editar_Disponibilidad_Producto,
@@ -11,30 +13,43 @@ from backend.Sucursales.repository import SucursalRespository as repo_sucursal
 from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 
 
-class DisponibilidadProductoService():
+class DisponibilidadProductoService:
 
     @staticmethod
-    def crear_disponibilidad_producto_service(json: Revisar_Json_Crear_Disponibilidad_Producto, id_empresa: int, db: Session, id_sucursal: int):
+    def crear_disponibilidad_producto_service(
+        json: Revisar_Json_Crear_Disponibilidad_Producto,
+        id_empresa: int,
+        db: Session,
+        id_sucursal: int,
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro el recurso")
-        producto = repo_producto.buscar_producto_por_id(db, json.id_producto, id_empresa)
+        producto = repo_producto.buscar_producto_por_id(
+            db, json.id_producto, id_empresa
+        )
         if producto is None:
             raise RecursoNoEncontradoError("No se encontro el recurso")
 
         look_up = repo.buscar_disponibilidad_producto(db, json.id_producto, id_sucursal)
         if look_up is not None:
-            raise RecursoDuplicadoError("Ya existe esta asignacion de producto y sucursal")
+            raise RecursoDuplicadoError(
+                "Ya existe esta asignacion de producto y sucursal"
+            )
 
         nueva_disponibilidad_producto = DisponibilidadProductos(
             id_producto=json.id_producto,
             id_sucursal=id_sucursal,
-            disponible=json.disponible
+            disponible=json.disponible,
         )
-        return repo.guardar_nueva_disponibilidad_producto(db, nueva_disponibilidad_producto)
+        return repo.guardar_nueva_disponibilidad_producto(
+            db, nueva_disponibilidad_producto
+        )
 
     @staticmethod
-    def listar_disponibilidad_productos_service(id_sucursal: int, id_empresa: int, pagina_actual: int, limite: int, db: Session):
+    def listar_disponibilidad_productos_service(
+        id_sucursal: int, id_empresa: int, pagina_actual: int, limite: int, db: Session
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro el recurso")
@@ -48,11 +63,13 @@ class DisponibilidadProductoService():
             "pagina_actual": pagina_actual,
             "limite": limite,
             "total_paginas": total_paginas,
-            "data": lista_disponibilidad_productos
+            "data": lista_disponibilidad_productos,
         }
 
     @staticmethod
-    def ver_disponibilidad_producto_service(id_producto: int, id_sucursal: int, id_empresa: int, db: Session):
+    def ver_disponibilidad_producto_service(
+        id_producto: int, id_sucursal: int, id_empresa: int, db: Session
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro el recurso")
@@ -66,7 +83,13 @@ class DisponibilidadProductoService():
         return look_up
 
     @staticmethod
-    def editar_disponibilidad_producto_service(json: Revisar_Json_Editar_Disponibilidad_Producto, id_producto: int, id_sucursal: int, id_empresa: int, db: Session):
+    def editar_disponibilidad_producto_service(
+        json: Revisar_Json_Editar_Disponibilidad_Producto,
+        id_producto: int,
+        id_sucursal: int,
+        id_empresa: int,
+        db: Session,
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro el recurso")
@@ -79,9 +102,13 @@ class DisponibilidadProductoService():
 
         cambios = json.model_dump(exclude_unset=True)
         if not cambios:
-            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+            raise HTTPException(
+                status_code=422, detail="Debes enviar al menos un campo para editar"
+            )
         if "disponible" in cambios and cambios["disponible"] is None:
-            raise HTTPException(status_code=422, detail="El campo disponible no acepta null")
+            raise HTTPException(
+                status_code=422, detail="El campo disponible no acepta null"
+            )
         for campo, valor in cambios.items():
             setattr(look_up, campo, valor)
         db.commit()
@@ -89,7 +116,9 @@ class DisponibilidadProductoService():
         return look_up
 
     @staticmethod
-    def retirar_disponibilidad_producto_service(id_producto: int, id_sucursal: int, id_empresa: int, db: Session):
+    def retirar_disponibilidad_producto_service(
+        id_producto: int, id_sucursal: int, id_empresa: int, db: Session
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro el recurso")

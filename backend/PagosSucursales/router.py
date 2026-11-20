@@ -11,7 +11,6 @@ from backend.PagosSucursales.schema import (
 from backend.PagosSucursales.service import PagoSucursalService as service
 from core.schema import RespuestaPaginada
 
-
 router = APIRouter(prefix="/pagos-sucursales", tags=["PagosSucursales"])
 
 
@@ -20,7 +19,7 @@ def crear_pago_sucursal(
     json: Revisar_Json_Crear_Pago_Sucursal,
     id_empresa: int = Depends(obtener_empresa),
     id_sucursal: int = Depends(obtener_sucursal),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
     return service.crear_pago_sucursal_service(json, id_empresa, db, id_sucursal)
 
@@ -32,7 +31,7 @@ def ver_pagos_sucursales(
     solo_habilitados: bool = True,
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
     return service.listar_pagos_sucursales_service(
         id_sucursal, id_empresa, solo_habilitados, pagina_actual, limite, db
@@ -44,9 +43,11 @@ def ver_pago_sucursal(
     id_sucursal: Annotated[int, Path(gt=0)],
     id_metodo_pago: Annotated[int, Path(gt=0)],
     id_empresa: int = Depends(obtener_empresa),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
-    return service.ver_pago_sucursal_service(id_sucursal, id_metodo_pago, id_empresa, db)
+    return service.ver_pago_sucursal_service(
+        id_sucursal, id_metodo_pago, id_empresa, db
+    )
 
 
 @router.patch("/{id_sucursal}/{id_metodo_pago}", response_model=RespuestaPagoSucursal)
@@ -55,16 +56,22 @@ def editar_pago_sucursal(
     id_metodo_pago: Annotated[int, Path(gt=0)],
     json: Revisar_Json_Editar_Pago_Sucursal,
     id_empresa: int = Depends(obtener_empresa),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
-    return service.editar_pago_sucursal_service(json, id_sucursal, id_metodo_pago, id_empresa, db)
+    return service.editar_pago_sucursal_service(
+        json, id_sucursal, id_metodo_pago, id_empresa, db
+    )
 
 
-@router.post("/{id_sucursal}/{id_metodo_pago}/desactivar", response_model=RespuestaPagoSucursal)
+@router.post(
+    "/{id_sucursal}/{id_metodo_pago}/desactivar", response_model=RespuestaPagoSucursal
+)
 def desactivar_pago_sucursal(
     id_sucursal: Annotated[int, Path(gt=0)],
     id_metodo_pago: Annotated[int, Path(gt=0)],
     id_empresa: int = Depends(obtener_empresa),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
-    return service.desactivar_pago_sucursal_service(id_sucursal, id_metodo_pago, id_empresa, db)
+    return service.desactivar_pago_sucursal_service(
+        id_sucursal, id_metodo_pago, id_empresa, db
+    )

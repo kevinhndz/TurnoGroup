@@ -3,11 +3,12 @@
 Revision ID: 32c0a1110003
 Revises: 32c0a1110002
 """
+
 from alembic import op
 import sqlalchemy as sa
 
-revision = '32c0a1110003'
-down_revision = '32c0a1110002'
+revision = "32c0a1110003"
+down_revision = "32c0a1110002"
 branch_labels = None
 depends_on = None
 

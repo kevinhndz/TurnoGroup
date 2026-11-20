@@ -6,9 +6,10 @@ UBICACION_ALMACEN = traer.DATABASE_URL
 
 
 motor = create_engine(UBICACION_ALMACEN)
-llaves = sessionmaker(bind = motor)
+llaves = sessionmaker(bind=motor)
 
-class miclaseBase (DeclarativeBase):
+
+class miclaseBase(DeclarativeBase):
     pass
 
 
@@ -19,5 +20,3 @@ def abrir_puerta_bd():
         yield db
     finally:
         db.close()
-
-

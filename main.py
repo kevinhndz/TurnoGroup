@@ -32,14 +32,21 @@ from backend.Reservas.router import router as routerreservas
 from backend.Finanzas.router import router as routerfinanzas
 from backend.Suscripciones.router import router as routersuscripciones
 
-app = FastAPI(dependencies=[Depends(autorizar_ruta)], docs_url=None, redoc_url=None, openapi_url=None, responses={
-    404: {"model": RespuestaError, "description": "Registro no encontrado"},
-    409: {"model": RespuestaError, "description": "Registro duplicado"},
-    422: {"model": RespuestaError, "description": "Datos invalidos"},
-})
+app = FastAPI(
+    dependencies=[Depends(autorizar_ruta)],
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+    responses={
+        404: {"model": RespuestaError, "description": "Registro no encontrado"},
+        409: {"model": RespuestaError, "description": "Registro duplicado"},
+        422: {"model": RespuestaError, "description": "Datos invalidos"},
+    },
+)
 
 
 from backend.Bitacora.router import router as routerbitacora
+
 app.include_router(routerbitacora)
 app.include_router(routerpedidos)
 app.include_router(routercajas)
@@ -66,10 +73,12 @@ app.include_router(routerpagossucursales.router)
 
 app.include_router(routerdisponibilidadproductos.router)
 
+
 @app.get("/salud")
 def salud(db: Session = Depends(abrir_puerta_bd)):
     db.execute(text("SELECT 1"))
     return {"servicio": "disponible", "base_datos": "conectada"}
+
 
 eg.directorio(app)
 
@@ -82,10 +91,12 @@ def esquema_privado():
 @app.get("/docs", include_in_schema=False)
 def documentacion_privada():
     from fastapi.openapi.docs import get_swagger_ui_html
+
     return get_swagger_ui_html(openapi_url="/openapi.json", title="Turno Group")
 
 
 @app.get("/redoc", include_in_schema=False)
 def redoc_privado():
     from fastapi.openapi.docs import get_redoc_html
+
     return get_redoc_html(openapi_url="/openapi.json", title="Turno Group")

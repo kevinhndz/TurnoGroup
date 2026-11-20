@@ -15,4 +15,6 @@ class BitacoraRepository:
         )
         if sucursal is not None or empresa is None:
             consulta = consulta.filter(Bitacora.id_sucursal == sucursal)
-        return filtrar_listado(consulta.order_by(Bitacora.id.desc()), Bitacora, filtros, [Usuarios.nombre])
+        return filtrar_listado(
+            consulta.order_by(Bitacora.id.desc()), Bitacora, filtros, [Usuarios.nombre]
+        )

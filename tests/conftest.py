@@ -24,34 +24,57 @@ from backend.MetodosPago.tabla import MetodosPago
 def db():
     url = os.environ.get("TEST_DATABASE_URL", "sqlite://")
     from sqlalchemy.engine import make_url
+
     destino = make_url(url)
-    if not url.startswith("sqlite") and (destino.host not in ("127.0.0.1", "localhost") or not (destino.database or "").endswith("_pytest")):
-        raise RuntimeError("Las pruebas solo pueden usar una base local terminada en _pytest")
+    if not url.startswith("sqlite") and (
+        destino.host not in ("127.0.0.1", "localhost")
+        or not (destino.database or "").endswith("_pytest")
+    ):
+        raise RuntimeError(
+            "Las pruebas solo pueden usar una base local terminada en _pytest"
+        )
     opciones = {}
     if url.startswith("sqlite"):
-        opciones = {"connect_args": {"check_same_thread": False}, "poolclass": StaticPool}
+        opciones = {
+            "connect_args": {"check_same_thread": False},
+            "poolclass": StaticPool,
+        }
     motor = create_engine(url, **opciones)
     if url.startswith("sqlite"):
+
         @event.listens_for(motor, "connect")
         def activar_claves(dbapi_connection, connection_record):
             dbapi_connection.execute("PRAGMA foreign_keys=ON")
+
     miclaseBase.metadata.create_all(motor)
     conexion = motor.connect()
     transaccion = conexion.begin()
     sesion = Session(bind=conexion, join_transaction_mode="create_savepoint")
     try:
         if sesion.query(TiposServicio).count() == 0:
-            sesion.add_all([
-                TiposServicio(clave_concepto="comer_aqui", nombre_visible="Comer aqui"),
-                TiposServicio(clave_concepto="para_llevar", nombre_visible="Para llevar"),
-                TiposServicio(clave_concepto="domicilio", nombre_visible="Domicilio"),
-            ])
+            sesion.add_all(
+                [
+                    TiposServicio(
+                        clave_concepto="comer_aqui", nombre_visible="Comer aqui"
+                    ),
+                    TiposServicio(
+                        clave_concepto="para_llevar", nombre_visible="Para llevar"
+                    ),
+                    TiposServicio(
+                        clave_concepto="domicilio", nombre_visible="Domicilio"
+                    ),
+                ]
+            )
         if sesion.query(MetodosPago).count() == 0:
-            sesion.add_all([
-                MetodosPago(clave_concepto="efectivo", nombre_visible="Efectivo"),
-                MetodosPago(clave_concepto="transferencia", nombre_visible="Transferencia"),
-                MetodosPago(clave_concepto="tarjeta", nombre_visible="Tarjeta"),
-            ])
+            sesion.add_all(
+                [
+                    MetodosPago(clave_concepto="efectivo", nombre_visible="Efectivo"),
+                    MetodosPago(
+                        clave_concepto="transferencia", nombre_visible="Transferencia"
+                    ),
+                    MetodosPago(clave_concepto="tarjeta", nombre_visible="Tarjeta"),
+                ]
+            )
         sesion.commit()
         yield sesion
     finally:
@@ -64,21 +87,34 @@ def db():
 @pytest.fixture
 def client(db, datos, monkeypatch, request):
     from core.config import revision
+
     monkeypatch.setattr(revision, "COOKIE_SEGURA", False)
     monkeypatch.setattr(revision, "ALTA_PUBLICA_HABILITADA", True)
-    modulo = request.node.callspec.params.get("modulo") if hasattr(request.node, "callspec") else None
+    modulo = (
+        request.node.callspec.params.get("modulo")
+        if hasattr(request.node, "callspec")
+        else None
+    )
     if modulo in ("usuarios", "empresas"):
-        db.get(Usuarios, datos["usuario_autorizado"]).rol_plataforma = "Superadministrador"
+        db.get(Usuarios, datos["usuario_autorizado"]).rol_plataforma = (
+            "Superadministrador"
+        )
         db.commit()
+
     def abrir_base_pruebas():
         try:
             yield db
         finally:
             db.rollback()
+
     app.dependency_overrides[abrir_puerta_bd] = abrir_base_pruebas
     try:
-        with TestClient(app, headers={"X-Solicitud":"TurnoGroup"}) as cliente:
-            cliente.cookies.set("sesion_turnogroup", "token-local-pruebas-autorizacion", domain="testserver.local")
+        with TestClient(app, headers={"X-Solicitud": "TurnoGroup"}) as cliente:
+            cliente.cookies.set(
+                "sesion_turnogroup",
+                "token-local-pruebas-autorizacion",
+                domain="testserver.local",
+            )
             yield cliente
     finally:
         app.dependency_overrides.clear()
@@ -86,36 +122,80 @@ def client(db, datos, monkeypatch, request):
 
 @pytest.fixture
 def datos(db):
-    empresas = [Empresas(nombre="Empresa de prueba " + str(i), tipo_negocio="Otro",
-                         codigo_pais="HN", codigo_moneda="HNL", zona_horaria="America/Tegucigalpa") for i in range(2)]
+    empresas = [
+        Empresas(
+            nombre="Empresa de prueba " + str(i),
+            tipo_negocio="Otro",
+            codigo_pais="HN",
+            codigo_moneda="HNL",
+            zona_horaria="America/Tegucigalpa",
+        )
+        for i in range(2)
+    ]
     db.add_all(empresas)
     db.flush()
-    sucursales = [Sucursales(id_empresa=empresas[i].id, nombre="Local " + str(i), direccion="Direccion de prueba") for i in range(2)]
-    categorias = [Categorias(id_empresa=empresas[i].id, nombre="Categoria " + str(i)) for i in range(2)]
+    sucursales = [
+        Sucursales(
+            id_empresa=empresas[i].id,
+            nombre="Local " + str(i),
+            direccion="Direccion de prueba",
+        )
+        for i in range(2)
+    ]
+    categorias = [
+        Categorias(id_empresa=empresas[i].id, nombre="Categoria " + str(i))
+        for i in range(2)
+    ]
     usuario = Usuarios(nombre="Persona de prueba", correo="persona@example.com")
     db.add_all(sucursales + categorias + [usuario])
     db.flush()
-    productos = [Productos(id_empresa=empresas[i].id, id_categoria=categorias[i].id, nombre="Producto " + str(i), precio=75) for i in range(2)]
+    productos = [
+        Productos(
+            id_empresa=empresas[i].id,
+            id_categoria=categorias[i].id,
+            nombre="Producto " + str(i),
+            precio=75,
+        )
+        for i in range(2)
+    ]
     db.add_all(productos)
     from datetime import datetime, timedelta
     from backend.VinculosLaborales.tabla import VinculosLaborales
     from backend.Sesiones.tabla import Sesiones
     from utils.token import proteger_token_sesion
+
     autorizado = Usuarios(nombre="Gerente de pruebas", correo="gerente@example.com")
     db.add(autorizado)
     db.flush()
-    vinculo = VinculosLaborales(id_usuario=autorizado.id, id_empresa=empresas[0].id, rol="Gerente")
+    vinculo = VinculosLaborales(
+        id_usuario=autorizado.id, id_empresa=empresas[0].id, rol="Gerente"
+    )
     db.add(vinculo)
     db.flush()
-    sesion = Sesiones(id_usuario=autorizado.id, id_vinculo_laboral=vinculo.id, id_sucursal=sucursales[0].id,
-                      token_protegido=proteger_token_sesion("token-local-pruebas-autorizacion"),
-                      fecha_inicio=datetime.utcnow(), vencimiento=datetime.utcnow()+timedelta(hours=8))
+    sesion = Sesiones(
+        id_usuario=autorizado.id,
+        id_vinculo_laboral=vinculo.id,
+        id_sucursal=sucursales[0].id,
+        token_protegido=proteger_token_sesion("token-local-pruebas-autorizacion"),
+        fecha_inicio=datetime.utcnow(),
+        vencimiento=datetime.utcnow() + timedelta(hours=8),
+    )
     db.add(sesion)
     from backend.Suscripciones.tabla import Suscripciones
+
     db.add_all([Suscripciones(id_empresa=empresa.id) for empresa in empresas])
     db.commit()
-    return {"usuario_autorizado": autorizado.id, "vinculo": vinculo.id, "sesion": sesion.id, "empresa": empresas[0].id, "otra_empresa": empresas[1].id,
-            "sucursal": sucursales[0].id, "otra_sucursal": sucursales[1].id,
-            "categoria": categorias[0].id, "otra_categoria": categorias[1].id,
-            "producto": productos[0].id, "otro_producto": productos[1].id,
-            "usuario": usuario.id}
+    return {
+        "usuario_autorizado": autorizado.id,
+        "vinculo": vinculo.id,
+        "sesion": sesion.id,
+        "empresa": empresas[0].id,
+        "otra_empresa": empresas[1].id,
+        "sucursal": sucursales[0].id,
+        "otra_sucursal": sucursales[1].id,
+        "categoria": categorias[0].id,
+        "otra_categoria": categorias[1].id,
+        "producto": productos[0].id,
+        "otro_producto": productos[1].id,
+        "usuario": usuario.id,
+    }

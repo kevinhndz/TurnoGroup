@@ -32,9 +32,12 @@ def ver_mesas(
     id_empresa: int = Depends(obtener_empresa),
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
-    db: Session = Depends(abrir_puerta_bd), filtros=Depends(filtros_listado)):
+    db: Session = Depends(abrir_puerta_bd),
+    filtros=Depends(filtros_listado),
+):
     return service.listar_mesas_service(
-        id_sucursal, pagina_actual, limite, id_empresa, db, filtros=filtros)
+        id_sucursal, pagina_actual, limite, id_empresa, db, filtros=filtros
+    )
 
 
 @router.post("/preparar")

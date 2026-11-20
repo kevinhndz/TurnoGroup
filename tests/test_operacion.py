@@ -107,17 +107,30 @@ def test_cobro_cierra_sin_entrega_para_cada_rol(client, db, datos, operacion, ro
     assert creado.json()["fecha_entrega"] is None
     pendiente = client.post("/pedidos/", json=pedido(datos, operacion)).json()
     assert pendiente["estado"] == "Abierto"
-    cobrado = client.post(f'/pedidos/{pendiente["id"]}/cobrar', json={"id_metodo_pago": operacion["pago"]})
+    cobrado = client.post(
+        f'/pedidos/{pendiente["id"]}/cobrar', json={"id_metodo_pago": operacion["pago"]}
+    )
     assert cobrado.status_code == 200, cobrado.text
     assert cobrado.json()["estado"] == "Cerrado"
     assert cobrado.json()["fecha_entrega"] is None
-    assert client.post(f'/pedidos/{pendiente["id"]}/cobrar', json={"id_metodo_pago": operacion["pago"]}).status_code == 409
+    assert (
+        client.post(
+            f'/pedidos/{pendiente["id"]}/cobrar',
+            json={"id_metodo_pago": operacion["pago"]},
+        ).status_code
+        == 409
+    )
 
 
 @pytest.mark.parametrize("campo", ["cliente", "telefono"])
 @pytest.mark.parametrize("valor", [None, "", "   "])
 def test_pedido_requiere_nombre_y_telefono(client, db, datos, operacion, campo, valor):
-    assert client.post("/pedidos/", json=pedido(datos, operacion, **{campo: valor})).status_code == 422
+    assert (
+        client.post(
+            "/pedidos/", json=pedido(datos, operacion, **{campo: valor})
+        ).status_code
+        == 422
+    )
     assert client.get("/pedidos/").json()["total"] == 0
 
 
@@ -470,7 +483,12 @@ def test_alta_negocio_revierte_todo_si_falla_ultimo_paso(
         "productos": [{"nombre": "Producto inicial", "precio": 45, "sucursales": [1]}],
     }
     client.cookies.clear()
-    cuerpo["tarjeta_suscripcion"] = {"tarjeta_prueba":"visa", "titular":"Propietario nuevo", "mes":12, "anio":2099}
+    cuerpo["tarjeta_suscripcion"] = {
+        "tarjeta_prueba": "visa",
+        "titular": "Propietario nuevo",
+        "mes": 12,
+        "anio": 2099,
+    }
     assert client.post("/usuarios/registro-negocio", json=cuerpo).status_code == 422
     assert db.query(Empresas).count() == empresas
     assert db.query(Usuarios).count() == usuarios

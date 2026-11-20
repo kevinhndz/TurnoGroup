@@ -16,9 +16,12 @@ def dashboard(
     solo_sucursal: bool = True,
     desde: date | None = None,
     hasta: date | None = None,
-    contexto=Depends(obtener_contexto), db: Session = Depends(abrir_puerta_bd),
+    contexto=Depends(obtener_contexto),
+    db: Session = Depends(abrir_puerta_bd),
 ):
-    return service.dashboard_service(db, contexto, periodo, anio, solo_sucursal, desde, hasta)
+    return service.dashboard_service(
+        db, contexto, periodo, anio, solo_sucursal, desde, hasta
+    )
 
 
 @router.get("/ventas")

@@ -11,10 +11,15 @@ from backend.Sucursales.repository import SucursalRespository as repo_sucursal
 from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 
 
-class ServicioSucursalService():
+class ServicioSucursalService:
 
     @staticmethod
-    def crear_servicio_sucursal_service(json: Revisar_Json_Crear_Servicio_Sucursal, id_empresa: int, db: Session, id_sucursal: int):
+    def crear_servicio_sucursal_service(
+        json: Revisar_Json_Crear_Servicio_Sucursal,
+        id_empresa: int,
+        db: Session,
+        id_sucursal: int,
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
@@ -25,14 +30,24 @@ class ServicioSucursalService():
 
         look_up = repo.buscar_servicio_sucursal(db, id_sucursal, json.id_tipo_servicio)
         if look_up is not None:
-            raise RecursoDuplicadoError("La opcion ya esta configurada en esta sucursal")
+            raise RecursoDuplicadoError(
+                "La opcion ya esta configurada en esta sucursal"
+            )
 
-        if opcion.clave_concepto != "comer_aqui" and (json.mesas_habilitadas or json.reservas_habilitadas):
-            raise HTTPException(status_code=422, detail="Solo Comer aqui permite mesas y reservas")
+        if opcion.clave_concepto != "comer_aqui" and (
+            json.mesas_habilitadas or json.reservas_habilitadas
+        ):
+            raise HTTPException(
+                status_code=422, detail="Solo Comer aqui permite mesas y reservas"
+            )
         if json.mesas_habilitadas and not json.habilitado:
-            raise HTTPException(status_code=422, detail="Debes habilitar el servicio para usar mesas")
+            raise HTTPException(
+                status_code=422, detail="Debes habilitar el servicio para usar mesas"
+            )
         if json.reservas_habilitadas and not json.mesas_habilitadas:
-            raise HTTPException(status_code=422, detail="Las reservas requieren mesas habilitadas")
+            raise HTTPException(
+                status_code=422, detail="Las reservas requieren mesas habilitadas"
+            )
 
         nuevo_servicio_sucursal = ServiciosSucursales(
             id_sucursal=id_sucursal,
@@ -45,8 +60,12 @@ class ServicioSucursalService():
 
     @staticmethod
     def listar_servicios_sucursales_service(
-        id_sucursal: int, id_empresa: int, solo_habilitados: bool,
-        pagina_actual: int, limite: int, db: Session
+        id_sucursal: int,
+        id_empresa: int,
+        solo_habilitados: bool,
+        pagina_actual: int,
+        limite: int,
+        db: Session,
     ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
@@ -61,25 +80,12 @@ class ServicioSucursalService():
             "pagina_actual": pagina_actual,
             "limite": limite,
             "total_paginas": total_paginas,
-            "data": lista_servicios_sucursales
+            "data": lista_servicios_sucursales,
         }
 
     @staticmethod
-    def ver_servicio_sucursal_service(id_sucursal: int, id_tipo_servicio: int, id_empresa: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
-        if sucursal is None:
-            raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
-
-        look_up = repo.buscar_servicio_sucursal(db, id_sucursal, id_tipo_servicio)
-        if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la configuracion de esta sucursal")
-
-        return look_up
-
-    @staticmethod
-    def editar_servicio_sucursal_service(
-        json: Revisar_Json_Editar_Servicio_Sucursal, id_sucursal: int,
-        id_tipo_servicio: int, id_empresa: int, db: Session
+    def ver_servicio_sucursal_service(
+        id_sucursal: int, id_tipo_servicio: int, id_empresa: int, db: Session
     ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
@@ -87,27 +93,63 @@ class ServicioSucursalService():
 
         look_up = repo.buscar_servicio_sucursal(db, id_sucursal, id_tipo_servicio)
         if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la configuracion de esta sucursal")
+            raise RecursoNoEncontradoError(
+                "No se encontro la configuracion de esta sucursal"
+            )
+
+        return look_up
+
+    @staticmethod
+    def editar_servicio_sucursal_service(
+        json: Revisar_Json_Editar_Servicio_Sucursal,
+        id_sucursal: int,
+        id_tipo_servicio: int,
+        id_empresa: int,
+        db: Session,
+    ):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
+        if sucursal is None:
+            raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
+
+        look_up = repo.buscar_servicio_sucursal(db, id_sucursal, id_tipo_servicio)
+        if look_up is None:
+            raise RecursoNoEncontradoError(
+                "No se encontro la configuracion de esta sucursal"
+            )
 
         cambios = json.model_dump(exclude_unset=True)
         if not cambios:
-            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+            raise HTTPException(
+                status_code=422, detail="Debes enviar al menos un campo para editar"
+            )
         for campo, valor in cambios.items():
             if valor is None:
-                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
+                raise HTTPException(
+                    status_code=422, detail="El campo " + campo + " no acepta null"
+                )
         opcion = repo_opcion.buscar_tipo_servicio_por_id(db, id_tipo_servicio)
         if opcion is None:
             raise RecursoNoEncontradoError("No se encontro la opcion del sistema")
         habilitado = cambios.get("habilitado", look_up.habilitado)
         mesas_habilitadas = cambios.get("mesas_habilitadas", look_up.mesas_habilitadas)
-        reservas_habilitadas = cambios.get("reservas_habilitadas", look_up.reservas_habilitadas)
+        reservas_habilitadas = cambios.get(
+            "reservas_habilitadas", look_up.reservas_habilitadas
+        )
 
-        if opcion.clave_concepto != "comer_aqui" and (mesas_habilitadas or reservas_habilitadas):
-            raise HTTPException(status_code=422, detail="Solo Comer aqui permite mesas y reservas")
+        if opcion.clave_concepto != "comer_aqui" and (
+            mesas_habilitadas or reservas_habilitadas
+        ):
+            raise HTTPException(
+                status_code=422, detail="Solo Comer aqui permite mesas y reservas"
+            )
         if mesas_habilitadas and not habilitado:
-            raise HTTPException(status_code=422, detail="Debes habilitar el servicio para usar mesas")
+            raise HTTPException(
+                status_code=422, detail="Debes habilitar el servicio para usar mesas"
+            )
         if reservas_habilitadas and not mesas_habilitadas:
-            raise HTTPException(status_code=422, detail="Las reservas requieren mesas habilitadas")
+            raise HTTPException(
+                status_code=422, detail="Las reservas requieren mesas habilitadas"
+            )
 
         for campo, valor in cambios.items():
             setattr(look_up, campo, valor)
@@ -117,14 +159,18 @@ class ServicioSucursalService():
         return look_up
 
     @staticmethod
-    def desactivar_servicio_sucursal_service(id_sucursal: int, id_tipo_servicio: int, id_empresa: int, db: Session):
+    def desactivar_servicio_sucursal_service(
+        id_sucursal: int, id_tipo_servicio: int, id_empresa: int, db: Session
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
 
         look_up = repo.buscar_servicio_sucursal(db, id_sucursal, id_tipo_servicio)
         if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la configuracion de esta sucursal")
+            raise RecursoNoEncontradoError(
+                "No se encontro la configuracion de esta sucursal"
+            )
 
         look_up.habilitado = False
         look_up.mesas_habilitadas = False

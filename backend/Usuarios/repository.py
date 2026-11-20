@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from backend.Usuarios.tabla import Usuarios
 
 
-class UsuarioRepository():
+class UsuarioRepository:
 
     @staticmethod
     def buscar_usuario_por_correo(db: Session, correo: str) -> Usuarios | None:

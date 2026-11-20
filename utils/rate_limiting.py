@@ -6,7 +6,6 @@ from time import monotonic
 
 from fastapi import HTTPException, Request
 
-
 _intentos = defaultdict(deque)
 _candado = Lock()
 

@@ -11,10 +11,15 @@ from backend.Sucursales.repository import SucursalRespository as repo_sucursal
 from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 
 
-class PagoSucursalService():
+class PagoSucursalService:
 
     @staticmethod
-    def crear_pago_sucursal_service(json: Revisar_Json_Crear_Pago_Sucursal, id_empresa: int, db: Session, id_sucursal: int):
+    def crear_pago_sucursal_service(
+        json: Revisar_Json_Crear_Pago_Sucursal,
+        id_empresa: int,
+        db: Session,
+        id_sucursal: int,
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
@@ -25,7 +30,9 @@ class PagoSucursalService():
 
         look_up = repo.buscar_pago_sucursal(db, id_sucursal, json.id_metodo_pago)
         if look_up is not None:
-            raise RecursoDuplicadoError("La opcion ya esta configurada en esta sucursal")
+            raise RecursoDuplicadoError(
+                "La opcion ya esta configurada en esta sucursal"
+            )
 
         nuevo_pago_sucursal = PagosSucursales(
             id_sucursal=id_sucursal,
@@ -36,8 +43,12 @@ class PagoSucursalService():
 
     @staticmethod
     def listar_pagos_sucursales_service(
-        id_sucursal: int, id_empresa: int, solo_habilitados: bool,
-        pagina_actual: int, limite: int, db: Session
+        id_sucursal: int,
+        id_empresa: int,
+        solo_habilitados: bool,
+        pagina_actual: int,
+        limite: int,
+        db: Session,
     ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
@@ -52,25 +63,12 @@ class PagoSucursalService():
             "pagina_actual": pagina_actual,
             "limite": limite,
             "total_paginas": total_paginas,
-            "data": lista_pagos_sucursales
+            "data": lista_pagos_sucursales,
         }
 
     @staticmethod
-    def ver_pago_sucursal_service(id_sucursal: int, id_metodo_pago: int, id_empresa: int, db: Session):
-        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
-        if sucursal is None:
-            raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
-
-        look_up = repo.buscar_pago_sucursal(db, id_sucursal, id_metodo_pago)
-        if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la configuracion de esta sucursal")
-
-        return look_up
-
-    @staticmethod
-    def editar_pago_sucursal_service(
-        json: Revisar_Json_Editar_Pago_Sucursal, id_sucursal: int,
-        id_metodo_pago: int, id_empresa: int, db: Session
+    def ver_pago_sucursal_service(
+        id_sucursal: int, id_metodo_pago: int, id_empresa: int, db: Session
     ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
@@ -78,14 +76,40 @@ class PagoSucursalService():
 
         look_up = repo.buscar_pago_sucursal(db, id_sucursal, id_metodo_pago)
         if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la configuracion de esta sucursal")
+            raise RecursoNoEncontradoError(
+                "No se encontro la configuracion de esta sucursal"
+            )
+
+        return look_up
+
+    @staticmethod
+    def editar_pago_sucursal_service(
+        json: Revisar_Json_Editar_Pago_Sucursal,
+        id_sucursal: int,
+        id_metodo_pago: int,
+        id_empresa: int,
+        db: Session,
+    ):
+        sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
+        if sucursal is None:
+            raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
+
+        look_up = repo.buscar_pago_sucursal(db, id_sucursal, id_metodo_pago)
+        if look_up is None:
+            raise RecursoNoEncontradoError(
+                "No se encontro la configuracion de esta sucursal"
+            )
 
         cambios = json.model_dump(exclude_unset=True)
         if not cambios:
-            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+            raise HTTPException(
+                status_code=422, detail="Debes enviar al menos un campo para editar"
+            )
         for campo, valor in cambios.items():
             if valor is None:
-                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
+                raise HTTPException(
+                    status_code=422, detail="El campo " + campo + " no acepta null"
+                )
         opcion = repo_opcion.buscar_metodo_pago_por_id(db, id_metodo_pago)
         if opcion is None:
             raise RecursoNoEncontradoError("No se encontro la opcion del sistema")
@@ -98,14 +122,18 @@ class PagoSucursalService():
         return look_up
 
     @staticmethod
-    def desactivar_pago_sucursal_service(id_sucursal: int, id_metodo_pago: int, id_empresa: int, db: Session):
+    def desactivar_pago_sucursal_service(
+        id_sucursal: int, id_metodo_pago: int, id_empresa: int, db: Session
+    ):
         sucursal = repo_sucursal.buscar_sucursal_por_id(db, id_sucursal, id_empresa)
         if sucursal is None:
             raise RecursoNoEncontradoError("No se encontro la sucursal de esta empresa")
 
         look_up = repo.buscar_pago_sucursal(db, id_sucursal, id_metodo_pago)
         if look_up is None:
-            raise RecursoNoEncontradoError("No se encontro la configuracion de esta sucursal")
+            raise RecursoNoEncontradoError(
+                "No se encontro la configuracion de esta sucursal"
+            )
 
         look_up.habilitado = False
         db.commit()

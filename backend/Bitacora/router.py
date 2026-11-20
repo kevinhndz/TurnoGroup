@@ -19,4 +19,6 @@ def listar(
     contexto=Depends(obtener_contexto),
     db: Session = Depends(abrir_puerta_bd),
 ):
-    return service.listar_service(db, contexto, pagina_actual, limite, solo_sucursal, filtros)
+    return service.listar_service(
+        db, contexto, pagina_actual, limite, solo_sucursal, filtros
+    )

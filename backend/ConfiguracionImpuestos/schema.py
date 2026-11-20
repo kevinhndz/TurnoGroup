@@ -13,7 +13,9 @@ class Revisar_Json_Crear_Configuracion_Impuestos(BaseModel):
 
 class Revisar_Json_Editar_Configuracion_Impuestos(BaseModel):
     nombre: Optional[str] = Field(default=None, min_length=1, max_length=80)
-    porcentaje: Optional[Decimal] = Field(default=None, ge=0, le=100, max_digits=6, decimal_places=3)
+    porcentaje: Optional[Decimal] = Field(
+        default=None, ge=0, le=100, max_digits=6, decimal_places=3
+    )
     precios_incluyen_impuesto: Optional[bool] = None
     activo: Optional[bool] = None
 

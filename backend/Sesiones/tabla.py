@@ -7,8 +7,14 @@ class Sesiones(miclaseBase):
 
     id = Column(Integer, primary_key=True)
     id_usuario = Column(Integer, ForeignKey("usuarios.id"), nullable=False, index=True)
-    id_vinculo_laboral = Column(Integer, ForeignKey("vinculos_laborales.id", name="fk_sesion_vinculo_laboral"), nullable=True)
-    id_sucursal = Column(Integer, ForeignKey("sucursales.id", name="fk_sesion_sucursal"), nullable=True)
+    id_vinculo_laboral = Column(
+        Integer,
+        ForeignKey("vinculos_laborales.id", name="fk_sesion_vinculo_laboral"),
+        nullable=True,
+    )
+    id_sucursal = Column(
+        Integer, ForeignKey("sucursales.id", name="fk_sesion_sucursal"), nullable=True
+    )
     token_protegido = Column(String(64), unique=True, nullable=False)
     fecha_inicio = Column(DateTime, nullable=False)
     vencimiento = Column(DateTime, nullable=False)

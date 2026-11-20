@@ -43,7 +43,11 @@ class PedidoService:
             salida[campo] = str(getattr(pedido, campo))
         if detalle:
             salida["registrado_por"] = repo.nombre_usuario(db, pedido.id_usuario)
-            mesa = repo.mesa(db, pedido.id_mesa, pedido.id_sucursal) if pedido.id_mesa else None
+            mesa = (
+                repo.mesa(db, pedido.id_mesa, pedido.id_sucursal)
+                if pedido.id_mesa
+                else None
+            )
             salida["nombre_mesa"] = mesa.nombre if mesa else None
             salida["detalles"] = [
                 {
@@ -199,7 +203,7 @@ class PedidoService:
             **json.model_dump(
                 exclude={"detalles", "clave_operacion", "cobrado", "total_esperado"}
             ),
-            **calculo
+            **calculo,
         )
         if json.cobrado:
             PedidoService.aplicar_cobro(nuevo_pedido, json.id_metodo_pago, db, contexto)
@@ -340,7 +344,11 @@ class PedidoService:
                 for servicio, tipo in datos["servicios"]
             ],
             "pagos": [
-                {"id_metodo_pago": metodo.id, "nombre_visible": metodo.nombre_visible, "clave_concepto": metodo.clave_concepto}
+                {
+                    "id_metodo_pago": metodo.id,
+                    "nombre_visible": metodo.nombre_visible,
+                    "clave_concepto": metodo.clave_concepto,
+                }
                 for pago, metodo in datos["pagos"]
             ],
             "mesas": [

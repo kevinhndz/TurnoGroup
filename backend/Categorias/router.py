@@ -12,15 +12,15 @@ from backend.Categorias.schema import (
 from backend.Categorias.service import CategoriaService as service
 from core.schema import RespuestaPaginada
 
-
-router = APIRouter(
-    prefix="/categorias",
-    tags=["Categorias"]
-)
+router = APIRouter(prefix="/categorias", tags=["Categorias"])
 
 
 @router.post("/", response_model=NuevaCategoriaRespuesta, status_code=201)
-def crear_categoria(json: Revisar_Json_Nueva_Categoria, db: Session = Depends(abrir_puerta_bd), id_empresa: int = Depends(obtener_empresa)):
+def crear_categoria(
+    json: Revisar_Json_Nueva_Categoria,
+    db: Session = Depends(abrir_puerta_bd),
+    id_empresa: int = Depends(obtener_empresa),
+):
     return service.crear_categoria_service(json, db, id_empresa)
 
 
@@ -30,20 +30,38 @@ def ver_categorias(
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     id_sucursal: int | None = Depends(obtener_sucursal_catalogo),
-    db: Session = Depends(abrir_puerta_bd), filtros=Depends(filtros_listado)):
-    return service.listar_categorias_service(id_empresa, pagina_actual, limite, db, id_sucursal, filtros=filtros)
+    db: Session = Depends(abrir_puerta_bd),
+    filtros=Depends(filtros_listado),
+):
+    return service.listar_categorias_service(
+        id_empresa, pagina_actual, limite, db, id_sucursal, filtros=filtros
+    )
 
 
 @router.get("/{id}", response_model=NuevaCategoriaRespuesta)
-def ver_categoria(id: Annotated[int, Path(gt=0)], id_empresa: int = Depends(obtener_empresa), id_sucursal: int | None = Depends(obtener_sucursal_catalogo), db: Session = Depends(abrir_puerta_bd)):
+def ver_categoria(
+    id: Annotated[int, Path(gt=0)],
+    id_empresa: int = Depends(obtener_empresa),
+    id_sucursal: int | None = Depends(obtener_sucursal_catalogo),
+    db: Session = Depends(abrir_puerta_bd),
+):
     return service.ver_categoria_service(id, id_empresa, db, id_sucursal)
 
 
 @router.patch("/{id}", response_model=NuevaCategoriaRespuesta)
-def editar_categoria(id: Annotated[int, Path(gt=0)], json: Revisar_Json_Editar_Categoria, id_empresa: int = Depends(obtener_empresa), db: Session = Depends(abrir_puerta_bd)):
+def editar_categoria(
+    id: Annotated[int, Path(gt=0)],
+    json: Revisar_Json_Editar_Categoria,
+    id_empresa: int = Depends(obtener_empresa),
+    db: Session = Depends(abrir_puerta_bd),
+):
     return service.editar_categoria_service(json, id, id_empresa, db)
 
 
 @router.post("/{id}/desactivar", response_model=NuevaCategoriaRespuesta)
-def desactivar_categoria(id: Annotated[int, Path(gt=0)], id_empresa: int = Depends(obtener_empresa), db: Session = Depends(abrir_puerta_bd)):
+def desactivar_categoria(
+    id: Annotated[int, Path(gt=0)],
+    id_empresa: int = Depends(obtener_empresa),
+    db: Session = Depends(abrir_puerta_bd),
+):
     return service.desactivar_categoria_service(id, id_empresa, db)

@@ -11,12 +11,7 @@ KEY = settings.SECRET_KEY
 def crear_token(user: str, id_user: int, rol: str) -> str:
     expires = datetime.now(timezone.utc) + timedelta(minutes=20)
 
-    data = {
-        "user": user,
-        "id_user": id_user,
-        "rol": rol,
-        "exp": expires
-    }
+    data = {"user": user, "id_user": id_user, "rol": rol, "exp": expires}
 
     token = jwt.encode(data, KEY, algorithm=settings.ALGORITHM)
 
@@ -26,10 +21,7 @@ def crear_token(user: str, id_user: int, rol: str) -> str:
 def verificar_token(token: str) -> dict:
     try:
         user_data = jwt.decode(
-            token,
-            KEY,
-            algorithms=[settings.ALGORITHM],
-            options={"require_exp": True}
+            token, KEY, algorithms=[settings.ALGORITHM], options={"require_exp": True}
         )
         return user_data
 

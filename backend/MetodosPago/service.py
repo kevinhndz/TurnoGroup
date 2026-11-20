@@ -3,7 +3,7 @@ from backend.MetodosPago.repository import MetodoPagoRepository as repo
 from core.exceptions import RecursoNoEncontradoError
 
 
-class MetodoPagoService():
+class MetodoPagoService:
 
     @staticmethod
     def listar_metodos_pago_service(pagina_actual: int, limite: int, db: Session):
@@ -14,7 +14,7 @@ class MetodoPagoService():
             "pagina_actual": pagina_actual,
             "limite": limite,
             "total_paginas": total_paginas,
-            "data": lista_metodos_pago
+            "data": lista_metodos_pago,
         }
 
     @staticmethod

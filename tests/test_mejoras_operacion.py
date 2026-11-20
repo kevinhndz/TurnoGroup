@@ -99,7 +99,8 @@ def test_error_no_deja_bitacora_fantasma(client, db, datos, operacion):
     anterior = db.query(Bitacora).count()
     assert (
         client.post(
-            "/pedidos/", json=pedido(datos, operacion, cobrado=True, id_metodo_pago=999999)
+            "/pedidos/",
+            json=pedido(datos, operacion, cobrado=True, id_metodo_pago=999999),
         ).status_code
         == 422
     )
@@ -182,7 +183,12 @@ def test_alta_prepara_mesas_por_sucursal(client, db):
             }
         ],
     }
-    cuerpo["tarjeta_suscripcion"] = {"tarjeta_prueba":"visa", "titular":"Gerente de prueba", "mes":12, "anio":2099}
+    cuerpo["tarjeta_suscripcion"] = {
+        "tarjeta_prueba": "visa",
+        "titular": "Gerente de prueba",
+        "mes": 12,
+        "anio": 2099,
+    }
     respuesta = client.post("/usuarios/registro-negocio", json=cuerpo)
     assert respuesta.status_code == 201, respuesta.text
     assert (

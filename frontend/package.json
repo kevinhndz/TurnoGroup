@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "format": "prettier --write app components README.md",
-    "format:check": "prettier --check app components README.md"
+    "format": "prettier --write app components lib public/workers package.json .prettierrc.json README.md",
+    "format:check": "prettier --check app components lib public/workers package.json .prettierrc.json README.md"
   },
   "dependencies": {
     "next": "^16.4.3",

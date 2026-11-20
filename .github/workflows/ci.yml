@@ -1,84 +1,133 @@
-# Nombre visible del flujo en la pestaña Actions.
 name: Integracion continua
 
-# Ejecuta el flujo cuando se abre o actualiza un PR y cuando cambia main.
+# Reviso las ramas de trabajo antes de llevar los cambios a main.
 on:
-  # Revisa cada pull request antes de fusionarlo.
   pull_request:
-    # Solo necesitamos validar cambios que lleguen a main.
-    branches: [main]
-  # Vuelve a comprobar la rama principal despues de cada merge.
+    branches: [main, 'mejora/**']
   push:
-    # La rama protegida del proyecto.
-    branches: [main]
+    branches: [main, 'mejora/**']
+  workflow_dispatch:
 
-# Variables seguras de prueba para no usar la base real en CI.
-env:
-  # SQLite permite cargar la aplicacion sin credenciales externas.
-  DATABASE_URL: sqlite:///./ci.db
-  # Clave ficticia usada unicamente durante estas pruebas.
-  SECRET_KEY: ci-solamente-no-usar-en-produccion
-  # Las pruebas no necesitan cookies HTTPS.
-  COOKIE_SEGURA: "false"
-
-# Permisos minimos que necesita el flujo.
 permissions:
-  # Permite leer el codigo del repositorio.
   contents: read
 
-# Trabajos que debe completar el PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Uso datos ficticios para que CI nunca necesite la base real.
+env:
+  DATABASE_URL: sqlite://
+  SECRET_KEY: ci-solamente-no-usar-en-produccion
+  COOKIE_SEGURA: 'false'
+  FACTURACION_MODO: simulado
+  PYTHONDONTWRITEBYTECODE: '1'
+
 jobs:
-  # Comprueba backend y frontend en el mismo entorno limpio.
-  validar:
-    # Usa un servidor Linux administrado por GitHub.
+  formato:
     runs-on: ubuntu-latest
-    # Pasos ejecutados en orden; si uno falla, el trabajo falla.
+    timeout-minutes: 10
     steps:
-      # Descarga el codigo de la rama del PR.
-      - name: Descargar codigo
-        uses: actions/checkout@v4
-
-      # Instala la version de Python del backend.
-      - name: Preparar Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          # Version estable y compatible con el proyecto.
-          python-version: "3.13"
+          python-version: '3.13'
+      - name: Instalar formateador
+        run: python -m pip install black==26.10.1
+      - name: Revisar formato Python
+        run: python -m black --check backend core database utils tests alembic *.py
 
-      # Instala las dependencias necesarias para ejecutar las pruebas.
-      - name: Instalar dependencias Python
-        run: python -m pip install -r requirements.txt -r requirements-dev.txt
-
-      # Revisa que los archivos Python no tengan errores de sintaxis.
-      - name: Compilar Python
-        run: python -m compileall -q backend core utils main.py
-
-      # Ejecuta las pruebas CRUD y las pruebas nuevas de rate limiting.
-      - name: Ejecutar pruebas
-        run: pytest -q tests/test_crud.py tests/test_rate_limiting.py
-
-      # Instala Node y npm para revisar el frontend.
-      - name: Preparar Node
-        uses: actions/setup-node@v4
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: turno_ci
+          POSTGRES_PASSWORD: clave-local-ci
+          POSTGRES_DB: turno_ci_pytest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U turno_ci -d turno_ci_pytest"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          # Usa la version LTS actual de Node.
-          node-version: "22"
-          # Activa la cache basada en package-lock.json.
+          python-version: '3.13'
+          cache: pip
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements-dev.txt
+      - name: Revisar dependencias instaladas
+        run: python -m pip check
+      - name: Probar backend con SQLite
+        run: python -m pytest -q --ignore=tests/test_concurrencia_postgres.py
+      # Ejecuto tambien los bloqueos reales; SQLite no los demuestra.
+      - name: Probar backend y concurrencia con PostgreSQL
+        env:
+          TEST_DATABASE_URL: postgresql+psycopg://turno_ci:clave-local-ci@127.0.0.1:5432/turno_ci_pytest
+        run: python -m pytest -q --junitxml=/tmp/pruebas-postgres.xml
+      - name: Verificar que no se omitieron pruebas PostgreSQL
+        run: |
+          python - <<'PY'
+          from xml.etree import ElementTree
+          informe = ElementTree.parse('/tmp/pruebas-postgres.xml')
+          assert not informe.findall('.//skipped'), 'Hay pruebas PostgreSQL omitidas'
+          PY
+      # Pruebo las migraciones en otra base para no mezclar sus datos.
+      - name: Crear base para migraciones
+        run: |
+          python - <<'PY'
+          import psycopg
+          with psycopg.connect('postgresql://turno_ci:clave-local-ci@127.0.0.1:5432/turno_ci_pytest', autocommit=True) as conexion:
+              conexion.execute('CREATE DATABASE turno_migraciones_pytest')
+          PY
+      - name: Aplicar migraciones desde cero
+        env:
+          DATABASE_URL: postgresql+psycopg://turno_ci:clave-local-ci@127.0.0.1:5432/turno_migraciones_pytest
+        run: |
+          python -m alembic upgrade head
+          python -m alembic current --check-heads
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
           cache: npm
-          # Indica donde vive el package-lock del frontend.
           cache-dependency-path: frontend/package-lock.json
-
-      # Instala exactamente las dependencias guardadas en el lockfile.
-      - name: Instalar dependencias frontend
-        working-directory: frontend
+      - name: Instalar dependencias del lockfile
         run: npm ci
-
-      # Comprueba que el frontend respete el formato definido.
-      - name: Revisar formato frontend
-        working-directory: frontend
+      - name: Revisar formato del frontend
         run: npm run format:check
-
-      # Comprueba que Next.js pueda generar la aplicacion.
-      - name: Compilar frontend
-        working-directory: frontend
+      - name: Compilar frontend de produccion
         run: npm run build
+
+  # Conservo un resultado final para usarlo como comprobacion obligatoria.
+  validar:
+    if: always()
+    needs: [formato, backend, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Exigir que todos los trabajos pasen
+        env:
+          FORMATO: ${{ needs.formato.result }}
+          BACKEND: ${{ needs.backend.result }}
+          FRONTEND: ${{ needs.frontend.result }}
+        run: |
+          test "$FORMATO" = success
+          test "$BACKEND" = success
+          test "$FRONTEND" = success

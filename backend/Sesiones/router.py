@@ -127,7 +127,11 @@ def consultar_mis_vinculos(
             "nombre_empresa": empresas.get(vinculo.id_empresa),
             "rol": vinculo.rol,
             "sucursales": [
-                {"id": sucursal.id, "nombre": sucursal.nombre, "direccion": sucursal.direccion}
+                {
+                    "id": sucursal.id,
+                    "nombre": sucursal.nombre,
+                    "direccion": sucursal.direccion,
+                }
                 for sucursal in SesionRepository.listar_sucursales_autorizadas(
                     db, vinculo
                 )

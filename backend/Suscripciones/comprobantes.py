@@ -9,10 +9,10 @@ def crear_pdf(item):
     salida = BytesIO()
     pdf = canvas.Canvas(salida, pagesize=A4)
     pdf.setTitle(f"Comprobante de prueba TG-{item.id}")
-    pdf.setFillColorRGB(.60, .25, .14)
+    pdf.setFillColorRGB(0.60, 0.25, 0.14)
     pdf.setFont("Helvetica-Bold", 23)
     pdf.drawString(50, 785, "Turno Group")
-    pdf.setFillColorRGB(.15, .15, .15)
+    pdf.setFillColorRGB(0.15, 0.15, 0.15)
     pdf.setFont("Helvetica-Bold", 14)
     pdf.drawString(50, 745, "COMPROBANTE DE PRUEBA - SIN VALIDEZ FISCAL")
     lineas = [
@@ -45,9 +45,33 @@ def crear_excel(filas):
     hoja = libro.active
     hoja.title = "Comprobantes de prueba"
     hoja.append(["DOCUMENTOS DE PRUEBA - SIN VALIDEZ FISCAL"])
-    hoja.append(["Numero", "Empresa", "Fecha", "Concepto", "Inicio", "Fin", "Importe", "Moneda", "Detalle"])
+    hoja.append(
+        [
+            "Numero",
+            "Empresa",
+            "Fecha",
+            "Concepto",
+            "Inicio",
+            "Fin",
+            "Importe",
+            "Moneda",
+            "Detalle",
+        ]
+    )
     for item in filas:
-        hoja.append([f"TG-PRUEBA-{item.id:06}", item.nombre_empresa, item.fecha, item.concepto, item.periodo_inicio, item.periodo_fin, float(item.importe), item.moneda, item.detalle])
+        hoja.append(
+            [
+                f"TG-PRUEBA-{item.id:06}",
+                item.nombre_empresa,
+                item.fecha,
+                item.concepto,
+                item.periodo_inicio,
+                item.periodo_fin,
+                float(item.importe),
+                item.moneda,
+                item.detalle,
+            ]
+        )
         for celda in hoja[hoja.max_row]:
             if isinstance(celda.value, str):
                 celda.data_type = "s"
@@ -71,15 +95,27 @@ def crear_historial_pdf(filas):
 
     salida = BytesIO()
     estilos = getSampleStyleSheet()
-    contenido = [Paragraph("Turno Group - Historial de facturacion", estilos["Title"]),
-                 Paragraph("DOCUMENTOS DE PRUEBA - SIN VALIDEZ FISCAL", estilos["Normal"]), Spacer(1, 20)]
+    contenido = [
+        Paragraph("Turno Group - Historial de facturacion", estilos["Title"]),
+        Paragraph("DOCUMENTOS DE PRUEBA - SIN VALIDEZ FISCAL", estilos["Normal"]),
+        Spacer(1, 20),
+    ]
     for item in filas:
-        contenido.extend([
-            Paragraph(f"TG-PRUEBA-{item.id:06} - {item.fecha:%d/%m/%Y}", estilos["Heading2"]),
-            Paragraph(escape(item.nombre_empresa), estilos["Normal"]),
-            Paragraph(escape(item.concepto), estilos["Normal"]),
-            Paragraph(escape(item.detalle), estilos["Normal"]),
-            Paragraph(f"Total: {item.importe:.2f} {escape(item.moneda)}", estilos["Normal"]), Spacer(1, 18),
-        ])
+        contenido.extend(
+            [
+                Paragraph(
+                    f"TG-PRUEBA-{item.id:06} - {item.fecha:%d/%m/%Y}",
+                    estilos["Heading2"],
+                ),
+                Paragraph(escape(item.nombre_empresa), estilos["Normal"]),
+                Paragraph(escape(item.concepto), estilos["Normal"]),
+                Paragraph(escape(item.detalle), estilos["Normal"]),
+                Paragraph(
+                    f"Total: {item.importe:.2f} {escape(item.moneda)}",
+                    estilos["Normal"],
+                ),
+                Spacer(1, 18),
+            ]
+        )
     SimpleDocTemplate(salida, pagesize=A4).build(contenido)
     return salida.getvalue()

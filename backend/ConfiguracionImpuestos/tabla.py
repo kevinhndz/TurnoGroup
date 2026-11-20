@@ -1,5 +1,12 @@
 from sqlalchemy import (
-    Boolean, CheckConstraint, Column, ForeignKey, Integer, Numeric, String, UniqueConstraint
+    Boolean,
+    CheckConstraint,
+    Column,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    UniqueConstraint,
 )
 from database.almacen import miclaseBase
 from database.base import PoderAuditor
@@ -9,7 +16,9 @@ class ConfiguracionImpuestos(miclaseBase, PoderAuditor):
     __tablename__ = "configuracion_impuestos"
     __table_args__ = (
         UniqueConstraint("id_empresa", name="uq_configuracion_impuestos_empresa"),
-        CheckConstraint("porcentaje >= 0 AND porcentaje <= 100", name="ck_impuestos_porcentaje"),
+        CheckConstraint(
+            "porcentaje >= 0 AND porcentaje <= 100", name="ck_impuestos_porcentaje"
+        ),
     )
 
     id = Column(Integer, primary_key=True)

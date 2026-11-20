@@ -17,6 +17,7 @@ class PedidoRepository:
     @staticmethod
     def nombre_usuario(db, id_usuario):
         from backend.Usuarios.tabla import Usuarios
+
         usuario = db.get(Usuarios, id_usuario)
         return usuario.nombre if usuario else "Persona no disponible"
 

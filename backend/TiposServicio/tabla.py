@@ -5,7 +5,10 @@ from database.almacen import miclaseBase
 class TiposServicio(miclaseBase):
     __tablename__ = "tipos_servicio"
     __table_args__ = (
-        CheckConstraint("clave_concepto IN ('comer_aqui', 'para_llevar', 'domicilio')", name="ck_tipos_servicio_clave"),
+        CheckConstraint(
+            "clave_concepto IN ('comer_aqui', 'para_llevar', 'domicilio')",
+            name="ck_tipos_servicio_clave",
+        ),
     )
 
     id = Column(Integer, primary_key=True)

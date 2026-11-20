@@ -61,7 +61,7 @@ class ReservaService:
                 id_empresa=empresa,
                 id_sucursal=sucursal,
                 id_usuario=contexto["usuario"].id,
-                **json.model_dump()
+                **json.model_dump(),
             )
             db.add(look_up)
         db.flush()

@@ -35,7 +35,9 @@ class InvitacionLaboralService:
             or any(id <= 0 for id in ids)
             or (json.rol != "Gerente" and len(ids) != 1)
         ):
-            raise HTTPException(422, "Indica una sola sucursal para administrador o mesero, sin repetir")
+            raise HTTPException(
+                422, "Indica una sola sucursal para administrador o mesero, sin repetir"
+            )
         for id_sucursal in ids:
             if not repo.buscar_sucursal(db, id_sucursal, empresa.id):
                 raise HTTPException(404, "No se encontro la sucursal")
@@ -80,8 +82,12 @@ class InvitacionLaboralService:
         return InvitacionLaboralService.respuesta_invitacion(invitacion, db)
 
     @staticmethod
-    def listar_invitaciones_service(id_empresa, pagina_actual, limite, db, filtros=None):
-        total, lista = repo.listar_invitaciones(db, id_empresa, pagina_actual, limite, filtros=filtros)
+    def listar_invitaciones_service(
+        id_empresa, pagina_actual, limite, db, filtros=None
+    ):
+        total, lista = repo.listar_invitaciones(
+            db, id_empresa, pagina_actual, limite, filtros=filtros
+        )
         return {
             "total": total,
             "pagina_actual": pagina_actual,

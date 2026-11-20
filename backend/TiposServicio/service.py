@@ -3,18 +3,20 @@ from backend.TiposServicio.repository import TipoServicioRepository as repo
 from core.exceptions import RecursoNoEncontradoError
 
 
-class TipoServicioService():
+class TipoServicioService:
 
     @staticmethod
     def listar_tipos_servicio_service(pagina_actual: int, limite: int, db: Session):
-        total, lista_tipos_servicio = repo.listar_tipos_servicio(db, pagina_actual, limite)
+        total, lista_tipos_servicio = repo.listar_tipos_servicio(
+            db, pagina_actual, limite
+        )
         total_paginas = (total + limite - 1) // limite
         return {
             "total": total,
             "pagina_actual": pagina_actual,
             "limite": limite,
             "total_paginas": total_paginas,
-            "data": lista_tipos_servicio
+            "data": lista_tipos_servicio,
         }
 
     @staticmethod

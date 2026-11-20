@@ -27,7 +27,10 @@ from backend.ServiciosSucursales.tabla import ServiciosSucursales
 from backend.PagosSucursales.tabla import PagosSucursales
 from backend.CategoriasGastos.tabla import CategoriasGastos
 from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
-from backend.InvitacionesLaborales.tabla import InvitacionesLaborales, SucursalesInvitacion
+from backend.InvitacionesLaborales.tabla import (
+    InvitacionesLaborales,
+    SucursalesInvitacion,
+)
 from backend.Sesiones.tabla import Sesiones
 from backend.RecuperacionesClave.tabla import RecuperacionesClave
 
@@ -35,9 +38,13 @@ from backend.Bitacora.tabla import Bitacora
 from backend.Pedidos.tabla import Pedidos, DetallesPedidos
 from backend.Cajas.tabla import Cajas
 from backend.Reservas.tabla import Reservas
-from backend.Suscripciones.tabla import Suscripciones, TarjetasSuscripcion, ComprobantesSuscripcion
+from backend.Suscripciones.tabla import (
+    Suscripciones,
+    TarjetasSuscripcion,
+    ComprobantesSuscripcion,
+)
 
-#EJEMPLOS  FUTUROS:
+# EJEMPLOS  FUTUROS:
 # from backend.empresas.model import Empresa
 # from backend.productos.model import Producto
 # from backend.finanzas.model import Finanza
@@ -76,10 +83,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, 
-            target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

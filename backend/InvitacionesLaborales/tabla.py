@@ -4,7 +4,11 @@ from database.almacen import miclaseBase
 
 class InvitacionesLaborales(miclaseBase):
     __tablename__ = "invitaciones_laborales"
-    __table_args__ = (CheckConstraint("rol IN ('Gerente', 'Administrador', 'Mesero')", name="ck_invitacion_rol"),)
+    __table_args__ = (
+        CheckConstraint(
+            "rol IN ('Gerente', 'Administrador', 'Mesero')", name="ck_invitacion_rol"
+        ),
+    )
 
     id = Column(Integer, primary_key=True)
     correo = Column(String(255), nullable=False)
@@ -21,5 +25,7 @@ class InvitacionesLaborales(miclaseBase):
 class SucursalesInvitacion(miclaseBase):
     __tablename__ = "sucursales_invitacion"
 
-    id_invitacion = Column(Integer, ForeignKey("invitaciones_laborales.id"), primary_key=True)
+    id_invitacion = Column(
+        Integer, ForeignKey("invitaciones_laborales.id"), primary_key=True
+    )
     id_sucursal = Column(Integer, ForeignKey("sucursales.id"), primary_key=True)

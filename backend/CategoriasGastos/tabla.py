@@ -6,7 +6,9 @@ from database.base import PoderAuditor
 class CategoriasGastos(miclaseBase, PoderAuditor):
     __tablename__ = "categorias_gastos"
     __table_args__ = (
-        UniqueConstraint("id_empresa", "nombre", name="uq_categoria_gasto_empresa_nombre"),
+        UniqueConstraint(
+            "id_empresa", "nombre", name="uq_categoria_gasto_empresa_nombre"
+        ),
     )
 
     id = Column(Integer, primary_key=True)

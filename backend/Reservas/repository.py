@@ -66,4 +66,8 @@ class ReservaRepository:
         )
         if estado:
             consulta = consulta.filter(Reservas.estado == estado)
-        return filtrar_listado(consulta.order_by(Reservas.inicio.desc(), Reservas.id.desc()), Reservas, filtros)
+        return filtrar_listado(
+            consulta.order_by(Reservas.inicio.desc(), Reservas.id.desc()),
+            Reservas,
+            filtros,
+        )

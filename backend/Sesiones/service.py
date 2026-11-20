@@ -10,12 +10,16 @@ from utils.token import crear_token_sesion, proteger_token_sesion
 _hash_sin_usuario = encriptar_contrasena(crear_token_sesion())
 
 
-class SesionService():
+class SesionService:
 
     @staticmethod
     def iniciar_sesion_service(json, db):
         look_up = repo.buscar_usuario_para_sesion(db, str(json.correo).lower())
-        hash_guardado = look_up.clave_protegida if look_up and look_up.clave_protegida else _hash_sin_usuario
+        hash_guardado = (
+            look_up.clave_protegida
+            if look_up and look_up.clave_protegida
+            else _hash_sin_usuario
+        )
         correcta = verificar_contrasena(json.clave.get_secret_value(), hash_guardado)
 
         if not look_up or not look_up.clave_protegida or not correcta:
@@ -25,7 +29,13 @@ class SesionService():
             if not look_up.fecha_desactivacion_voluntaria:
                 raise HTTPException(401, "Correo o clave incorrectos")
             if not json.reactivar:
-                raise HTTPException(409, {"codigo": "CUENTA_DESACTIVADA", "mensaje": "Tu cuenta esta desactivada. Puedes reactivarla para recuperar el acceso."})
+                raise HTTPException(
+                    409,
+                    {
+                        "codigo": "CUENTA_DESACTIVADA",
+                        "mensaje": "Tu cuenta esta desactivada. Puedes reactivarla para recuperar el acceso.",
+                    },
+                )
             look_up.estado = True
             look_up.fecha_desactivacion_voluntaria = None
 
@@ -35,7 +45,7 @@ class SesionService():
             id_usuario=look_up.id,
             token_protegido=proteger_token_sesion(token),
             fecha_inicio=ahora,
-            vencimiento=ahora + timedelta(hours=revision.SESION_HORAS)
+            vencimiento=ahora + timedelta(hours=revision.SESION_HORAS),
         )
         if look_up.rol_plataforma != "Superadministrador":
             vinculo = repo.buscar_vinculo_autorizado(db, look_up.id)
@@ -78,7 +88,9 @@ class SesionService():
         if token and len(token) <= 128:
             look_up = repo.buscar_sesion(db, proteger_token_sesion(token))
             if look_up and not look_up.fecha_revocacion:
-                look_up.fecha_revocacion = datetime.now(timezone.utc).replace(tzinfo=None)
+                look_up.fecha_revocacion = datetime.now(timezone.utc).replace(
+                    tzinfo=None
+                )
                 db.commit()
 
     @staticmethod
@@ -87,17 +99,24 @@ class SesionService():
         repo.revocar_sesiones(db, id_usuario, ahora)
         db.commit()
 
-
     @staticmethod
     def obtener_contexto_service(sesion, usuario, db):
-        contexto = {"sesion": sesion, "usuario": usuario, "vinculo": None,
-                    "id_empresa": None, "id_sucursal": None, "rol": None,
-                    "rol_plataforma": usuario.rol_plataforma}
+        contexto = {
+            "sesion": sesion,
+            "usuario": usuario,
+            "vinculo": None,
+            "id_empresa": None,
+            "id_sucursal": None,
+            "rol": None,
+            "rol_plataforma": usuario.rol_plataforma,
+        }
         if usuario.rol_plataforma == "Superadministrador":
             return contexto
         if sesion.id_vinculo_laboral is None:
             return contexto
-        vinculo = repo.buscar_vinculo_autorizado(db, usuario.id, sesion.id_vinculo_laboral)
+        vinculo = repo.buscar_vinculo_autorizado(
+            db, usuario.id, sesion.id_vinculo_laboral
+        )
         if not vinculo or vinculo.rol not in ("Gerente", "Administrador", "Mesero"):
             raise HTTPException(403, "El vinculo no esta autorizado")
         contexto.update(vinculo=vinculo, id_empresa=vinculo.id_empresa, rol=vinculo.rol)
@@ -112,7 +131,9 @@ class SesionService():
     def seleccionar_contexto_service(json, sesion, usuario, db):
         if usuario.rol_plataforma == "Superadministrador":
             raise HTTPException(403, "La plataforma no opera empresas de clientes")
-        vinculo = repo.buscar_vinculo_autorizado(db, usuario.id, json.id_vinculo_laboral)
+        vinculo = repo.buscar_vinculo_autorizado(
+            db, usuario.id, json.id_vinculo_laboral
+        )
         if not vinculo:
             raise HTTPException(403, "El vinculo no esta autorizado")
         if sesion.id_vinculo_laboral and sesion.id_vinculo_laboral != vinculo.id:
@@ -138,10 +159,34 @@ class SesionService():
         from backend.ServiciosSucursales.tabla import ServiciosSucursales
         from backend.Suscripciones.repository import SuscripcionRepository
         from backend.Suscripciones.service import SuscripcionService
-        servicio = db.query(ServiciosSucursales).filter(ServiciosSucursales.id_sucursal == contexto['id_sucursal'], ServiciosSucursales.habilitado.is_(True), ServiciosSucursales.mesas_habilitadas.is_(True)).first() if contexto['id_sucursal'] else None
-        suscripcion = SuscripcionRepository.buscar_suscripcion(db, contexto['id_empresa']) if contexto['id_empresa'] else None
-        return {"usuario": usuario, "vencimiento": sesion.vencimiento,
-                "id_empresa": contexto["id_empresa"], "id_sucursal": contexto["id_sucursal"],
-                "rol_empresa": contexto["rol"], "mesas_habilitadas": bool(servicio),
-                "reservas_habilitadas": bool(servicio and servicio.reservas_habilitadas),
-                "finanzas_habilitadas": bool(suscripcion and suscripcion.finanzas_habilitadas and SuscripcionService.vigente(suscripcion))}
+
+        servicio = (
+            db.query(ServiciosSucursales)
+            .filter(
+                ServiciosSucursales.id_sucursal == contexto["id_sucursal"],
+                ServiciosSucursales.habilitado.is_(True),
+                ServiciosSucursales.mesas_habilitadas.is_(True),
+            )
+            .first()
+            if contexto["id_sucursal"]
+            else None
+        )
+        suscripcion = (
+            SuscripcionRepository.buscar_suscripcion(db, contexto["id_empresa"])
+            if contexto["id_empresa"]
+            else None
+        )
+        return {
+            "usuario": usuario,
+            "vencimiento": sesion.vencimiento,
+            "id_empresa": contexto["id_empresa"],
+            "id_sucursal": contexto["id_sucursal"],
+            "rol_empresa": contexto["rol"],
+            "mesas_habilitadas": bool(servicio),
+            "reservas_habilitadas": bool(servicio and servicio.reservas_habilitadas),
+            "finanzas_habilitadas": bool(
+                suscripcion
+                and suscripcion.finanzas_habilitadas
+                and SuscripcionService.vigente(suscripcion)
+            ),
+        }

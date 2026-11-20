@@ -11,15 +11,15 @@ from backend.CategoriasGastos.schema import (
 from backend.CategoriasGastos.service import CategoriaGastoService as service
 from core.schema import RespuestaPaginada
 
-
-router = APIRouter(
-    prefix="/categorias-gastos",
-    tags=["Categorias de gastos"]
-)
+router = APIRouter(prefix="/categorias-gastos", tags=["Categorias de gastos"])
 
 
 @router.post("/", response_model=RespuestaCategoriaGasto, status_code=201)
-def crear_categoria_gasto(json: Revisar_Json_Crear_Categoria_Gasto, db: Session = Depends(abrir_puerta_bd), id_empresa: int = Depends(obtener_empresa)):
+def crear_categoria_gasto(
+    json: Revisar_Json_Crear_Categoria_Gasto,
+    db: Session = Depends(abrir_puerta_bd),
+    id_empresa: int = Depends(obtener_empresa),
+):
     return service.crear_categoria_gasto_service(json, db, id_empresa)
 
 
@@ -28,16 +28,18 @@ def ver_categorias_gastos(
     id_empresa: int = Depends(obtener_empresa),
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
-    return service.listar_categorias_gastos_service(id_empresa, pagina_actual, limite, db)
+    return service.listar_categorias_gastos_service(
+        id_empresa, pagina_actual, limite, db
+    )
 
 
 @router.get("/{id}", response_model=RespuestaCategoriaGasto)
 def ver_categoria_gasto(
     id: Annotated[int, Path(gt=0)],
     id_empresa: int = Depends(obtener_empresa),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
     return service.ver_categoria_gasto_service(id, id_empresa, db)
 
@@ -47,7 +49,7 @@ def editar_categoria_gasto(
     id: Annotated[int, Path(gt=0)],
     json: Revisar_Json_Editar_Categoria_Gasto,
     id_empresa: int = Depends(obtener_empresa),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
     return service.editar_categoria_gasto_service(json, id, id_empresa, db)
 
@@ -56,6 +58,6 @@ def editar_categoria_gasto(
 def desactivar_categoria_gasto(
     id: Annotated[int, Path(gt=0)],
     id_empresa: int = Depends(obtener_empresa),
-    db: Session = Depends(abrir_puerta_bd)
+    db: Session = Depends(abrir_puerta_bd),
 ):
     return service.desactivar_categoria_gasto_service(id, id_empresa, db)

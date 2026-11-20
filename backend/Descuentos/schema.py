@@ -14,7 +14,9 @@ class Revisar_Json_Crear_Descuento(BaseModel):
 class Revisar_Json_Editar_Descuento(BaseModel):
     nombre: Optional[str] = Field(default=None, min_length=1, max_length=100)
     tipo_descuento: Optional[Literal["Porcentaje", "CantidadFija"]] = None
-    valor: Optional[Decimal] = Field(default=None, ge=0, max_digits=12, decimal_places=2)
+    valor: Optional[Decimal] = Field(
+        default=None, ge=0, max_digits=12, decimal_places=2
+    )
     activo: Optional[bool] = None
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")

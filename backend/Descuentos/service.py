@@ -10,10 +10,12 @@ from backend.Empresas.repository import EmpresaRepository as repo_empresa
 from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
 
 
-class DescuentoService():
+class DescuentoService:
 
     @staticmethod
-    def crear_descuento_service(json: Revisar_Json_Crear_Descuento, db: Session, id_empresa: int):
+    def crear_descuento_service(
+        json: Revisar_Json_Crear_Descuento, db: Session, id_empresa: int
+    ):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
@@ -21,27 +23,36 @@ class DescuentoService():
 
         look_up = repo.buscar_descuento_por_nombre(db, id_empresa, json.nombre)
         if look_up is not None:
-            raise RecursoDuplicadoError("Ya existe un descuento con ese nombre en la empresa")
+            raise RecursoDuplicadoError(
+                "Ya existe un descuento con ese nombre en la empresa"
+            )
 
         if json.tipo_descuento == "Porcentaje" and json.valor > 100:
-            raise HTTPException(status_code=422, detail="El porcentaje del descuento debe estar entre 0 y 100")
+            raise HTTPException(
+                status_code=422,
+                detail="El porcentaje del descuento debe estar entre 0 y 100",
+            )
 
         nuevo_descuento = Descuentos(
             id_empresa=id_empresa,
             nombre=json.nombre,
             tipo_descuento=json.tipo_descuento,
-            valor=json.valor
+            valor=json.valor,
         )
         return repo.guardar_nuevo_descuento(db, nuevo_descuento)
 
     @staticmethod
-    def listar_descuentos_service(id_empresa: int, pagina_actual: int, limite: int, db: Session, filtros=None):
+    def listar_descuentos_service(
+        id_empresa: int, pagina_actual: int, limite: int, db: Session, filtros=None
+    ):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        total, lista_descuentos = repo.listar_descuentos(db, id_empresa, pagina_actual, limite, filtros=filtros)
+        total, lista_descuentos = repo.listar_descuentos(
+            db, id_empresa, pagina_actual, limite, filtros=filtros
+        )
         total_paginas = (total + limite - 1) // limite
 
         return {
@@ -49,7 +60,7 @@ class DescuentoService():
             "pagina_actual": pagina_actual,
             "limite": limite,
             "total_paginas": total_paginas,
-            "data": lista_descuentos
+            "data": lista_descuentos,
         }
 
     @staticmethod
@@ -66,7 +77,9 @@ class DescuentoService():
         return look_up
 
     @staticmethod
-    def editar_descuento_service(json: Revisar_Json_Editar_Descuento, id: int, id_empresa: int, db: Session):
+    def editar_descuento_service(
+        json: Revisar_Json_Editar_Descuento, id: int, id_empresa: int, db: Session
+    ):
         empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
         if empresa is None:
@@ -78,23 +91,32 @@ class DescuentoService():
 
         cambios = json.model_dump(exclude_unset=True)
         if not cambios:
-            raise HTTPException(status_code=422, detail="Debes enviar al menos un campo para editar")
+            raise HTTPException(
+                status_code=422, detail="Debes enviar al menos un campo para editar"
+            )
         for campo, valor in cambios.items():
             if valor is None:
-                raise HTTPException(status_code=422, detail="El campo " + campo + " no acepta null")
+                raise HTTPException(
+                    status_code=422, detail="El campo " + campo + " no acepta null"
+                )
 
         if "nombre" in cambios and cambios["nombre"] != look_up.nombre:
             descuento_existente = repo.buscar_descuento_por_nombre(
                 db, id_empresa, cambios["nombre"]
             )
             if descuento_existente is not None:
-                raise RecursoDuplicadoError("Ya existe un descuento con ese nombre en la empresa")
+                raise RecursoDuplicadoError(
+                    "Ya existe un descuento con ese nombre en la empresa"
+                )
 
         tipo_descuento = cambios.get("tipo_descuento", look_up.tipo_descuento)
         valor = cambios.get("valor", look_up.valor)
 
         if tipo_descuento == "Porcentaje" and valor > 100:
-            raise HTTPException(status_code=422, detail="El porcentaje del descuento debe estar entre 0 y 100")
+            raise HTTPException(
+                status_code=422,
+                detail="El porcentaje del descuento debe estar entre 0 y 100",
+            )
 
         for campo, valor in cambios.items():
             setattr(look_up, campo, valor)

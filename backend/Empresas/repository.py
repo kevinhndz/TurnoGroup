@@ -4,8 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from backend.Empresas.tabla import Empresas
 
 
-class EmpresaRepository():
-
+class EmpresaRepository:
 
     @staticmethod
     def buscar_empresa(db: Session, nombre: str) -> Empresas | None:
@@ -25,7 +24,9 @@ class EmpresaRepository():
         return nueva_empresa
 
     @staticmethod
-    def listar_empresas(db: Session, pagina_actual: int, limite: int, id_empresa=None, filtros=None):
+    def listar_empresas(
+        db: Session, pagina_actual: int, limite: int, id_empresa=None, filtros=None
+    ):
         consulta = db.query(Empresas)
         if id_empresa is not None:
             consulta = consulta.filter(Empresas.id == id_empresa)
@@ -34,5 +35,3 @@ class EmpresaRepository():
     @staticmethod
     def buscar_empresa_por_id(db: Session, id: int) -> Empresas | None:
         return db.query(Empresas).filter(Empresas.id == id).first()
-
-    

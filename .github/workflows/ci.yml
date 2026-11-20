@@ -110,6 +110,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Instalar dependencias del lockfile
         run: npm ci
+      - name: Revisar vulnerabilidades de dependencias
+        run: npm audit --audit-level=moderate
       - name: Revisar formato del frontend
         run: npm run format:check
       - name: Compilar frontend de produccion

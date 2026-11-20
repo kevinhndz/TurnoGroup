@@ -10,7 +10,7 @@
     "format:check": "prettier --check app components lib public/workers package.json .prettierrc.json README.md"
   },
   "dependencies": {
-    "next": "^16.4.3",
+    "next": "~16.4.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },

@@ -20,6 +20,16 @@ from backend.TiposServicio.tabla import TiposServicio
 from backend.MetodosPago.tabla import MetodosPago
 
 
+@pytest.fixture(autouse=True)
+def reiniciar_limites_entre_pruebas():
+    # Limpio los intentos para que una prueba no bloquee a la siguiente.
+    from utils.rate_limiting import limpiar_limites
+
+    limpiar_limites()
+    yield
+    limpiar_limites()
+
+
 @pytest.fixture
 def db():
     url = os.environ.get("TEST_DATABASE_URL", "sqlite://")

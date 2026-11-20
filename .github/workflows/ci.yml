@@ -35,7 +35,7 @@ jobs:
       - name: Instalar formateador
         run: python -m pip install black==26.10.1
       - name: Revisar formato Python
-        run: python -m black --check backend core database utils tests alembic *.py
+        run: python -m black --check backend core database utils tests alembic scripts *.py
 
   backend:
     runs-on: ubuntu-latest
@@ -64,8 +64,12 @@ jobs:
         run: python -m pip install -r requirements-dev.txt
       - name: Revisar dependencias instaladas
         run: python -m pip check
+      - name: Preparar certificado TLS de prueba
+        env:
+          CONTENEDOR_POSTGRES_CI: ${{ job.services.postgres.id }}
+        run: bash scripts/preparar_tls_ci.sh
       - name: Probar backend con SQLite
-        run: python -m pytest -q --ignore=tests/test_concurrencia_postgres.py
+        run: python -m pytest -q --ignore=tests/test_concurrencia_postgres.py --ignore=tests/test_conexion_tls_postgres.py
       # Ejecuto tambien los bloqueos reales; SQLite no los demuestra.
       - name: Probar backend y concurrencia con PostgreSQL
         env:

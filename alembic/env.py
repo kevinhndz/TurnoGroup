@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 # 2. IMPORTAR LA INSTANCIA DE CONFIGURACION (revision) Y LA BASE DE DATOS
 from core.config import revision
-from database.almacen import miclaseBase
+from database.almacen import miclaseBase, UBICACION_ALMACEN
 
 # 3. IMPORTAR MANUALMENTE Los MODELOS/TABLAS A MEDIDA QUE SE VAYA CREANDO CADA ENTIDAD
 from backend.Empresas.tabla import Empresas  # Registra la tabla en metadata.
@@ -56,7 +56,11 @@ if config.config_file_name is not None:
 
 # 4. INYECTAR LA URL DE LA BASE DE DATOS DESDE EL GUARDIA DE SEGURIDAD (PYDANTIC)
 # ConfigParser necesita escapar los porcentajes de una URL codificada.
-config.set_main_option("sqlalchemy.url", revision.DATABASE_URL.replace("%", "%%"))
+# Reutilizo la URL verificada para que Alembic tampoco conecte sin TLS.
+config.set_main_option(
+    "sqlalchemy.url",
+    UBICACION_ALMACEN.render_as_string(hide_password=False).replace("%", "%%"),
+)
 
 target_metadata = miclaseBase.metadata
 

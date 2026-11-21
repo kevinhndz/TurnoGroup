@@ -3538,3 +3538,33 @@
     max-width: 110px;
   }
 }
+
+/* El modo compacto conserva la navegacion movil. */
+.tg-compact-toggle {
+  display: none;
+}
+@media (min-width: 1025px) {
+  .tg-compact-toggle {
+    display: inline-flex;
+  }
+  .tg-compacto .tg-sidebar {
+    display: none;
+  }
+  .tg-compacto .tg-workspace {
+    margin-left: 0;
+  }
+}
+.tg-orders-tabs {
+  overflow-x: auto;
+}
+.tg-orders-tabs button {
+  white-space: nowrap;
+  min-height: 44px;
+}
+.tg-order-period {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 16px;
+}

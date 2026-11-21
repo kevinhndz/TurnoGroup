@@ -118,6 +118,8 @@ jobs:
         run: npm audit --audit-level=moderate
       - name: Revisar formato del frontend
         run: npm run format:check
+      - name: Probar seguridad del proxy
+        run: npm run test:proxy
       - name: Compilar frontend de produccion
         run: npm run build
 

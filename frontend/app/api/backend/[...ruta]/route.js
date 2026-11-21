@@ -34,12 +34,31 @@ async function comunicar(request, { params }) {
 
   const escritura = !['GET', 'HEAD'].includes(request.method);
   const origen = request.headers.get('origin');
+  // Uso el dominio configurado, no las cabeceras que puede enviar el cliente.
+  const origenPublico =
+    process.env.PUBLIC_ORIGIN ||
+    (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000');
+  let destinoPublico;
+  try {
+    destinoPublico = new URL(origenPublico);
+  } catch {
+    return Response.json({ detail: 'Falta configurar PUBLIC_ORIGIN' }, { status: 503 });
+  }
+  if (
+    origenPublico !== destinoPublico.origin ||
+    (process.env.NODE_ENV === 'production' && destinoPublico.protocol !== 'https:') ||
+    (destinoPublico.protocol === 'https:' && !process.env.BACKEND_PROXY_SECRET)
+  ) {
+    return Response.json({ detail: 'Falta configurar el proxy seguro' }, { status: 503 });
+  }
+  if (request.headers.get('host') !== destinoPublico.host) {
+    return Response.json({ detail: 'Dominio no permitido' }, { status: 403 });
+  }
 
   if (
     escritura &&
     (request.headers.get('X-Solicitud') !== 'TurnoGroup' ||
-      (origen &&
-        origen !== `${new URL(request.url).protocol}//${request.headers.get('host')}`))
+      (origen && origen !== destinoPublico.origin))
   ) {
     return Response.json({ detail: 'Solicitud no permitida' }, { status: 403 });
   }
@@ -75,7 +94,11 @@ async function comunicar(request, { params }) {
       .find((parte) => parte.trim().startsWith('sesion_turnogroup='));
 
     if (cookie) headers.set('cookie', cookie.trim());
-    headers.set('X-Forwarded-Proto', new URL(request.url).protocol.replace(':', ''));
+    // Marco el HTTPS publico y pruebo al backend que soy el proxy autorizado.
+    headers.set('X-Forwarded-Proto', destinoPublico.protocol.replace(':', ''));
+    if (process.env.BACKEND_PROXY_SECRET)
+      headers.set('X-TurnoGroup-Proxy-Secret', process.env.BACKEND_PROXY_SECRET);
+    if (origen) headers.set('origin', origen);
 
     let body;
     if (escritura) {

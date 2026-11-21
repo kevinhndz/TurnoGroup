@@ -121,13 +121,23 @@ export default function Inicio() {
               <h2>
                 {superadmin ? 'Cada empresa tiene su espacio' : 'Pedidos de la sucursal'}
               </h2>
-              {pedidos.datos?.data?.length ? (
+              <Mensaje error={pedidos.error} />
+              {pedidos.cargando && !superadmin ? (
+                <p role="status">Cargando pedidos…</p>
+              ) : pedidos.error ? (
+                <button className="tg-button tg-secondary" onClick={pedidos.recargar}>
+                  Volver a intentar
+                </button>
+              ) : pedidos.datos?.data?.length ? (
                 <div className="tg-quick-links">
                   {pedidos.datos.data.map((pedido) => (
                     <Link key={pedido.id} href={`/panel/pedidos?pedido=${pedido.id}`}>
                       Pedido #TG-{pedido.id}
                       <span>{pedido.cliente || 'Sin nombre'}</span>
-                      <span>{pedido.fecha_pago ? 'Pagado' : 'Pendiente de cobro'} →</span>
+                      <span className="tg-status">
+                        {pedido.fecha_entrega ? 'Servido' : 'Por servir'}
+                      </span>
+                      <span>{pedido.fecha_pago ? 'Cobrado' : 'Pendiente de pago'} →</span>
                     </Link>
                   ))}
                 </div>

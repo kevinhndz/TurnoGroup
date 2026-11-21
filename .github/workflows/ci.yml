@@ -89,6 +89,14 @@ jobs:
           import psycopg
           with psycopg.connect('postgresql://turno_ci:clave-local-ci@127.0.0.1:5432/turno_ci_pytest', autocommit=True) as conexion:
               conexion.execute('CREATE DATABASE turno_migraciones_pytest')
+              # Simulo los roles que Supabase usa para su Data API.
+              for rol in ('anon', 'authenticated', 'service_role'):
+                  conexion.execute(f'CREATE ROLE {rol} NOLOGIN')
+          with psycopg.connect('postgresql://turno_ci:clave-local-ci@127.0.0.1:5432/turno_migraciones_pytest', autocommit=True) as conexion:
+              # Simulo los permisos automaticos que debemos retirar.
+              for rol in ('anon', 'authenticated', 'service_role'):
+                  conexion.execute(f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {rol}')
+                  conexion.execute(f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {rol}')
           PY
       - name: Aplicar migraciones desde cero
         env:
@@ -96,6 +104,7 @@ jobs:
         run: |
           python -m alembic upgrade head
           python -m alembic current --check-heads
+          python -m scripts.verificar_permisos_api
 
   frontend:
     runs-on: ubuntu-latest

@@ -511,3 +511,21 @@ def test_catalogo_unificado_solo_productos_y_opciones_del_local(
     ).one().disponible = False
     db.commit()
     assert client.get("/pedidos/catalogo").json()["productos"] == []
+
+
+def test_filtros_operativos_y_promedio_entrega(client, db, datos, operacion):
+    from backend.Pedidos.tabla import Pedidos
+
+    id = client.post("/pedidos/", json=pedido(datos, operacion)).json()["id"]
+    assert client.get("/pedidos/?entrega=pendiente").json()["total"] == 1
+    assert client.get("/pedidos/?pago=cobrado").json()["total"] == 0
+    fila = db.get(Pedidos, id)
+    fila.fecha_registro = datetime(2026, 11, 21, 6, 0)
+    fila.fecha_entrega = datetime(2026, 11, 21, 6, 12)
+    db.commit()
+    respuesta = client.get("/pedidos/?entrega=servido&fecha=2026-11-21").json()
+    assert respuesta["total"] == 1
+    assert respuesta["promedio_entrega_minutos"] == 12
+    assert client.get("/pedidos/?fecha=2026-11-20").json()["total"] == 0
+    assert client.get("/pedidos/?entrega=pendiente").json()["total"] == 0
+    assert client.get("/pedidos/?entrega=inventado").status_code == 422

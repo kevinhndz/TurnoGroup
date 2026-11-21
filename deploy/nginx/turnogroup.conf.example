@@ -1,0 +1,27 @@
+# Ejemplo: Nginx comparte la red privada con el contenedor frontend.
+# Cambia el dominio y las rutas del certificado antes de activarlo.
+server {
+    listen 80;
+    server_name turnos.example;
+    return 301 https://turnos.example$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name turnos.example;
+    ssl_certificate /etc/letsencrypt/live/turnos.example/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/turnos.example/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+        proxy_pass http://frontend:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        # El navegador nunca debe pasar el secreto interno al frontend.
+        proxy_set_header X-TurnoGroup-Proxy-Secret "";
+    }
+}

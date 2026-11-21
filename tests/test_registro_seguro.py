@@ -81,9 +81,18 @@ def test_registro_guarda_token_solo_en_cookie(client, db):
 def test_cookie_registro_respeta_https(client, monkeypatch, segura):
     client.cookies.clear()
     monkeypatch.setattr(revision, "COOKIE_SEGURA", segura)
-    protocolo = "https" if segura else "http"
+    monkeypatch.setattr(revision, "BACKEND_PROXY_SECRET", "clave-de-prueba")
+    cabeceras = {}
+    if segura:
+        # Simulo la senal que Next manda despues de recibir HTTPS en Nginx.
+        cabeceras = {
+            "X-Forwarded-Proto": "https",
+            "X-TurnoGroup-Proxy-Secret": "clave-de-prueba",
+        }
     respuesta = client.post(
-        f"{protocolo}://testserver/usuarios/registro-negocio", json=datos_registro()
+        "http://testserver/usuarios/registro-negocio",
+        json=datos_registro(),
+        headers=cabeceras,
     )
     assert respuesta.status_code == 201
     cookies = SimpleCookie()

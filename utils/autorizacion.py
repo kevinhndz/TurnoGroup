@@ -1,4 +1,5 @@
 from fastapi import Depends, Request, HTTPException
+from hmac import compare_digest
 from sqlalchemy.orm import Session
 from core.config import revision
 from database.almacen import abrir_puerta_bd
@@ -148,7 +149,14 @@ RUTAS_CON_PERMISO = {
 
 # Validaciones generales de cada solicitud.
 def revisar_solicitud_sesion(request: Request):
-    if revision.COOKIE_SEGURA and request.url.scheme != "https":
+    # Solo Next puede afirmar que el navegador entro por HTTPS.
+    proxy_verificado = bool(revision.BACKEND_PROXY_SECRET) and compare_digest(
+        request.headers.get("X-TurnoGroup-Proxy-Secret", ""),
+        revision.BACKEND_PROXY_SECRET,
+    )
+    if revision.COOKIE_SEGURA and not (
+        proxy_verificado and request.headers.get("X-Forwarded-Proto") == "https"
+    ):
         raise HTTPException(400, "Esta operacion requiere HTTPS")
     origen = request.headers.get("origin")
     if origen and origen not in revision.ORIGENES_PERMITIDOS:

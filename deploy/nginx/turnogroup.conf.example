@@ -3,7 +3,7 @@
 server {
     listen 80;
     server_name turnos.example;
-    return 301 https://$host$request_uri;
+    return 301 https://turnos.example$request_uri;
 }
 
 server {

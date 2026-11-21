@@ -1,3 +1,4 @@
+from datetime import datetime, time, timedelta
 from backend.Pedidos.tabla import Pedidos, DetallesPedidos
 from backend.Productos.tabla import Productos
 from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
@@ -56,6 +57,29 @@ class PedidoRepository:
         consulta = db.query(Pedidos).filter(
             Pedidos.id_empresa == id_empresa, Pedidos.id_sucursal == id_sucursal
         )
+        filtros = filtros or {}
+        if filtros.get("entrega") or filtros.get("pago"):
+            consulta = consulta.filter(Pedidos.estado != "Cancelado")
+        if filtros.get("entrega") == "pendiente":
+            consulta = consulta.filter(Pedidos.fecha_entrega.is_(None))
+        elif filtros.get("entrega") == "servido":
+            consulta = consulta.filter(Pedidos.fecha_entrega.is_not(None))
+        if filtros.get("pago") == "pendiente":
+            consulta = consulta.filter(Pedidos.fecha_pago.is_(None))
+        elif filtros.get("pago") == "cobrado":
+            consulta = consulta.filter(Pedidos.fecha_pago.is_not(None))
+        if filtros.get("fecha"):
+            from zoneinfo import ZoneInfo
+            from datetime import timezone
+
+            inicio = datetime.combine(
+                filtros["fecha"], time(), ZoneInfo("America/Tegucigalpa")
+            )
+            inicio = inicio.astimezone(timezone.utc).replace(tzinfo=None)
+            consulta = consulta.filter(
+                Pedidos.fecha_registro >= inicio,
+                Pedidos.fecha_registro < inicio + timedelta(days=1),
+            )
         if estado:
             consulta = consulta.filter(Pedidos.estado == estado)
         return filtrar_listado(consulta.order_by(Pedidos.id.desc()), Pedidos, filtros)

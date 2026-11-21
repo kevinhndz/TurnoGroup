@@ -12,6 +12,7 @@ export default function Pedidos() {
   const { sesion } = usarSesion();
   const [estado, setEstado] = useState('');
   const [pagina, setPagina] = useState(1);
+  const [fecha, setFecha] = useState('');
   const filtros = useFiltrosListado();
   const [detalle, setDetalle] = useState(null);
   const [accion, setAccion] = useState(null);
@@ -22,13 +23,13 @@ export default function Pedidos() {
     if (!sesion.id_sucursal) return null;
     const [lista, tipos, metodos] = await Promise.all([
       api(
-        `/pedidos/?pagina_actual=${pagina}&limite=10&${filtros.parametros}${estado ? `&estado=${estado}` : ''}`,
+        `/pedidos/?pagina_actual=${pagina}&limite=10&${filtros.parametros}${estado ? `&${estado}` : ''}${fecha ? `&fecha=${fecha}` : ''}`,
       ),
       listarTodo('/tipos-servicio/'),
       listarTodo('/metodos-pago/'),
     ]);
     return { lista, tipos, metodos };
-  }, [pagina, estado, sesion.id_sucursal, filtros.parametros]);
+  }, [pagina, estado, fecha, sesion.id_sucursal, filtros.parametros]);
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('pedido');
     if (id && /^\d+$/.test(id))
@@ -96,9 +97,12 @@ export default function Pedidos() {
         <nav className="tg-tabs tg-orders-tabs" aria-label="Estado de pedidos">
           {[
             ['', 'Todos'],
-            ['Abierto', 'Abiertos'],
-            ['Cerrado', 'Cerrados'],
-            ['Cancelado', 'Cancelados'],
+            ['estado=Abierto', 'En curso'],
+            ['entrega=pendiente', 'Por servir'],
+            ['entrega=servido', 'Servidos'],
+            ['pago=pendiente', 'Pendientes de pago'],
+            ['estado=Cerrado', 'Cerrados / cobrados'],
+            ['estado=Cancelado', 'Cancelados'],
           ].map(([valor, label]) => (
             <button
               key={valor}
@@ -108,10 +112,54 @@ export default function Pedidos() {
                 setPagina(1);
               }}
             >
-              {label} {d?.lista.conteos?.[valor || 'Todos'] ?? ''}
+              {label}
             </button>
           ))}
         </nav>
+        <div className="tg-order-period">
+          <span>
+            Promedio de registro a entrega:{' '}
+            <strong>
+              {d?.lista.promedio_entrega_minutos == null
+                ? 'Sin entregas registradas'
+                : `${d.lista.promedio_entrega_minutos} min`}
+            </strong>
+          </span>
+          <label>
+            Fecha del pedido (Honduras)
+            <input
+              type="date"
+              value={fecha}
+              onChange={(event) => {
+                setFecha(event.target.value);
+                setPagina(1);
+              }}
+            />
+          </label>
+          <button
+            className="tg-button tg-secondary"
+            onClick={() => {
+              setFecha(
+                new Intl.DateTimeFormat('en-CA', {
+                  timeZone: 'America/Tegucigalpa',
+                }).format(new Date()),
+              );
+              setPagina(1);
+            }}
+          >
+            Hoy
+          </button>
+          <button
+            className="tg-link-button"
+            onClick={() => {
+              setFecha('');
+              setPagina(1);
+            }}
+          >
+            Todas las fechas
+          </button>
+          {datos.actualizando && <span role="status">Actualizando pedidos…</span>}
+        </div>
         <div className="tg-toolbar">
           <FiltrosListado
             filtros={filtros}

@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import date
 from core.listados import filtros_listado
 from typing import Literal
 from fastapi import APIRouter, Depends, Query, Path
@@ -69,11 +70,15 @@ def crear(
 def listar(
     filtros=Depends(filtros_listado),
     estado: Literal["Abierto", "Cerrado", "Cancelado"] | None = None,
+    entrega: Literal["pendiente", "servido"] | None = None,
+    pago: Literal["pendiente", "cobrado"] | None = None,
+    fecha: date | None = None,
     pagina_actual: int = Query(1, ge=1),
     limite: int = Query(10, ge=1, le=100),
     contexto=Depends(obtener_contexto),
     db: Session = Depends(abrir_puerta_bd),
 ):
+    filtros.update({"entrega": entrega, "pago": pago, "fecha": fecha})
     return service.listar_service(db, contexto, pagina_actual, limite, estado, filtros)
 
 

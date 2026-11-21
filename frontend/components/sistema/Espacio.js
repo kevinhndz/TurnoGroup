@@ -96,6 +96,15 @@ function Interior({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [menu, setMenu] = useState(false);
+  const [compacto, setCompacto] = useState(false);
+  useEffect(() => {
+    setCompacto(localStorage.getItem('turno-menu-compacto') === 'si');
+  }, []);
+  function alternarCompacto() {
+    const siguiente = !compacto;
+    setCompacto(siguiente);
+    localStorage.setItem('turno-menu-compacto', siguiente ? 'si' : 'no');
+  }
   const [error, setError] = useState('');
   const [saliendo, setSaliendo] = useState(false);
   const [empresa, setEmpresa] = useState(null);
@@ -207,7 +216,7 @@ function Interior({ children }) {
 
   return (
     <div
-      className="tg-app"
+      className={`tg-app ${compacto ? 'tg-compacto' : ''}`}
       onKeyDown={(event) => {
         if (event.key === 'Escape') setMenu(false);
       }}
@@ -282,6 +291,14 @@ function Interior({ children }) {
       </aside>
       <div className="tg-workspace">
         <header className="tg-app-header">
+          <button
+            className="tg-button tg-secondary tg-compact-toggle"
+            aria-expanded={!compacto}
+            onClick={alternarCompacto}
+          >
+            <Icon name="menu" />
+            {compacto ? 'Mostrar menú' : 'Ocultar menú'}
+          </button>
           <button
             className="tg-icon-button tg-nav-toggle"
             aria-label="Abrir navegación"

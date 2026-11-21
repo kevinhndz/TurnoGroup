@@ -302,6 +302,25 @@ class PedidoService:
             .all()
         )
         respuesta["conteos"] = {**conteos, "Todos": sum(conteos.values())}
+        entregados = repo.listar(db, empresa, sucursal, estado, filtros).filter(
+            Pedidos.estado != "Cancelado",
+            Pedidos.fecha_entrega.is_not(None),
+            Pedidos.fecha_entrega >= Pedidos.fecha_registro,
+        )
+        if db.bind.dialect.name == "sqlite":
+            minutos = (
+                func.julianday(Pedidos.fecha_entrega)
+                - func.julianday(Pedidos.fecha_registro)
+            ) * 1440
+        else:
+            minutos = (
+                func.extract("epoch", Pedidos.fecha_entrega - Pedidos.fecha_registro)
+                / 60
+            )
+        promedio = entregados.order_by(None).with_entities(func.avg(minutos)).scalar()
+        respuesta["promedio_entrega_minutos"] = (
+            round(float(promedio), 1) if promedio is not None else None
+        )
         return respuesta
 
     @staticmethod

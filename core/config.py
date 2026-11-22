@@ -1,12 +1,13 @@
 import os
 from pathlib import Path
 from typing import Literal
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class GuardiaSeguridad(BaseSettings):
 
+    ENTORNO: Literal["desarrollo", "pruebas", "produccion"] = "desarrollo"
     DATABASE_URL: str
     # Puedo indicar otra CA si el proveedor cambia su certificado.
     DATABASE_SSL_ROOT_CERT: str = ""
@@ -38,6 +39,47 @@ class GuardiaSeguridad(BaseSettings):
     PADDLE_PRECIO_SUCURSAL: str = ""
     PADDLE_PRECIO_FINANZAS: str = ""
     SECRET_KEY: str
+
+    @model_validator(mode="after")
+    def revisar_produccion(self):
+        if self.ENTORNO != "produccion":
+            return self
+
+        from urllib.parse import urlsplit
+        from sqlalchemy.engine import make_url
+
+        errores = []
+        if not self.COOKIE_SEGURA:
+            errores.append("COOKIE_SEGURA debe estar activada")
+        for nombre in ("SECRET_KEY", "BACKEND_PROXY_SECRET"):
+            if len(getattr(self, nombre)) < 32:
+                errores.append(nombre + " debe contener al menos 32 caracteres")
+        if self.SECRET_KEY == self.BACKEND_PROXY_SECRET:
+            errores.append("Los secretos de aplicacion y proxy deben ser diferentes")
+        for origen in [self.URL_FRONTEND, *self.ORIGENES_PERMITIDOS]:
+            url = urlsplit(origen)
+            if (
+                url.scheme != "https"
+                or not url.hostname
+                or url.hostname in ("localhost", "127.0.0.1", "::1")
+                or url.username
+                or url.password
+                or url.query
+                or url.fragment
+                or url.path not in ("", "/")
+            ):
+                errores.append("Los origenes de produccion deben ser dominios HTTPS")
+        if self.URL_FRONTEND.rstrip("/") not in self.ORIGENES_PERMITIDOS:
+            errores.append("URL_FRONTEND debe estar en ORIGENES_PERMITIDOS")
+        if make_url(self.DATABASE_URL).get_backend_name() != "postgresql":
+            errores.append("Produccion requiere PostgreSQL")
+        for nombre in ("SMTP_SERVIDOR", "SMTP_USUARIO", "SMTP_CLAVE", "SMTP_REMITENTE"):
+            if not getattr(self, nombre):
+                errores.append(nombre + " es obligatorio en produccion")
+        if errores:
+            # Los mensajes nunca incluyen valores de secretos.
+            raise ValueError("; ".join(errores))
+        return self
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

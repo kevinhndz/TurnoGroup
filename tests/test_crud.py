@@ -230,7 +230,9 @@ def test_editar_no_duplica_identidad(client, datos, modulo):
             == 201
         )
     respuesta = client.patch(ruta + str(creado["id"]), params=params, json=body)
-    assert respuesta.status_code == 409, respuesta.text
+    # Cambiar correo requiere su flujo de confirmacion, incluso si esta duplicado.
+    esperado = 403 if modulo == "usuarios" else 409
+    assert respuesta.status_code == esperado, respuesta.text
 
 
 @pytest.mark.parametrize("valor", ["-1", "NaN", "Infinity", "1.001", "100000000.00"])

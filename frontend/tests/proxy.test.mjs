@@ -57,3 +57,20 @@ test('el proxy exige su secreto para el dominio HTTPS', async () => {
   delete process.env.BACKEND_PROXY_SECRET;
   assert.equal((await POST(solicitud(), parametros)).status, 503);
 });
+
+test('limita bytes antes de terminar de leer una solicitud', async () => {
+  const { leerCuerpo } = await import('../app/api/backend/[...ruta]/route.js');
+  const request = new Request('http://interno', { method: 'POST', body: 'ááá' });
+  const respuesta = await leerCuerpo(request, 5);
+  assert.equal(respuesta.status, 413);
+});
+
+test('conserva el cuerpo permitido', async () => {
+  const { leerCuerpo } = await import('../app/api/backend/[...ruta]/route.js');
+  const request = new Request('http://interno', {
+    method: 'POST',
+    body: '{"nombre":"café"}',
+  });
+  const respuesta = await leerCuerpo(request, 100);
+  assert.equal(respuesta.body, '{"nombre":"café"}');
+});

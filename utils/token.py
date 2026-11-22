@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from secrets import token_urlsafe
 from hashlib import sha256
-from jose import JWTError, jwt
+import jwt
+from jwt import InvalidTokenError
 from core.config import revision as settings
 from core.exceptions import AccesoProhibidoError
 
@@ -21,11 +22,11 @@ def crear_token(user: str, id_user: int, rol: str) -> str:
 def verificar_token(token: str) -> dict:
     try:
         user_data = jwt.decode(
-            token, KEY, algorithms=[settings.ALGORITHM], options={"require_exp": True}
+            token, KEY, algorithms=[settings.ALGORITHM], options={"require": ["exp"]}
         )
         return user_data
 
-    except JWTError:
+    except InvalidTokenError:
         raise AccesoProhibidoError("Token invalido o sesion expirada") from None
 
 

@@ -7,6 +7,7 @@ from core.config import revision
 from utils.hash import encriptar_contrasena
 from utils.token import crear_token_sesion, proteger_token_sesion
 from utils.correo import enviar_recuperacion
+from backend.Correos.service import encolar_correo, procesar_correo
 
 
 class RecuperacionClaveService:
@@ -34,8 +35,12 @@ class RecuperacionClaveService:
                 fecha_inicio=ahora,
                 vencimiento=ahora + timedelta(minutes=15),
             )
-            repo.guardar_recuperacion(db, recuperacion)
-            tareas.add_task(enviar_recuperacion, look_up.correo, codigo)
+            db.add(recuperacion)
+            id_correo = encolar_correo(
+                db, "recuperacion", look_up.correo, codigo, recuperacion.vencimiento
+            )
+            db.commit()
+            tareas.add_task(procesar_correo, db, id_correo, enviar_recuperacion)
 
         return {
             "detail": "Si el correo esta registrado y activo, recibiras instrucciones para recuperar tu clave"

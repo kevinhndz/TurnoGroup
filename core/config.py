@@ -26,6 +26,7 @@ class GuardiaSeguridad(BaseSettings):
     VENTANA_RATE_LIMIT_SEGUNDOS: int = Field(default=60, ge=10, le=3600)
     ORIGENES_PERMITIDOS: list[str] = ["http://localhost:3000"]
     URL_FRONTEND: str = "http://localhost:3000"
+    CORREO_CLAVE_CIFRADO: str = ""
     SMTP_SERVIDOR: str = ""
     SMTP_PUERTO: int = 587
     SMTP_USUARIO: str = ""
@@ -76,6 +77,12 @@ class GuardiaSeguridad(BaseSettings):
         for nombre in ("SMTP_SERVIDOR", "SMTP_USUARIO", "SMTP_CLAVE", "SMTP_REMITENTE"):
             if not getattr(self, nombre):
                 errores.append(nombre + " es obligatorio en produccion")
+        from cryptography.fernet import Fernet
+
+        try:
+            Fernet(self.CORREO_CLAVE_CIFRADO)
+        except (ValueError, TypeError):
+            errores.append("CORREO_CLAVE_CIFRADO debe ser una clave Fernet valida")
         if errores:
             # Los mensajes nunca incluyen valores de secretos.
             raise ValueError("; ".join(errores))

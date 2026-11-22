@@ -100,6 +100,7 @@ export default function Acceso({ modo = 'login' }) {
           correo: datos.get('correo'),
           clave: datos.get('clave'),
           reactivar: confirmarReactivacion.current,
+          codigo_mfa: datos.get('codigo_mfa') || null,
         });
         const volver = new URLSearchParams(window.location.search).get('volver');
         const destino =
@@ -253,6 +254,21 @@ export default function Acceso({ modo = 'login' }) {
                       {visible ? 'Ocultar' : 'Mostrar'}
                     </button>
                   </span>
+                </Campo>
+              )}
+              {modo === 'login' && (
+                <Campo
+                  label="Código del autenticador"
+                  ayuda="Solo si tu cuenta tiene segundo factor activado."
+                >
+                  <input
+                    name="codigo_mfa"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    placeholder="000000"
+                  />
                 </Campo>
               )}
               {modo === 'login' && (

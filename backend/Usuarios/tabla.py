@@ -16,6 +16,8 @@ class Usuarios(miclaseBase, PoderAuditor):
     id = Column(Integer, primary_key=True)
     correo = Column(String(255), unique=True, nullable=False)
     clave_protegida = Column(String(255), nullable=True)
+    mfa_secreto_cifrado = Column(String(255), nullable=True)
+    mfa_ultimo_contador = Column(Integer, nullable=True)
     nombre = Column(String(100), nullable=False)
     rol_plataforma = Column(
         String(30), nullable=False, default="Usuario", server_default="Usuario"

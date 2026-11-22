@@ -7,3 +7,5 @@ En el entorno del frontend configure `PUBLIC_ORIGIN=https://turnos.example`, `BA
 El proxy de Next compara Host y Origin con `PUBLIC_ORIGIN`, reenvia el origen si existe y envia `X-Forwarded-Proto` y su secreto al backend. FastAPI solo acepta el HTTPS reenviado si el secreto coincide. Nginx reemplaza las cabeceras del proxy para que el navegador no pueda imponer sus propios valores.
 
 Compruebe desde el dominio HTTPS que registro e inicio de sesion devuelven una cookie `Secure`, `HttpOnly` y `SameSite=Lax`. Una solicitud directa por HTTP al backend con `X-Forwarded-Proto: https` pero sin el secreto debe recibir 400. Una solicitud con Host u Origin ajeno al dominio debe recibir 403 en Next. Para probar TLS de extremo a extremo se necesita el dominio y certificado reales; este repositorio no configura el servidor Nginx en produccion.
+
+Para los limites compartidos configure REDIS_URL en el backend y TRUST_REVERSE_PROXY=true en Next. Nginx debe ser la unica entrada a Next y reemplazar X-Real-IP con $remote_addr. Redis debe estar en la red privada, con autenticacion, sin puerto publico. Nunca confie en X-Real-IP si Next es accesible directamente desde Internet.

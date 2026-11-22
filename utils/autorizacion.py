@@ -406,7 +406,9 @@ def aplicar_rate_limit(request: Request, ruta: str, metodo: str) -> None:
         return
 
     ventana = revision.VENTANA_RATE_LIMIT_SEGUNDOS
-    if ruta == "/sesiones/iniciar":
+    if ruta == "/usuarios/registro-negocio":
+        limitar_por_ip(request, "registro", revision.LIMITE_REGISTRO, ventana)
+    elif ruta == "/sesiones/iniciar":
         limitar_por_ip(request, "login", revision.LIMITE_LOGIN, ventana)
     elif ruta in (
         "/recuperaciones-clave/solicitar",

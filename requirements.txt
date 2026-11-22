@@ -49,3 +49,4 @@ reportlab==5.1.0
 openpyxl==3.1.5
 
 pyotp==2.12.1
+redis==8.1.0

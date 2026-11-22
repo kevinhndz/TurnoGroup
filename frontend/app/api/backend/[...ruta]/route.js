@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { isIP } from 'node:net';
 
 export const runtime = 'nodejs';
 
@@ -99,6 +100,18 @@ async function comunicar(request, { params }) {
     if (process.env.BACKEND_PROXY_SECRET)
       headers.set('X-TurnoGroup-Proxy-Secret', process.env.BACKEND_PROXY_SECRET);
     if (origen) headers.set('origin', origen);
+    // Nginx debe ser la unica entrada y reemplazar X-Real-IP.
+    if (process.env.TRUST_REVERSE_PROXY === 'true') {
+      const ip = request.headers.get('x-real-ip') || '';
+      if (!isIP(ip))
+        return Response.json({ detail: 'IP del proxy invalida' }, { status: 400 });
+      headers.set('X-TurnoGroup-Client-IP', ip);
+    } else if (process.env.NODE_ENV === 'production') {
+      return Response.json(
+        { detail: 'Falta configurar el proxy de entrada' },
+        { status: 503 },
+      );
+    }
 
     let body;
     if (escritura) {

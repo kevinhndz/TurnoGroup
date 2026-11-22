@@ -14,6 +14,9 @@ class SesionService:
 
     @staticmethod
     def iniciar_sesion_service(json, db):
+        from utils.rate_limiting import limitar_por_cuenta
+
+        limitar_por_cuenta(str(json.correo))
         look_up = repo.buscar_usuario_para_sesion(db, str(json.correo).lower())
         hash_guardado = (
             look_up.clave_protegida

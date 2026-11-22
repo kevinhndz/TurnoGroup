@@ -17,6 +17,8 @@ class GuardiaSeguridad(BaseSettings):
     # Solo Next conoce este valor; asi no confio en cabeceras falsas del cliente.
     BACKEND_PROXY_SECRET: str = ""
     SESION_HORAS: int = Field(default=8, ge=1, le=24)
+    REDIS_URL: str = ""
+    LIMITE_REGISTRO: int = Field(default=3, ge=1, le=100)
     LIMITE_LOGIN: int = Field(default=5, ge=1, le=100)
     LIMITE_RECUPERACION: int = Field(default=3, ge=1, le=100)
     LIMITE_INVITACION: int = Field(default=10, ge=1, le=100)

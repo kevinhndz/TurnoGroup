@@ -14,6 +14,7 @@ def configuracion(**cambios):
         COOKIE_SEGURA=True,
         URL_FRONTEND="https://turno.example",
         ORIGENES_PERMITIDOS=["https://turno.example"],
+        CORREO_CLAVE_CIFRADO="YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXphYmNkZWY=",
         SMTP_SERVIDOR="smtp.example",
         SMTP_USUARIO="usuario",
         SMTP_CLAVE="secreto",

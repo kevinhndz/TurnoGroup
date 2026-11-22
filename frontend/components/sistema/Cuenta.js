@@ -15,6 +15,7 @@ export default function Cuenta() {
   const [error, setError] = useState('');
   const [confirmar, setConfirmar] = useState(false);
   const [ocupado, setOcupado] = useState(false);
+  const [correoPendiente, setCorreoPendiente] = useState(false);
   return (
     <>
       <div className="tg-section-heading">
@@ -38,12 +39,6 @@ export default function Cuenta() {
                 minLength: 1,
                 maxLength: 100,
               },
-              {
-                clave: 'correo',
-                label: 'Correo electrónico',
-                type: 'email',
-                required: true,
-              },
             ]}
             guardar={async (body) => {
               await api(`/usuarios/${sesion.usuario.id}`, { method: 'PATCH', body });
@@ -51,6 +46,59 @@ export default function Cuenta() {
               setAviso('Tu perfil quedó actualizado.');
             }}
           />
+        </section>
+        <section className="tg-card">
+          <h2>Correo de acceso</h2>
+          <p>Correo actual: {sesion.usuario.correo}</p>
+          <p>
+            Para cambiarlo, confirma tu contraseña y el código que enviaremos al correo
+            nuevo.
+          </p>
+          <Formulario
+            key={correoPendiente ? 'confirmar-correo' : 'solicitar-correo'}
+            campos={[
+              correoPendiente
+                ? {
+                    clave: 'codigo',
+                    label: 'Código recibido',
+                    required: true,
+                    maxLength: 128,
+                  }
+                : {
+                    clave: 'correo_nuevo',
+                    label: 'Nuevo correo',
+                    type: 'email',
+                    required: true,
+                  },
+              {
+                clave: 'clave_actual',
+                label: 'Contraseña actual',
+                type: 'password',
+                required: true,
+                maxLength: 128,
+              },
+            ]}
+            texto={correoPendiente ? 'Confirmar correo' : 'Enviar código'}
+            guardar={async (body) => {
+              const accion = correoPendiente ? 'confirmar' : 'solicitar';
+              const respuesta = await api(
+                `/usuarios/${sesion.usuario.id}/correo/${accion}`,
+                { method: 'POST', body },
+              );
+              setAviso(respuesta.detail);
+              if (correoPendiente) {
+                olvidar();
+                router.replace('/login');
+              } else {
+                setCorreoPendiente(true);
+              }
+            }}
+          />
+          {correoPendiente && (
+            <button className="tg-link-button" onClick={() => setCorreoPendiente(false)}>
+              Cambiar correo o reenviar
+            </button>
+          )}
         </section>
         <section className="tg-card">
           <h2>Acceso y sesiones</h2>

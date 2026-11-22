@@ -74,11 +74,7 @@ class UsuarioService:
         if "correo" in cambios:
             cambios["correo"] = str(cambios["correo"]).lower()
             if cambios["correo"] != look_up.correo:
-                usuario_existente = repo.buscar_usuario_por_correo(
-                    db, cambios["correo"]
-                )
-                if usuario_existente is not None:
-                    raise RecursoDuplicadoError("Ya existe un usuario con ese correo")
+                raise HTTPException(403, "Confirma el correo nuevo desde Mi cuenta")
 
         if cambios.get("estado") is False:
             look_up.fecha_desactivacion_voluntaria = None

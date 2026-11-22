@@ -63,3 +63,35 @@ def enviar_invitacion(correo: str, codigo: str) -> bool:
         return True
     except (OSError, smtplib.SMTPException):
         return False
+
+
+def enviar_cambio_correo(correo: str, codigo: str) -> bool:
+    return enviar_mensaje(
+        correo,
+        "Confirma tu correo de Turno Group",
+        "Introduce este codigo en Mi cuenta: "
+        + codigo
+        + "\nVence en 15 minutos. Si no lo solicitaste, ignora este mensaje.",
+    )
+
+
+def enviar_mensaje(correo: str, asunto: str, texto: str) -> bool:
+    mensaje = EmailMessage()
+    mensaje["From"] = revision.SMTP_REMITENTE
+    mensaje["To"] = correo
+    mensaje["Subject"] = asunto
+    mensaje.set_content(texto)
+    try:
+        with smtplib.SMTP(
+            revision.SMTP_SERVIDOR, revision.SMTP_PUERTO, timeout=10
+        ) as servidor:
+            servidor.starttls(context=ssl.create_default_context())
+            servidor.login(revision.SMTP_USUARIO, revision.SMTP_CLAVE)
+            servidor.send_message(mensaje)
+        return True
+    except (OSError, smtplib.SMTPException):
+        return False
+
+
+def enviar_aviso_correo(correo: str, texto: str) -> bool:
+    return enviar_mensaje(correo, "Cambio de correo en Turno Group", texto)

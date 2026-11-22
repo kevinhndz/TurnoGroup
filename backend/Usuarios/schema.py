@@ -81,3 +81,15 @@ class Revisar_Json_Registro_Negocio(BaseModel):
     )
     impuesto: Revisar_Json_Crear_Configuracion_Impuestos | None = None
     model_config = ConfigDict(extra="forbid")
+
+
+class SolicitarCambioCorreo(BaseModel):
+    correo_nuevo: EmailStr
+    clave_actual: SecretStr = Field(min_length=1, max_length=128)
+    model_config = ConfigDict(extra="forbid")
+
+
+class ConfirmarCambioCorreo(BaseModel):
+    codigo: SecretStr = Field(min_length=32, max_length=128)
+    clave_actual: SecretStr = Field(min_length=1, max_length=128)
+    model_config = ConfigDict(extra="forbid")

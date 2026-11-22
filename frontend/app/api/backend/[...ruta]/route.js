@@ -102,20 +102,16 @@ async function comunicar(request, { params }) {
 
     let body;
     if (escritura) {
-      body = await request.text();
-      if (
-        body.length >
-        (ruta[0] === 'productos' && ruta.at(-1) === 'imagen'
+      const limite =
+        ruta[0] === 'productos' && ruta.at(-1) === 'imagen'
           ? 7_100_000
           : ruta[0] === 'productos' && ruta.at(-1) === 'revisar-archivo'
             ? 1_400_000
-            : 1_000_000)
-      ) {
-        return Response.json(
-          { detail: 'La solicitud es demasiado grande' },
-          { status: 413 },
-        );
-      }
+            : 1_000_000;
+      const lectura = await leerCuerpo(request, limite);
+      if (lectura.error)
+        return Response.json({ detail: lectura.error }, { status: lectura.status });
+      body = lectura.body;
       if (body) headers.set('content-type', 'application/json');
     }
 
@@ -131,6 +127,8 @@ async function comunicar(request, { params }) {
     const salida = new Headers({ 'Cache-Control': 'no-store' });
     const tipo = respuesta.headers.get('content-type');
     if (tipo) salida.set('content-type', tipo);
+    const espera = respuesta.headers.get('retry-after');
+    if (espera) salida.set('retry-after', espera);
     const descarga = respuesta.headers.get('content-disposition');
     if (descarga) salida.set('content-disposition', descarga);
     for (const valor of respuesta.headers.getSetCookie())
@@ -162,3 +160,32 @@ export const GET = comunicar;
 export const POST = comunicar;
 export const PATCH = comunicar;
 export const DELETE = comunicar;
+
+export async function leerCuerpo(request, limite) {
+  if (!request.body) return { body: '' };
+  const lector = request.body.getReader();
+  const partes = [];
+  let total = 0;
+  let vencido = false;
+  const reloj = setTimeout(() => {
+    vencido = true;
+    void lector.cancel();
+  }, 15000);
+  try {
+    while (true) {
+      const { value, done } = await lector.read();
+      if (vencido) return { error: 'Tiempo de lectura agotado', status: 408 };
+      if (done) break;
+      total += value.byteLength;
+      if (total > limite) {
+        await lector.cancel();
+        return { error: 'La solicitud es demasiado grande', status: 413 };
+      }
+      partes.push(value);
+    }
+    return { body: Buffer.concat(partes, total).toString('utf8') };
+  } finally {
+    clearTimeout(reloj);
+    lector.releaseLock();
+  }
+}

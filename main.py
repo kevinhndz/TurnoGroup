@@ -47,6 +47,10 @@ app = FastAPI(
 
 from backend.Bitacora.router import router as routerbitacora
 
+from utils.solicitudes import LimitarSolicitudes
+
+app.add_middleware(LimitarSolicitudes)
+
 app.include_router(routerbitacora)
 app.include_router(routerpedidos)
 app.include_router(routercajas)

@@ -8,6 +8,7 @@ def configuracion(**cambios):
     datos = dict(
         _env_file=None,
         ENTORNO="produccion",
+        REDIS_URL="redis://redis:6379/0",
         DATABASE_URL="postgresql://app:clave@db.example/turno",
         SECRET_KEY="a" * 40,
         BACKEND_PROXY_SECRET="b" * 40,

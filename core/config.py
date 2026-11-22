@@ -50,6 +50,8 @@ class GuardiaSeguridad(BaseSettings):
         from sqlalchemy.engine import make_url
 
         errores = []
+        if not self.REDIS_URL:
+            errores.append("REDIS_URL es obligatorio para limites compartidos")
         if not self.COOKIE_SEGURA:
             errores.append("COOKIE_SEGURA debe estar activada")
         for nombre in ("SECRET_KEY", "BACKEND_PROXY_SECRET"):

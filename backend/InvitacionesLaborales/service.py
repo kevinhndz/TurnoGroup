@@ -9,6 +9,7 @@ from backend.VinculosLaborales.tabla import VinculosLaborales
 from core.config import revision
 from utils.token import crear_token_sesion, proteger_token_sesion
 from utils.correo import enviar_invitacion
+from backend.Correos.service import encolar_correo, procesar_correo
 
 
 class InvitacionLaboralService:
@@ -77,8 +78,11 @@ class InvitacionLaboralService:
                     id_invitacion=invitacion.id, id_sucursal=id_sucursal
                 )
             )
+        id_correo = encolar_correo(
+            db, "invitacion", correo, codigo, invitacion.vencimiento
+        )
         db.commit()
-        tareas.add_task(enviar_invitacion, correo, codigo)
+        tareas.add_task(procesar_correo, db, id_correo, enviar_invitacion)
         return InvitacionLaboralService.respuesta_invitacion(invitacion, db)
 
     @staticmethod

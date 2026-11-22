@@ -51,6 +51,10 @@ from utils.solicitudes import LimitarSolicitudes
 
 app.add_middleware(LimitarSolicitudes)
 
+from utils.auditoria_seguridad import AuditoriaSeguridad
+
+app.add_middleware(AuditoriaSeguridad)
+
 app.include_router(routerbitacora)
 app.include_router(routerpedidos)
 app.include_router(routercajas)

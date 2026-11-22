@@ -94,3 +94,38 @@ def completar_registro_negocio(
     # Guardo el token solo en la cookie para que JavaScript no pueda leerlo.
     poner_cookie(response, token, vencimiento)
     return respuesta
+
+
+from fastapi import BackgroundTasks
+from backend.Usuarios.schema import SolicitarCambioCorreo, ConfirmarCambioCorreo
+from backend.Usuarios.seguridad import SeguridadUsuarioService
+from backend.Sesiones.router import quitar_cookie
+
+
+@router.post("/{id}/correo/solicitar", status_code=202)
+def solicitar_cambio_correo(
+    id: int,
+    json: SolicitarCambioCorreo,
+    tareas: BackgroundTasks,
+    sesion=Depends(obtener_sesion),
+    db: Session = Depends(abrir_puerta_bd),
+):
+    if sesion[1].id != id:
+        raise HTTPException(403, "Solo puedes cambiar tu propio correo")
+    return SeguridadUsuarioService.solicitar(json, id, db, tareas)
+
+
+@router.post("/{id}/correo/confirmar")
+def confirmar_cambio_correo(
+    id: int,
+    json: ConfirmarCambioCorreo,
+    tareas: BackgroundTasks,
+    response: Response,
+    sesion=Depends(obtener_sesion),
+    db: Session = Depends(abrir_puerta_bd),
+):
+    if sesion[1].id != id:
+        raise HTTPException(403, "Solo puedes cambiar tu propio correo")
+    resultado = SeguridadUsuarioService.confirmar(json, id, db, tareas)
+    quitar_cookie(response)
+    return resultado

@@ -10,6 +10,8 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
 # Rutas conocidas por la capa de autorizacion.
 RUTAS_CON_PERMISO = {
+    ("POST", "/usuarios/{id}/correo/solicitar"),
+    ("POST", "/usuarios/{id}/correo/confirmar"),
     ("GET", "/finanzas/dashboard"),
     ("POST", "/productos/revisar-archivo"),
     ("POST", "/suscripciones/desactivar-cuenta"),
@@ -406,7 +408,9 @@ def aplicar_rate_limit(request: Request, ruta: str, metodo: str) -> None:
         return
 
     ventana = revision.VENTANA_RATE_LIMIT_SEGUNDOS
-    if ruta == "/sesiones/iniciar":
+    if ruta in ("/usuarios/{id}/correo/solicitar", "/usuarios/{id}/correo/confirmar"):
+        limitar_por_ip(request, "cambio_correo", 5, ventana)
+    elif ruta == "/sesiones/iniciar":
         limitar_por_ip(request, "login", revision.LIMITE_LOGIN, ventana)
     elif ruta in (
         "/recuperaciones-clave/solicitar",

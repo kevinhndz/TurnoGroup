@@ -61,11 +61,15 @@ def procesar_correo(db, id, enviar=None):
             from utils.correo import (
                 enviar_recuperacion,
                 enviar_invitacion,
+                enviar_cambio_correo,
+                enviar_aviso_correo,
             )
 
             enviar = {
                 "recuperacion": enviar_recuperacion,
                 "invitacion": enviar_invitacion,
+                "cambio_correo": enviar_cambio_correo,
+                "aviso_correo": enviar_aviso_correo,
             }[mensaje.tipo]
         correcto = enviar(datos["correo"], datos["codigo"]) is not False
     except (InvalidToken, ValueError, KeyError):

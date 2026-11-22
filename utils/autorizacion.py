@@ -410,6 +410,8 @@ def aplicar_rate_limit(request: Request, ruta: str, metodo: str) -> None:
     ventana = revision.VENTANA_RATE_LIMIT_SEGUNDOS
     if ruta in ("/usuarios/{id}/correo/solicitar", "/usuarios/{id}/correo/confirmar"):
         limitar_por_ip(request, "cambio_correo", 5, ventana)
+    elif ruta == "/usuarios/registro-negocio":
+        limitar_por_ip(request, "registro", revision.LIMITE_REGISTRO, ventana)
     elif ruta == "/sesiones/iniciar":
         limitar_por_ip(request, "login", revision.LIMITE_LOGIN, ventana)
     elif ruta in (

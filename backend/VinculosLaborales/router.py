@@ -1,9 +1,8 @@
-from core.listados import filtros_listado
-from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query, Response, status
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
+
 from backend.VinculosLaborales.schema import (
     RespuestaAsignacionSucursal,
     RespuestaVinculoLaboral,
@@ -13,7 +12,10 @@ from backend.VinculosLaborales.schema import (
     Revisar_Json_Editar_Vinculo_Laboral,
 )
 from backend.VinculosLaborales.service import VinculoLaboralService as service
+from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_empresa
 
 router = APIRouter(prefix="/vinculos-laborales", tags=["Vinculos Laborales"])
 
@@ -67,6 +69,7 @@ def quitar_asignacion_sucursal(
     db: Session = Depends(abrir_puerta_bd),
 ):
     service.quitar_asignacion_sucursal_service(id, id_sucursal, id_empresa, db)
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

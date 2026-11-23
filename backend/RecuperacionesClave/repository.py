@@ -3,7 +3,6 @@ from backend.Usuarios.tabla import Usuarios
 
 
 class RecuperacionClaveRepository:
-
     @staticmethod
     def buscar_usuario_para_recuperacion(db, correo):
         return (
@@ -44,4 +43,20 @@ class RecuperacionClaveRepository:
     @staticmethod
     def guardar_recuperacion(db, recuperacion):
         db.add(recuperacion)
-        db.commit()
+        db.flush()
+
+    @staticmethod
+    def agregar(db, registro):
+        db.add(registro)
+
+        return registro
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro

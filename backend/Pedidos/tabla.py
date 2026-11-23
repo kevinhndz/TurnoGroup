@@ -1,14 +1,15 @@
 from sqlalchemy import (
     Boolean,
-    Column,
-    Integer,
-    String,
-    ForeignKey,
-    DateTime,
-    Numeric,
-    UniqueConstraint,
     CheckConstraint,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    UniqueConstraint,
 )
+
 from database.almacen import miclaseBase
 
 

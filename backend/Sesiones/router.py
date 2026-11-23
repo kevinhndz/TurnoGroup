@@ -1,14 +1,17 @@
 from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
+
+from backend.Sesiones.repository import SesionRepository
 from backend.Sesiones.schema import (
-    Revisar_Json_Iniciar_Sesion,
     RespuestaSesion,
+    Revisar_Json_Iniciar_Sesion,
     Revisar_Json_Seleccionar_Contexto,
 )
 from backend.Sesiones.service import SesionService as service
 from core.config import revision
+from database.almacen import abrir_puerta_bd
 from utils.autorizacion import obtener_sesion, revisar_solicitud_sesion
 
 router = APIRouter(
@@ -54,6 +57,7 @@ def iniciar_sesion(
     sesion, usuario, token = service.iniciar_sesion_service(json, db)
     request.state.sesion_validada = (sesion, usuario)
     poner_cookie(response, token, sesion.vencimiento)
+
     return service.respuesta_sesion_service(sesion, usuario, db)
 
 
@@ -64,6 +68,7 @@ def consultar_sesion(
     db: Session = Depends(abrir_puerta_bd),
 ):
     response.headers["Cache-Control"] = "no-store"
+
     return service.respuesta_sesion_service(sesion[0], sesion[1], db)
 
 
@@ -75,6 +80,7 @@ def renovar_sesion(
 ):
     token = service.renovar_sesion_service(sesion[0], db)
     poner_cookie(response, token, sesion[0].vencimiento)
+
     return service.respuesta_sesion_service(sesion[0], sesion[1], db)
 
 
@@ -83,6 +89,7 @@ def cerrar_sesion(request: Request, db: Session = Depends(abrir_puerta_bd)):
     service.cerrar_sesion_service(request.cookies.get("sesion_turnogroup"), db)
     response = Response(status_code=204)
     quitar_cookie(response)
+
     return response
 
 
@@ -93,6 +100,7 @@ def revocar_sesiones(
     service.revocar_sesiones_service(sesion[1].id, db)
     response = Response(status_code=204)
     quitar_cookie(response)
+
     return response
 
 
@@ -105,6 +113,7 @@ def seleccionar_contexto(
 ):
     token = service.seleccionar_contexto_service(json, sesion[0], sesion[1], db)
     poner_cookie(response, token, sesion[0].vencimiento)
+
     return service.respuesta_sesion_service(sesion[0], sesion[1], db)
 
 
@@ -112,32 +121,36 @@ def seleccionar_contexto(
 def consultar_mis_vinculos(
     sesion=Depends(obtener_sesion), db: Session = Depends(abrir_puerta_bd)
 ):
-    from backend.Sesiones.repository import SesionRepository
-
     vinculos = SesionRepository.listar_vinculos_usuario(db, sesion[1].id)
-    from backend.Empresas.tabla import Empresas
 
-    empresas = dict(
-        db.query(Empresas.id, Empresas.nombre)
-        .filter(Empresas.id.in_([vinculo.id_empresa for vinculo in vinculos]))
-        .all()
-    )
-    return [
-        {
-            "id": vinculo.id,
-            "id_empresa": vinculo.id_empresa,
-            "nombre_empresa": empresas.get(vinculo.id_empresa),
-            "rol": vinculo.rol,
-            "sucursales": [
+    elementos = []
+
+    for vinculo_actual in vinculos:
+        elementos.append(vinculo_actual.id_empresa)
+    empresas = dict(SesionRepository.listar_nombres_empresas(db, elementos))
+    elementos_2 = []
+
+    for vinculo_actual_2 in vinculos:
+        elementos_3 = []
+
+        for sucursal_actual in SesionRepository.listar_sucursales_autorizadas(
+            db, vinculo_actual_2
+        ):
+            elementos_3.append(
                 {
-                    "id": sucursal.id,
-                    "nombre": sucursal.nombre,
-                    "direccion": sucursal.direccion,
+                    "id": sucursal_actual.id,
+                    "nombre": sucursal_actual.nombre,
+                    "direccion": sucursal_actual.direccion,
                 }
-                for sucursal in SesionRepository.listar_sucursales_autorizadas(
-                    db, vinculo
-                )
-            ],
-        }
-        for vinculo in vinculos
-    ]
+            )
+        elementos_2.append(
+            {
+                "id": vinculo_actual_2.id,
+                "id_empresa": vinculo_actual_2.id_empresa,
+                "nombre_empresa": empresas.get(vinculo_actual_2.id_empresa),
+                "rol": vinculo_actual_2.rol,
+                "sucursales": elementos_3,
+            }
+        )
+
+    return elementos_2

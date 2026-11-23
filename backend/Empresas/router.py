@@ -1,16 +1,18 @@
-from core.listados import filtros_listado
-from utils.autorizacion import obtener_contexto, obtener_sesion
-from fastapi import APIRouter, Depends, Query, Path
-from sqlalchemy.orm import Session
 from typing import Annotated
-from database.almacen import abrir_puerta_bd
+
+from fastapi import APIRouter, Depends, Path, Query
+from sqlalchemy.orm import Session
+
 from backend.Empresas.schema import (
-    Revisar_Json_Nueva_Empresa,
     NuevaEmpresaRespuesta,
     Revisar_Json_Editar_Empresa,
+    Revisar_Json_Nueva_Empresa,
 )
 from backend.Empresas.service import EmpresaService as service
+from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_contexto, obtener_sesion
 
 router = APIRouter(prefix="/empresas", tags=["Empresas"])
 

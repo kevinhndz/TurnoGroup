@@ -1,4 +1,5 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer
+
 from database.almacen import miclaseBase
 
 

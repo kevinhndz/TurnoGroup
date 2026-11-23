@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
+
 from backend.TiposServicio.tabla import TiposServicio
 
 
 class TipoServicioRepository:
-
     @staticmethod
     def listar_tipos_servicio(db: Session, pagina_actual: int, limite: int):
         salto = (pagina_actual - 1) * limite
@@ -16,6 +16,7 @@ class TipoServicioRepository:
             .limit(limite)
             .all()
         )
+
         return total, lista_tipos_servicio
 
     @staticmethod

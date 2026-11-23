@@ -1,16 +1,15 @@
-from core.listados import pagina_listado
+from backend.Empresas.tabla import Empresas
 from backend.InvitacionesLaborales.tabla import (
     InvitacionesLaborales,
     SucursalesInvitacion,
 )
-from backend.VinculosLaborales.tabla import VinculosLaborales, AsignacionesSucursales
-from backend.Empresas.tabla import Empresas
 from backend.Sucursales.tabla import Sucursales
 from backend.Usuarios.tabla import Usuarios
+from backend.VinculosLaborales.tabla import AsignacionesSucursales, VinculosLaborales
+from core.listados import pagina_listado
 
 
 class InvitacionLaboralRepository:
-
     @staticmethod
     def bloquear_empresa(db, id_empresa):
         return (
@@ -44,18 +43,23 @@ class InvitacionLaboralRepository:
         consulta = db.query(InvitacionesLaborales).filter(
             InvitacionesLaborales.id_empresa == id_empresa
         )
+
         return pagina_listado(
             consulta, InvitacionesLaborales, pagina_actual, limite, filtros
         )
 
     @staticmethod
     def sucursales_invitacion(db, id):
-        return [
-            fila.id_sucursal
-            for fila in db.query(SucursalesInvitacion)
+        elementos = []
+
+        for fila_actual in (
+            db.query(SucursalesInvitacion)
             .filter(SucursalesInvitacion.id_invitacion == id)
             .all()
-        ]
+        ):
+            elementos.append(fila_actual.id_sucursal)
+
+        return elementos
 
     @staticmethod
     def buscar_sucursal(db, id, id_empresa):
@@ -90,8 +94,10 @@ class InvitacionLaboralRepository:
         consulta = db.query(VinculosLaborales).filter(
             VinculosLaborales.id_usuario == id_usuario
         )
+
         if id_empresa is not None:
             consulta = consulta.filter(VinculosLaborales.id_empresa != id_empresa)
+
         return consulta.first()
 
     @staticmethod
@@ -108,6 +114,7 @@ class InvitacionLaboralRepository:
         db.query(AsignacionesSucursales).filter(
             AsignacionesSucursales.id_vinculo_laboral == id_vinculo
         ).delete(synchronize_session="fetch")
+
         for id_sucursal in sucursales:
             db.add(
                 AsignacionesSucursales(
@@ -130,3 +137,19 @@ class InvitacionLaboralRepository:
             )
             .first()
         )
+
+    @staticmethod
+    def agregar(db, registro):
+        db.add(registro)
+
+        return registro
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro

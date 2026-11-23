@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
@@ -17,10 +18,12 @@ class Revisar_Json_Crear_Reserva(BaseModel):
     def normalizar_fecha(cls, fecha):
         if fecha.tzinfo is None:
             raise ValueError("Indica una fecha con zona horaria")
+
         return fecha.astimezone(timezone.utc).replace(tzinfo=None)
 
     @model_validator(mode="after")
     def validar_horario(self):
         if self.fin <= self.inicio:
             raise ValueError("El fin debe ser posterior al inicio")
+
         return self

@@ -1,11 +1,16 @@
 from io import BytesIO
 from textwrap import wrap
+from xml.sax.saxutils import escape
+
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
 
 def crear_pdf(item):
-    from reportlab.pdfgen import canvas
-    from reportlab.lib.pagesizes import A4
-
     salida = BytesIO()
     pdf = canvas.Canvas(salida, pagesize=A4)
     pdf.setTitle(f"Comprobante de prueba TG-{item.id}")
@@ -29,18 +34,17 @@ def crear_pdf(item):
     ]
     pdf.setFont("Helvetica", 11)
     y = 707
+
     for linea in lineas:
         for parte in wrap(linea, width=80) or [""]:
             pdf.drawString(50, y, parte)
             y -= 21
     pdf.save()
+
     return salida.getvalue()
 
 
 def crear_excel(filas):
-    from openpyxl import Workbook
-    from openpyxl.styles import Font
-
     libro = Workbook()
     hoja = libro.active
     hoja.title = "Comprobantes de prueba"
@@ -58,6 +62,7 @@ def crear_excel(filas):
             "Detalle",
         ]
     )
+
     for item in filas:
         hoja.append(
             [
@@ -72,27 +77,27 @@ def crear_excel(filas):
                 item.detalle,
             ]
         )
+
         for celda in hoja[hoja.max_row]:
             if isinstance(celda.value, str):
                 celda.data_type = "s"
+
         for columna in (3, 5, 6):
             hoja.cell(hoja.max_row, columna).number_format = "dd/mm/yyyy"
+
     for celda in hoja[2]:
         celda.font = Font(bold=True)
     hoja.freeze_panes = "A3"
+
     for columna in "ABCDEFGHI":
         hoja.column_dimensions[columna].width = 24 if columna != "I" else 65
     salida = BytesIO()
     libro.save(salida)
+
     return salida.getvalue()
 
 
 def crear_historial_pdf(filas):
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-    from reportlab.lib.styles import getSampleStyleSheet
-    from reportlab.lib.pagesizes import A4
-    from xml.sax.saxutils import escape
-
     salida = BytesIO()
     estilos = getSampleStyleSheet()
     contenido = [
@@ -100,6 +105,7 @@ def crear_historial_pdf(filas):
         Paragraph("DOCUMENTOS DE PRUEBA - SIN VALIDEZ FISCAL", estilos["Normal"]),
         Spacer(1, 20),
     ]
+
     for item in filas:
         contenido.extend(
             [
@@ -118,4 +124,5 @@ def crear_historial_pdf(filas):
             ]
         )
     SimpleDocTemplate(salida, pagesize=A4).build(contenido)
+
     return salida.getvalue()

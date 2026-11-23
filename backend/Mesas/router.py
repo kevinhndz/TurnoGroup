@@ -1,17 +1,19 @@
-from core.listados import filtros_listado
-from utils.autorizacion import obtener_empresa, obtener_sucursal
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
+
 from backend.Mesas.schema import (
     RespuestaMesa,
-    Revisar_Json_Preparar_Mesas,
     Revisar_Json_Crear_Mesa,
     Revisar_Json_Editar_Mesa,
+    Revisar_Json_Preparar_Mesas,
 )
 from backend.Mesas.service import MesaService as service
+from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_empresa, obtener_sucursal
 
 router = APIRouter(prefix="/mesas", tags=["Mesas"])
 

@@ -1,6 +1,8 @@
-from datetime import datetime, time, timedelta, timezone
-from decimal import Decimal
+from collections import defaultdict
+from datetime import date, datetime, time, timedelta, timezone
+from decimal import ROUND_DOWN, Decimal
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
 from backend.Finanzas.repository import FinanzasRepository as repo
 from backend.Suscripciones.service import SuscripcionService
 from core.operaciones import exigir
@@ -16,6 +18,7 @@ class FinanzasService:
             "Consulta un periodo de hasta 366 dias",
         )
         negocio = repo.empresa(db, empresa)
+
         try:
             zona = ZoneInfo(negocio.zona_horaria)
         except ZoneInfoNotFoundError:
@@ -32,10 +35,12 @@ class FinanzasService:
         )
         sucursal = contexto["id_sucursal"] if solo_sucursal else None
         exigir(not solo_sucursal or sucursal, "Selecciona una sucursal", 403)
+
         if filas is None:
             filas = repo.ventas(db, empresa, inicio, fin, sucursal)
         grupos = {}
         locales = {}
+
         for pedido in filas:
             fecha = (
                 pedido.fecha_pago.replace(tzinfo=timezone.utc).astimezone(zona).date()
@@ -51,6 +56,7 @@ class FinanzasService:
                     )
                 )
             )
+
             for tabla, llave in [(grupos, clave), (locales, str(pedido.id_sucursal))]:
                 grupo = tabla.setdefault(
                     llave,
@@ -72,34 +78,52 @@ class FinanzasService:
                         else "ventas_sin_descuento"
                     )
                 ] += pedido.total
-        convertir = lambda datos: {
-            k: str(v) if isinstance(v, Decimal) else v for k, v in datos.items()
-        }
+
+        def convertir(datos):
+            campos = {}
+
+            for k_actual, v_actual in datos.items():
+                campos[k_actual] = (
+                    str(v_actual) if isinstance(v_actual, Decimal) else v_actual
+                )
+
+            return campos
+
+        elementos_4 = []
+
+        for k_actual_2, v_actual_2 in grupos.items():
+            elementos_4.append({"periodo": k_actual_2, **convertir(v_actual_2)})
+        elementos_5 = []
+
+        for k_actual_3, v_actual_3 in locales.items():
+            elementos_5.append(
+                {"id_sucursal": int(k_actual_3), **convertir(v_actual_3)}
+            )
+        total_calculado = Decimal("0")
+
+        for pedido_actual in filas:
+            total_calculado += pedido_actual.total
+
         return {
             "desde": desde,
             "hasta": hasta,
             "periodo": periodo,
             "moneda": negocio.codigo_moneda,
-            "total_cobrado": str(sum((pedido.total for pedido in filas), Decimal("0"))),
+            "total_cobrado": str(total_calculado),
             "pedidos": len(filas),
-            "series": [{"periodo": k, **convertir(v)} for k, v in grupos.items()],
-            "sucursales": [
-                {"id_sucursal": int(k), **convertir(v)} for k, v in locales.items()
-            ],
+            "series": elementos_4,
+            "sucursales": elementos_5,
         }
 
     @staticmethod
     def dashboard_service(
         db, contexto, periodo, anio, solo_sucursal, desde=None, hasta=None
     ):
-        from collections import defaultdict
-        from decimal import ROUND_DOWN
-        from datetime import date
-
         empresa = contexto["id_empresa"]
         exigir(contexto["rol"] == "Gerente" and empresa, "No estas autorizado", 403)
         SuscripcionService.exigir_finanzas(db, empresa)
         negocio = repo.empresa(db, empresa)
+
         try:
             zona = ZoneInfo(negocio.zona_horaria)
         except ZoneInfoNotFoundError:
@@ -144,54 +168,82 @@ class FinanzasService:
             desde - timedelta(days=duracion), desde - timedelta(days=1)
         )
         previas = repo.ventas(db, empresa, previo_inicio, previo_fin, sucursal)
-        anterior = sum((item.total for item in previas), Decimal("0"))
-        total = sum((item.total for item in filas), Decimal("0"))
-        series = {item["periodo"]: item for item in respuesta["series"]}
-        respuesta["series"] = [
-            series.get(
-                (desde + timedelta(days=indice)).isoformat(),
-                {
-                    "periodo": (desde + timedelta(days=indice)).isoformat(),
-                    "pedidos": 0,
-                    "ventas": "0.00",
-                    "descuentos": "0.00",
-                    "ventas_con_descuento": "0.00",
-                    "ventas_sin_descuento": "0.00",
-                },
+        total_calculado_2 = Decimal("0")
+
+        for item_actual in previas:
+            total_calculado_2 += item_actual.total
+        anterior = total_calculado_2
+        total_calculado_3 = Decimal("0")
+
+        for item_actual_2 in filas:
+            total_calculado_3 += item_actual_2.total
+        total = total_calculado_3
+        campos_2 = {}
+
+        for item_actual_4 in respuesta["series"]:
+            campos_2[item_actual_4["periodo"]] = item_actual_4
+        series = campos_2
+        elementos = []
+
+        for indice_actual in range(duracion):
+            elementos.append(
+                series.get(
+                    (desde + timedelta(days=indice_actual)).isoformat(),
+                    {
+                        "periodo": (desde + timedelta(days=indice_actual)).isoformat(),
+                        "pedidos": 0,
+                        "ventas": "0.00",
+                        "descuentos": "0.00",
+                        "ventas_con_descuento": "0.00",
+                        "ventas_sin_descuento": "0.00",
+                    },
+                )
             )
-            for indice in range(duracion)
-        ]
+        respuesta["series"] = elementos
         categorias = defaultdict(lambda: {"ventas": Decimal("0"), "unidades": 0})
         detalles = defaultdict(list)
+
         for item, categoria in repo.detalles_ventas(db, empresa, inicio, fin, sucursal):
             detalles[item.id_pedido].append((item, categoria or "Sin categoría"))
+
         for pedido in filas:
             lineas = detalles[pedido.id]
-            base = sum(
-                (item.precio_unitario * item.cantidad for item, _ in lineas),
-                Decimal("0"),
-            )
-            exactos = [
-                (
-                    pedido.total * item.precio_unitario * item.cantidad / base
+            total_calculado_4 = Decimal("0")
+
+            for item_actual_3, __actual in lineas:
+                total_calculado_4 += (
+                    item_actual_3.precio_unitario * item_actual_3.cantidad
+                )
+            base = total_calculado_4
+            exactos = []
+
+            for item_actual_5, __actual_2 in lineas:
+                exactos.append(
+                    pedido.total
+                    * item_actual_5.precio_unitario
+                    * item_actual_5.cantidad
+                    / base
                     if base
                     else Decimal("0")
                 )
-                for item, _ in lineas
-            ]
-            importes = [
-                valor.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
-                for valor in exactos
-            ]
+            importes = []
+
+            for valor_actual in exactos:
+                importes.append(
+                    valor_actual.quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+                )
             centavos = int((pedido.total - sum(importes, Decimal("0"))) * 100)
+
             for indice in sorted(
                 range(len(lineas)), key=lambda i: exactos[i] - importes[i], reverse=True
             )[: max(0, centavos)]:
                 importes[indice] += Decimal("0.01")
+
             for (item, categoria), importe in zip(lineas, importes):
                 categorias[categoria]["ventas"] += importe
                 categorias[categoria]["unidades"] += item.cantidad
         horas = {"actual": [0] * 24, "anterior": [0] * 24}
+
         for clave, pedidos in (("actual", filas), ("anterior", previas)):
             for item in pedidos:
                 horas[clave][
@@ -199,15 +251,46 @@ class FinanzasService:
                 ] += 1
         inicio_anio, fin_anio = limites(date(anio, 1, 1), date(anio, 12, 31))
         anual = [Decimal("0")] * 12
+
         for item in repo.ventas(db, empresa, inicio_anio, fin_anio, sucursal):
             anual[
                 item.fecha_pago.replace(tzinfo=timezone.utc).astimezone(zona).month - 1
             ] += item.total
-        locales = {item.id: item for item in repo.sucursales(db, empresa)}
+        locales = {}
+
+        for item_actual_6 in repo.sucursales(db, empresa):
+            locales[item_actual_6.id] = item_actual_6
+
         for item in respuesta["sucursales"]:
             local = locales.get(item["id_sucursal"])
             item["nombre"] = local.nombre if local else "Sucursal"
             item["direccion"] = local.direccion if local else ""
+        elementos_2 = []
+
+        for nombre_actual, valor_actual_2 in sorted(
+            categorias.items(), key=lambda item: item[1]["ventas"], reverse=True
+        ):
+            elementos_2.append(
+                {
+                    "nombre": nombre_actual,
+                    "ventas": str(valor_actual_2["ventas"]),
+                    "unidades": valor_actual_2["unidades"],
+                }
+            )
+        elementos_3 = []
+
+        for valor_actual_3 in anual:
+            elementos_3.append(str(valor_actual_3))
+        campos_3 = {}
+        campos_4 = {}
+
+        for clave_27_30, rango_actual in rangos.items():
+            campos_4[clave_27_30] = limites(*rango_actual)
+
+        for clave_actual, valor_actual_4 in repo.totales_periodos(
+            db, empresa, sucursal, campos_4
+        ).items():
+            campos_3[clave_actual] = str(valor_actual_4)
         respuesta.update(
             {
                 "actualizado": datetime.now(timezone.utc).isoformat(),
@@ -223,22 +306,11 @@ class FinanzasService:
                     if anterior
                     else None
                 ),
-                "categorias": [
-                    {
-                        "nombre": nombre,
-                        "ventas": str(valor["ventas"]),
-                        "unidades": valor["unidades"],
-                    }
-                    for nombre, valor in sorted(
-                        categorias.items(),
-                        key=lambda item: item[1]["ventas"],
-                        reverse=True,
-                    )
-                ],
+                "categorias": elementos_2,
                 "horas": horas,
                 "anio": anio,
                 "anio_actual": hoy.year,
-                "anual": [str(valor) for valor in anual],
+                "anual": elementos_3,
                 "total_anual": str(sum(anual, Decimal("0"))),
                 "promedio_mensual": str(
                     (
@@ -246,15 +318,8 @@ class FinanzasService:
                         / (hoy.month if anio == hoy.year else 12)
                     ).quantize(Decimal("0.01"))
                 ),
-                "periodos": {
-                    clave: str(valor)
-                    for clave, valor in repo.totales_periodos(
-                        db,
-                        empresa,
-                        sucursal,
-                        {clave: limites(*rango) for clave, rango in rangos.items()},
-                    ).items()
-                },
+                "periodos": campos_3,
             }
         )
+
         return respuesta

@@ -1,8 +1,8 @@
-from utils.autorizacion import obtener_empresa, obtener_sucursal
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query, Response
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
+
 from backend.DisponibilidadProductos.schema import (
     RespuestaDisponibilidadProducto,
     Revisar_Json_Crear_Disponibilidad_Producto,
@@ -12,6 +12,8 @@ from backend.DisponibilidadProductos.service import (
     DisponibilidadProductoService as service,
 )
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_empresa, obtener_sucursal
 
 router = APIRouter(
     prefix="/disponibilidad-productos", tags=["Disponibilidad de productos"]
@@ -82,4 +84,5 @@ def retirar_disponibilidad_producto(
     service.retirar_disponibilidad_producto_service(
         id_producto, id_sucursal, id_empresa, db
     )
+
     return Response(status_code=204)

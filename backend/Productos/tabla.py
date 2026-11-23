@@ -1,7 +1,4 @@
-from database.base import PoderAuditor
-from database.almacen import miclaseBase
 from sqlalchemy import (
-    UniqueConstraint,
     Boolean,
     Column,
     ForeignKey,
@@ -9,7 +6,11 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    UniqueConstraint,
 )
+
+from database.almacen import miclaseBase
+from database.base import PoderAuditor
 
 
 class Productos(miclaseBase, PoderAuditor):

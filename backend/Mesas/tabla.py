@@ -1,4 +1,5 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint, Boolean
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
+
 from database.almacen import miclaseBase
 from database.base import PoderAuditor
 

@@ -1,21 +1,22 @@
-from core.listados import filtros_listado
-from fastapi import Response
-from backend.Sesiones.schema import RespuestaSesion
-from backend.Sesiones.router import poner_cookie
-from backend.InvitacionesLaborales.schema import Revisar_Json_Registro_Invitacion
 from typing import Annotated
-from fastapi import APIRouter, Depends, BackgroundTasks, Path, Query
+
+from fastapi import APIRouter, BackgroundTasks, Depends, Path, Query, Response
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
-from utils.autorizacion import obtener_contexto, obtener_empresa, obtener_sesion
+
 from backend.InvitacionesLaborales.schema import (
-    Revisar_Json_Crear_Invitacion_Laboral,
-    Revisar_Json_Aceptar_Invitacion_Laboral,
     RespuestaInvitacionLaboral,
+    Revisar_Json_Aceptar_Invitacion_Laboral,
+    Revisar_Json_Crear_Invitacion_Laboral,
+    Revisar_Json_Registro_Invitacion,
 )
 from backend.InvitacionesLaborales.service import InvitacionLaboralService as service
+from backend.Sesiones.router import poner_cookie
+from backend.Sesiones.schema import RespuestaSesion
 from backend.VinculosLaborales.schema import RespuestaVinculoLaboral
+from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_contexto, obtener_empresa, obtener_sesion
 
 router = APIRouter(prefix="/invitaciones-laborales", tags=["Invitaciones laborales"])
 
@@ -78,4 +79,5 @@ def registrar_invitado(
 ):
     respuesta, token, vencimiento = service.registrar_invitado_service(json, db)
     poner_cookie(response, token, vencimiento)
+
     return respuesta

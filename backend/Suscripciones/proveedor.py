@@ -19,4 +19,5 @@ def exigir_simulacion():
 
 def datos_tarjeta_prueba(tipo):
     exigir_simulacion()
+
     return TARJETAS_PRUEBA[tipo]

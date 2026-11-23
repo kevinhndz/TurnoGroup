@@ -1,8 +1,8 @@
-from utils.autorizacion import obtener_empresa, obtener_sucursal
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
+
 from backend.ServiciosSucursales.schema import (
     RespuestaServicioSucursal,
     Revisar_Json_Crear_Servicio_Sucursal,
@@ -10,6 +10,8 @@ from backend.ServiciosSucursales.schema import (
 )
 from backend.ServiciosSucursales.service import ServicioSucursalService as service
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_empresa, obtener_sucursal
 
 router = APIRouter(prefix="/servicios-sucursales", tags=["ServiciosSucursales"])
 

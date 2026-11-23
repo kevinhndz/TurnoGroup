@@ -8,6 +8,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
+
 from database.almacen import miclaseBase
 from database.base import PoderAuditor
 

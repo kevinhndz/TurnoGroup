@@ -1,13 +1,13 @@
 from sqlalchemy import (
-    Boolean,
-    String,
-    Column,
-    Integer,
-    ForeignKey,
-    DateTime,
-    Numeric,
     CheckConstraint,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
 )
+
 from database.almacen import miclaseBase
 
 

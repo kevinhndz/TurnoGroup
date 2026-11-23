@@ -1,10 +1,10 @@
-from core.listados import pagina_listado
 from sqlalchemy.orm import Session
+
 from backend.Sucursales.tabla import Sucursales
+from core.listados import pagina_listado
 
 
 class SucursalRespository:
-
     @staticmethod
     def buscar_sucursal(
         db: Session, id_empresa: int, nombre: str, direccion=None
@@ -12,8 +12,10 @@ class SucursalRespository:
         consulta = db.query(Sucursales).filter(
             Sucursales.id_empresa == id_empresa, Sucursales.nombre == nombre
         )
+
         if direccion is not None:
             consulta = consulta.filter(Sucursales.direccion == direccion)
+
         return consulta.first()
 
     @staticmethod
@@ -31,8 +33,8 @@ class SucursalRespository:
     @staticmethod
     def guardar_nueva_sucursal(db: Session, nueva_sucursal: Sucursales) -> Sucursales:
         db.add(nueva_sucursal)
-        db.commit()
-        db.refresh(nueva_sucursal)
+        db.flush()
+
         return nueva_sucursal
 
     @staticmethod
@@ -45,8 +47,10 @@ class SucursalRespository:
         filtros=None,
     ):
         consulta = db.query(Sucursales).filter(Sucursales.id_empresa == id_empresa)
+
         if id_sucursal is not None:
             consulta = consulta.filter(Sucursales.id == id_sucursal)
+
         return pagina_listado(consulta, Sucursales, pagina_actual, limite, filtros)
 
     @staticmethod
@@ -62,3 +66,13 @@ class SucursalRespository:
     @staticmethod
     def buscar_sucursal_por_id_sin_empresa(db: Session, id: int) -> Sucursales | None:
         return db.query(Sucursales).filter(Sucursales.id == id).first()
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro

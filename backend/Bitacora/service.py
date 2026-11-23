@@ -1,15 +1,14 @@
 from sqlalchemy import event, inspect
 from sqlalchemy.orm import Session
-from backend.Bitacora.tabla import Bitacora
+
 from backend.Bitacora.repository import BitacoraRepository as repo
-from core.operaciones import alcance, paginar
+from backend.Bitacora.tabla import Bitacora
+from core.operaciones import alcance, exigir, paginar
 
 
 class BitacoraService:
     @staticmethod
     def listar_service(db, contexto, pagina, limite, solo_sucursal=True, filtros=None):
-        from core.operaciones import exigir
-
         if contexto["rol_plataforma"] == "Superadministrador":
             empresa, sucursal = None, None
         elif not solo_sucursal:
@@ -21,6 +20,7 @@ class BitacoraService:
             empresa, sucursal = contexto["id_empresa"], None
         else:
             empresa, sucursal = alcance(contexto)
+
         return paginar(
             repo.listar(db, empresa, sucursal, filtros),
             pagina,
@@ -41,6 +41,7 @@ class BitacoraService:
 @event.listens_for(Session, "before_flush")
 def preparar_eventos(db, contexto, instancias):
     actor = db.info.get("actor_bitacora")
+
     if not actor:
         return
     recursos = {
@@ -49,16 +50,20 @@ def preparar_eventos(db, contexto, instancias):
         "reservas": "Reserva",
         "mesas": "Mesa",
     }
+
     if actor.get("plataforma"):
         recursos = {"empresas": "Empresa", "usuarios": "Cuenta"}
     pendientes = db.info.setdefault("eventos_bitacora", [])
+
     for objeto in list(db.new) + list(db.dirty):
         tabla = getattr(objeto, "__tablename__", "")
+
         if tabla not in recursos or (
             objeto not in db.new
             and not db.is_modified(objeto, include_collections=False)
         ):
             continue
+
         if getattr(objeto, "id_sucursal", None) != actor["sucursal"]:
             continue
         femenino = tabla in ("mesas", "reservas", "cajas", "empresas", "usuarios")
@@ -67,8 +72,10 @@ def preparar_eventos(db, contexto, instancias):
             if objeto in db.new
             else (" actualizada" if femenino else " actualizado")
         )
+
         if tabla == "cajas" and objeto in db.new:
             accion = "Caja abierta"
+
         if (
             tabla == "reservas"
             and objeto not in db.new
@@ -78,6 +85,7 @@ def preparar_eventos(db, contexto, instancias):
                 "Atendida": "Reserva atendida",
                 "Cancelada": "Reserva cancelada",
             }.get(objeto.estado, accion)
+
         if (
             tabla == "mesas"
             and objeto not in db.new
@@ -99,6 +107,7 @@ def preparar_eventos(db, contexto, instancias):
             ):
                 accion = texto
         pendientes.append((objeto, accion, tabla, actor.copy()))
+
         if tabla == "pedidos" and objeto in db.new and objeto.fecha_pago:
             pendientes.append((objeto, "Pedido cobrado", tabla, actor.copy()))
 
@@ -106,7 +115,8 @@ def preparar_eventos(db, contexto, instancias):
 @event.listens_for(Session, "after_flush_postexec")
 def guardar_eventos(db, contexto):
     for objeto, accion, recurso, actor in db.info.pop("eventos_bitacora", []):
-        db.add(
+        repo.agregar(
+            db,
             Bitacora(
                 id_empresa=actor["empresa"],
                 id_sucursal=actor["sucursal"],
@@ -117,7 +127,7 @@ def guardar_eventos(db, contexto):
                 cliente=(
                     getattr(objeto, "cliente", None) if recurso == "pedidos" else None
                 ),
-            )
+            ),
         )
 
 

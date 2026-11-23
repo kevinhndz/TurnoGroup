@@ -1,17 +1,19 @@
 from datetime import timedelta
-from core.operaciones import ahora
+
 from sqlalchemy import (
-    Column,
-    Integer,
-    ForeignKey,
-    String,
     Boolean,
-    DateTime,
-    Numeric,
     CheckConstraint,
-    UniqueConstraint,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
     Text,
+    UniqueConstraint,
 )
+
+from core.operaciones import ahora
 from database.almacen import miclaseBase
 
 

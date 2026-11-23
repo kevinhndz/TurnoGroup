@@ -1,25 +1,31 @@
-from datetime import datetime, time, timedelta
-from backend.Pedidos.tabla import Pedidos, DetallesPedidos
-from backend.Productos.tabla import Productos
-from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
-from backend.ServiciosSucursales.tabla import ServiciosSucursales
-from backend.PagosSucursales.tabla import PagosSucursales
-from backend.TiposServicio.tabla import TiposServicio
-from backend.MetodosPago.tabla import MetodosPago
-from backend.Mesas.tabla import Mesas
-from backend.Descuentos.tabla import Descuentos
+from datetime import datetime, time, timedelta, timezone
+from zoneinfo import ZoneInfo
+
+from sqlalchemy import func
+
+from backend.Categorias.tabla import Categorias
 from backend.ConfiguracionImpuestos.tabla import ConfiguracionImpuestos
-from backend.Sucursales.tabla import Sucursales
+from backend.Descuentos.tabla import Descuentos
+from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
 from backend.Empresas.tabla import Empresas
+from backend.Mesas.tabla import Mesas
+from backend.MetodosPago.tabla import MetodosPago
+from backend.PagosSucursales.tabla import PagosSucursales
+from backend.Pedidos.tabla import DetallesPedidos, Pedidos
+from backend.Productos.tabla import Productos
+from backend.Reservas.tabla import Reservas
+from backend.ServiciosSucursales.tabla import ServiciosSucursales
+from backend.Sucursales.tabla import Sucursales
+from backend.TiposServicio.tabla import TiposServicio
+from backend.Usuarios.tabla import Usuarios
 from core.listados import filtrar_listado
 
 
 class PedidoRepository:
     @staticmethod
     def nombre_usuario(db, id_usuario):
-        from backend.Usuarios.tabla import Usuarios
-
         usuario = db.get(Usuarios, id_usuario)
+
         return usuario.nombre if usuario else "Persona no disponible"
 
     @staticmethod
@@ -42,6 +48,7 @@ class PedidoRepository:
             Pedidos.id_empresa == id_empresa,
             Pedidos.id_sucursal == id_sucursal,
         )
+
         return (consulta.with_for_update() if bloquear else consulta).first()
 
     @staticmethod
@@ -58,20 +65,21 @@ class PedidoRepository:
             Pedidos.id_empresa == id_empresa, Pedidos.id_sucursal == id_sucursal
         )
         filtros = filtros or {}
+
         if filtros.get("entrega") or filtros.get("pago"):
             consulta = consulta.filter(Pedidos.estado != "Cancelado")
+
         if filtros.get("entrega") == "pendiente":
             consulta = consulta.filter(Pedidos.fecha_entrega.is_(None))
         elif filtros.get("entrega") == "servido":
             consulta = consulta.filter(Pedidos.fecha_entrega.is_not(None))
+
         if filtros.get("pago") == "pendiente":
             consulta = consulta.filter(Pedidos.fecha_pago.is_(None))
         elif filtros.get("pago") == "cobrado":
             consulta = consulta.filter(Pedidos.fecha_pago.is_not(None))
-        if filtros.get("fecha"):
-            from zoneinfo import ZoneInfo
-            from datetime import timezone
 
+        if filtros.get("fecha"):
             inicio = datetime.combine(
                 filtros["fecha"], time(), ZoneInfo("America/Tegucigalpa")
             )
@@ -80,8 +88,10 @@ class PedidoRepository:
                 Pedidos.fecha_registro >= inicio,
                 Pedidos.fecha_registro < inicio + timedelta(days=1),
             )
+
         if estado:
             consulta = consulta.filter(Pedidos.estado == estado)
+
         return filtrar_listado(consulta.order_by(Pedidos.id.desc()), Pedidos, filtros)
 
     @staticmethod
@@ -158,8 +168,10 @@ class PedidoRepository:
             Pedidos.id_sucursal == id_sucursal,
             Pedidos.estado == "Abierto",
         )
+
         if excluir:
             consulta = consulta.filter(Pedidos.id != excluir)
+
         return consulta.first()
 
     @staticmethod
@@ -191,9 +203,6 @@ class PedidoRepository:
 
     @staticmethod
     def catalogo(db, id_empresa, id_sucursal):
-        from backend.Categorias.tabla import Categorias
-        from backend.Sucursales.tabla import Sucursales
-
         productos = (
             db.query(Productos)
             .join(
@@ -233,6 +242,13 @@ class PedidoRepository:
             .order_by(MetodosPago.id)
             .all()
         )
+        cumple_condicion = False
+
+        for servicio_actual, tipo_actual in servicios:
+            if servicio_actual.mesas_habilitadas:
+                cumple_condicion = True
+                break
+
         return {
             "empresa": db.get(Empresas, id_empresa),
             "sucursal": db.query(Sucursales)
@@ -250,7 +266,7 @@ class PedidoRepository:
                 .filter(Mesas.id_sucursal == id_sucursal, Mesas.activo.is_(True))
                 .order_by(Mesas.id)
                 .all()
-                if any(servicio.mesas_habilitadas for servicio, tipo in servicios)
+                if cumple_condicion
                 else []
             ),
             "descuentos": db.query(Descuentos)
@@ -258,3 +274,63 @@ class PedidoRepository:
             .order_by(Descuentos.nombre)
             .all(),
         }
+
+    @staticmethod
+    def agregar(db, registro):
+        db.add(registro)
+
+        return registro
+
+    @staticmethod
+    def agregar_varios(db, registros):
+        db.add_all(registros)
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def eliminar_detalles(db, id):
+        return (
+            db.query(DetallesPedidos).filter(DetallesPedidos.id_pedido == id).delete()
+        )
+
+    @staticmethod
+    def contar_pedidos_por_estado(db, empresa, sucursal):
+        return (
+            db.query(Pedidos.estado, func.count(Pedidos.id))
+            .filter(Pedidos.id_empresa == empresa, Pedidos.id_sucursal == sucursal)
+            .group_by(Pedidos.estado)
+            .all()
+        )
+
+    @staticmethod
+    def consultar_mesas_ocupadas(db, empresa, sucursal):
+        return db.query(Pedidos.id_mesa).filter(
+            Pedidos.id_empresa == empresa,
+            Pedidos.id_sucursal == sucursal,
+            Pedidos.estado == "Abierto",
+        )
+
+    @staticmethod
+    def listar_mesas_reservadas(db, empresa, sucursal, instante):
+        return (
+            db.query(Reservas.id_mesa)
+            .filter(
+                Reservas.id_empresa == empresa,
+                Reservas.id_sucursal == sucursal,
+                Reservas.estado == "Confirmada",
+                Reservas.inicio <= instante,
+                Reservas.fin > instante,
+            )
+            .all()
+        )
+
+    @staticmethod
+    def listar_mesas_activas(db, sucursal):
+        return (
+            db.query(Mesas)
+            .filter(Mesas.id_sucursal == sucursal, Mesas.activo.is_(True))
+            .order_by(Mesas.id)
+            .all()
+        )

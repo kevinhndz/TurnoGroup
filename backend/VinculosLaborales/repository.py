@@ -1,11 +1,11 @@
-from core.listados import pagina_listado
-from backend.Usuarios.tabla import Usuarios
 from sqlalchemy.orm import Session
+
+from backend.Usuarios.tabla import Usuarios
 from backend.VinculosLaborales.tabla import AsignacionesSucursales, VinculosLaborales
+from core.listados import pagina_listado
 
 
 class VinculoLaboralRepository:
-
     @staticmethod
     def buscar_vinculo_usuario_empresa(
         db: Session, id_usuario: int, id_empresa: int
@@ -24,8 +24,8 @@ class VinculoLaboralRepository:
         db: Session, nuevo_vinculo: VinculosLaborales
     ) -> VinculosLaborales:
         db.add(nuevo_vinculo)
-        db.commit()
-        db.refresh(nuevo_vinculo)
+        db.flush()
+
         return nuevo_vinculo
 
     @staticmethod
@@ -36,6 +36,7 @@ class VinculoLaboralRepository:
             VinculosLaborales.id_empresa == id_empresa
         )
         consulta = consulta.join(Usuarios, Usuarios.id == VinculosLaborales.id_usuario)
+
         return pagina_listado(
             consulta,
             VinculosLaborales,
@@ -89,14 +90,14 @@ class VinculoLaboralRepository:
         db: Session, nueva_asignacion: AsignacionesSucursales
     ) -> AsignacionesSucursales:
         db.add(nueva_asignacion)
-        db.commit()
-        db.refresh(nueva_asignacion)
+        db.flush()
+
         return nueva_asignacion
 
     @staticmethod
     def quitar_asignacion_sucursal(db: Session, asignacion: AsignacionesSucursales):
         db.delete(asignacion)
-        db.commit()
+        db.flush()
 
     @staticmethod
     def listar_asignaciones_sucursales_paginadas(
@@ -113,4 +114,44 @@ class VinculoLaboralRepository:
             .limit(limite)
             .all()
         )
+
         return total, asignaciones
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro
+
+    @staticmethod
+    def buscar_gerente_activo(db, id_empresa):
+        return (
+            db.query(VinculosLaborales)
+            .filter(
+                VinculosLaborales.id_empresa == id_empresa,
+                VinculosLaborales.rol == "Gerente",
+                VinculosLaborales.activo.is_(True),
+            )
+            .first()
+        )
+
+    @staticmethod
+    def listar_usuarios_de_vinculos(db, elementos):
+        return db.query(Usuarios).filter(Usuarios.id.in_(elementos)).all()
+
+    @staticmethod
+    def contar_otros_gerentes(db, id_empresa, id):
+        return (
+            db.query(VinculosLaborales)
+            .filter(
+                VinculosLaborales.id_empresa == id_empresa,
+                VinculosLaborales.id != id,
+                VinculosLaborales.rol == "Gerente",
+                VinculosLaborales.activo.is_(True),
+            )
+            .count()
+        )

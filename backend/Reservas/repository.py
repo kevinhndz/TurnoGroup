@@ -1,8 +1,8 @@
-from backend.Reservas.tabla import Reservas
-from core.listados import filtrar_listado
 from backend.Mesas.tabla import Mesas
+from backend.Reservas.tabla import Reservas
 from backend.ServiciosSucursales.tabla import ServiciosSucursales
 from backend.TiposServicio.tabla import TiposServicio
+from core.listados import filtrar_listado
 
 
 class ReservaRepository:
@@ -42,8 +42,10 @@ class ReservaRepository:
             Reservas.inicio < fin,
             Reservas.fin > inicio,
         )
+
         if excluir:
             consulta = consulta.filter(Reservas.id != excluir)
+
         return consulta.first()
 
     @staticmethod
@@ -64,10 +66,22 @@ class ReservaRepository:
         consulta = db.query(Reservas).filter(
             Reservas.id_empresa == id_empresa, Reservas.id_sucursal == id_sucursal
         )
+
         if estado:
             consulta = consulta.filter(Reservas.estado == estado)
+
         return filtrar_listado(
             consulta.order_by(Reservas.inicio.desc(), Reservas.id.desc()),
             Reservas,
             filtros,
         )
+
+    @staticmethod
+    def agregar(db, registro):
+        db.add(registro)
+
+        return registro
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()

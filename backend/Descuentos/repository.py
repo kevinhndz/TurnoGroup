@@ -1,10 +1,10 @@
-from core.listados import pagina_listado
 from sqlalchemy.orm import Session
+
 from backend.Descuentos.tabla import Descuentos
+from core.listados import pagina_listado
 
 
 class DescuentoRepository:
-
     @staticmethod
     def buscar_descuento_por_nombre(
         db: Session, id_empresa: int, nombre: str
@@ -18,8 +18,8 @@ class DescuentoRepository:
     @staticmethod
     def guardar_nuevo_descuento(db: Session, nuevo_descuento: Descuentos) -> Descuentos:
         db.add(nuevo_descuento)
-        db.commit()
-        db.refresh(nuevo_descuento)
+        db.flush()
+
         return nuevo_descuento
 
     @staticmethod
@@ -27,6 +27,7 @@ class DescuentoRepository:
         db: Session, id_empresa: int, pagina_actual: int, limite: int, filtros=None
     ):
         consulta = db.query(Descuentos).filter(Descuentos.id_empresa == id_empresa)
+
         return pagina_listado(consulta, Descuentos, pagina_actual, limite, filtros)
 
     @staticmethod
@@ -38,3 +39,13 @@ class DescuentoRepository:
             .filter(Descuentos.id == id, Descuentos.id_empresa == id_empresa)
             .first()
         )
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro

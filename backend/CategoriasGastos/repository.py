@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
+
 from backend.CategoriasGastos.tabla import CategoriasGastos
 
 
 class CategoriaGastoRepository:
-
     @staticmethod
     def buscar_categoria_gasto_por_nombre(
         db: Session, id_empresa: int, nombre: str
@@ -22,8 +22,8 @@ class CategoriaGastoRepository:
         db: Session, nueva_categoria_gasto: CategoriasGastos
     ) -> CategoriasGastos:
         db.add(nueva_categoria_gasto)
-        db.commit()
-        db.refresh(nueva_categoria_gasto)
+        db.flush()
+
         return nueva_categoria_gasto
 
     @staticmethod
@@ -44,6 +44,7 @@ class CategoriaGastoRepository:
             .limit(limite)
             .all()
         )
+
         return total, lista_categorias_gastos
 
     @staticmethod
@@ -57,3 +58,13 @@ class CategoriaGastoRepository:
             )
             .first()
         )
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro

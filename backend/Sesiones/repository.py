@@ -1,9 +1,12 @@
+from backend.Empresas.tabla import Empresas
+from backend.ServiciosSucursales.tabla import ServiciosSucursales
 from backend.Sesiones.tabla import Sesiones
+from backend.Sucursales.tabla import Sucursales
 from backend.Usuarios.tabla import Usuarios
+from backend.VinculosLaborales.tabla import AsignacionesSucursales, VinculosLaborales
 
 
 class SesionRepository:
-
     @staticmethod
     def buscar_usuario_para_sesion(db, correo):
         return (
@@ -33,8 +36,8 @@ class SesionRepository:
     @staticmethod
     def guardar_nueva_sesion(db, nueva_sesion):
         db.add(nueva_sesion)
-        db.commit()
-        db.refresh(nueva_sesion)
+        db.flush()
+
         return nueva_sesion
 
     @staticmethod
@@ -58,9 +61,6 @@ class SesionRepository:
 
     @staticmethod
     def buscar_vinculo_autorizado(db, id_usuario, id_vinculo=None):
-        from backend.VinculosLaborales.tabla import VinculosLaborales
-        from backend.Empresas.tabla import Empresas
-
         consulta = (
             db.query(VinculosLaborales)
             .join(Empresas, Empresas.id == VinculosLaborales.id_empresa)
@@ -70,31 +70,31 @@ class SesionRepository:
                 Empresas.estado.in_(["En Prueba", "Activa"]),
             )
         )
+
         if id_vinculo is not None:
             consulta = consulta.filter(VinculosLaborales.id == id_vinculo)
+
         return consulta.order_by(VinculosLaborales.id).first()
 
     @staticmethod
     def buscar_sucursal_autorizada(db, vinculo, id_sucursal=None):
-        from backend.Sucursales.tabla import Sucursales
-        from backend.VinculosLaborales.tabla import AsignacionesSucursales
-
         consulta = db.query(Sucursales).filter(
             Sucursales.id_empresa == vinculo.id_empresa, Sucursales.activo.is_(True)
         )
+
         if vinculo.rol != "Gerente":
             consulta = consulta.join(
                 AsignacionesSucursales,
                 AsignacionesSucursales.id_sucursal == Sucursales.id,
             ).filter(AsignacionesSucursales.id_vinculo_laboral == vinculo.id)
+
         if id_sucursal is not None:
             consulta = consulta.filter(Sucursales.id == id_sucursal)
+
         return consulta.order_by(Sucursales.id).first()
 
     @staticmethod
     def listar_vinculos_usuario(db, id_usuario):
-        from backend.VinculosLaborales.tabla import VinculosLaborales
-
         return (
             db.query(VinculosLaborales)
             .filter(
@@ -107,15 +107,44 @@ class SesionRepository:
 
     @staticmethod
     def listar_sucursales_autorizadas(db, vinculo):
-        from backend.Sucursales.tabla import Sucursales
-        from backend.VinculosLaborales.tabla import AsignacionesSucursales
-
         consulta = db.query(Sucursales).filter(
             Sucursales.id_empresa == vinculo.id_empresa, Sucursales.activo.is_(True)
         )
+
         if vinculo.rol != "Gerente":
             consulta = consulta.join(
                 AsignacionesSucursales,
                 AsignacionesSucursales.id_sucursal == Sucursales.id,
             ).filter(AsignacionesSucursales.id_vinculo_laboral == vinculo.id)
+
         return consulta.order_by(Sucursales.id).all()
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro
+
+    @staticmethod
+    def buscar_servicio_con_mesas(db, contexto):
+        return (
+            db.query(ServiciosSucursales)
+            .filter(
+                ServiciosSucursales.id_sucursal == contexto["id_sucursal"],
+                ServiciosSucursales.habilitado.is_(True),
+                ServiciosSucursales.mesas_habilitadas.is_(True),
+            )
+            .first()
+        )
+
+    @staticmethod
+    def listar_nombres_empresas(db, ids_empresas):
+        return (
+            db.query(Empresas.id, Empresas.nombre)
+            .filter(Empresas.id.in_(ids_empresas))
+            .all()
+        )

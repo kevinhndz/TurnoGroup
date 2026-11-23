@@ -1,10 +1,12 @@
-from core.listados import pagina_listado
 from sqlalchemy.orm import Session
+
 from backend.Categorias.tabla import Categorias
+from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
+from backend.Productos.tabla import Productos
+from core.listados import pagina_listado
 
 
 class CategoriaRepository:
-
     @staticmethod
     def buscar_categoria_por_nombre(
         db: Session, id_empresa: int, nombre: str
@@ -21,8 +23,8 @@ class CategoriaRepository:
     @staticmethod
     def guardar_nueva_categoria(db: Session, nueva_categoria: Categorias) -> Categorias:
         db.add(nueva_categoria)
-        db.commit()
-        db.refresh(nueva_categoria)
+        db.flush()
+
         return nueva_categoria
 
     @staticmethod
@@ -35,6 +37,7 @@ class CategoriaRepository:
         filtros=None,
     ):
         consulta = CategoriaRepository.consulta_catalogo(db, id_empresa, id_sucursal)
+
         return pagina_listado(consulta, Categorias, pagina_actual, limite, filtros)
 
     @staticmethod
@@ -49,10 +52,8 @@ class CategoriaRepository:
 
     @staticmethod
     def consulta_catalogo(db, id_empresa, id_sucursal=None):
-        from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
-        from backend.Productos.tabla import Productos
-
         consulta = db.query(Categorias).filter(Categorias.id_empresa == id_empresa)
+
         if id_sucursal is not None:
             categorias = (
                 db.query(Productos.id_categoria)
@@ -70,4 +71,15 @@ class CategoriaRepository:
             consulta = consulta.filter(
                 Categorias.id.in_(categorias), Categorias.activo.is_(True)
             )
+
         return consulta
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro

@@ -1,9 +1,8 @@
-from core.listados import filtros_listado
-from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
+
 from backend.ConfiguracionImpuestos.schema import (
     RespuestaConfiguracionImpuestos,
     Revisar_Json_Crear_Configuracion_Impuestos,
@@ -12,7 +11,10 @@ from backend.ConfiguracionImpuestos.schema import (
 from backend.ConfiguracionImpuestos.service import (
     ConfiguracionImpuestosService as service,
 )
+from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_empresa
 
 router = APIRouter(
     prefix="/configuracion-impuestos", tags=["Configuracion de impuestos"]

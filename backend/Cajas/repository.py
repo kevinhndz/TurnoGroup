@@ -1,6 +1,6 @@
 from backend.Cajas.tabla import Cajas
-from backend.Pedidos.tabla import Pedidos
 from backend.MetodosPago.tabla import MetodosPago
+from backend.Pedidos.tabla import Pedidos
 from backend.Sucursales.tabla import Sucursales
 
 
@@ -64,3 +64,13 @@ class CajaRepository:
             )
             .all()
         )
+
+    @staticmethod
+    def agregar(db, registro):
+        db.add(registro)
+
+        return registro
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()

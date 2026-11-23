@@ -1,21 +1,26 @@
-from core.listados import filtros_listado
-from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query
 from fastapi.responses import FileResponse
-from utils.autorizacion import obtener_sucursal
 from sqlalchemy.orm import Session
-from typing import Annotated
-from database.almacen import abrir_puerta_bd
+
 from backend.Productos.schema import (
     NuevoProductoRespuesta,
-    Revisar_Json_Importar_Productos,
     Revisar_Json_Archivo_Productos,
-    Revisar_Json_Imagen_Producto,
     Revisar_Json_Editar_Producto,
+    Revisar_Json_Imagen_Producto,
+    Revisar_Json_Importar_Productos,
     Revisar_Json_Nuevo_Producto,
 )
 from backend.Productos.service import ProductoService as service
+from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import (
+    obtener_empresa,
+    obtener_sucursal,
+    obtener_sucursal_catalogo,
+)
 
 router = APIRouter(prefix="/productos", tags=["Productos"])
 
@@ -76,6 +81,7 @@ def consultar_imagen_producto(
     id_sucursal: int | None = Depends(obtener_sucursal_catalogo),
 ):
     archivo = service.consultar_imagen_service(id, id_empresa, db, id_sucursal)
+
     return FileResponse(
         archivo,
         media_type="image/jpeg",

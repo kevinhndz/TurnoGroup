@@ -12,12 +12,6 @@ const config = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
-          // Esta politica protege incrustacion, formularios y objetos.
-          {
-            key: 'Content-Security-Policy',
-            value:
-              "object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
-          },
         ],
       },
     ];

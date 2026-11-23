@@ -46,6 +46,7 @@ export default function Acceso({ modo = 'login' }) {
   const [codigo, setCodigo] = useState('');
   const [reactivacion, setReactivacion] = useState(false);
   const [correoEnviado, setCorreoEnviado] = useState('');
+  const [usarRespaldo, setUsarRespaldo] = useState(false);
   const formulario = useRef(null);
   const confirmarReactivacion = useRef(false);
   useEffect(() => {
@@ -119,6 +120,7 @@ export default function Acceso({ modo = 'login' }) {
           clave: datos.get('clave'),
           reactivar: confirmarReactivacion.current,
           codigo_mfa: datos.get('codigo_mfa') || null,
+          codigo_recuperacion_mfa: datos.get('codigo_recuperacion_mfa') || null,
         });
         const volver = new URLSearchParams(window.location.search).get('volver');
         const destino =
@@ -297,19 +299,48 @@ export default function Acceso({ modo = 'login' }) {
                 </Campo>
               )}
               {modo === 'login' && (
-                <Campo
-                  label="Código del autenticador"
-                  ayuda="Solo si tu cuenta tiene segundo factor activado."
-                >
-                  <input
-                    name="codigo_mfa"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    pattern="[0-9]{6}"
-                    maxLength={6}
-                    placeholder="000000"
-                  />
-                </Campo>
+                <>
+                  <Campo
+                    label={
+                      usarRespaldo ? 'Código de respaldo' : 'Código del autenticador'
+                    }
+                    ayuda={
+                      usarRespaldo
+                        ? 'Cada código sirve una sola vez. Conserva los demás en un lugar seguro.'
+                        : 'Solo si tu cuenta tiene segundo factor activado.'
+                    }
+                  >
+                    {usarRespaldo ? (
+                      <input
+                        key="respaldo"
+                        name="codigo_recuperacion_mfa"
+                        required
+                        minLength={24}
+                        maxLength={24}
+                        autoComplete="off"
+                      />
+                    ) : (
+                      <input
+                        key="autenticador"
+                        name="codigo_mfa"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        pattern="[0-9]{6}"
+                        maxLength={6}
+                        placeholder="000000"
+                      />
+                    )}
+                  </Campo>
+                  <button
+                    type="button"
+                    className="tg-link"
+                    onClick={() => setUsarRespaldo(!usarRespaldo)}
+                  >
+                    {usarRespaldo
+                      ? 'Usar autenticador'
+                      : 'Perdí mi autenticador: usar código de respaldo'}
+                  </button>
+                </>
               )}
               {modo === 'login' && (
                 <Link href="/recuperar-clave" className="tg-forgot">

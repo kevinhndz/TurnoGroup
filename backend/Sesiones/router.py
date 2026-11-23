@@ -47,10 +47,12 @@ def quitar_cookie(response):
 @router.post("/iniciar", response_model=RespuestaSesion)
 def iniciar_sesion(
     json: Revisar_Json_Iniciar_Sesion,
+    request: Request,
     response: Response,
     db: Session = Depends(abrir_puerta_bd),
 ):
     sesion, usuario, token = service.iniciar_sesion_service(json, db)
+    request.state.sesion_validada = (sesion, usuario)
     poner_cookie(response, token, sesion.vencimiento)
     return service.respuesta_sesion_service(sesion, usuario, db)
 

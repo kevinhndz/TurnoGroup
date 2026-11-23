@@ -69,6 +69,7 @@ class ProductoRegistro(Revisar_Json_Nuevo_Producto):
 
 
 class Revisar_Json_Registro_Negocio(BaseModel):
+    comprobante_correo: SecretStr = Field(min_length=40, max_length=128)
     tarjeta_suscripcion: Revisar_Json_Tarjeta_Suscripcion
     finanzas_habilitadas: bool = False
     cuenta: Revisar_Json_Nuevo_Usuario
@@ -93,3 +94,12 @@ class ConfirmarCambioCorreo(BaseModel):
     codigo: SecretStr = Field(min_length=32, max_length=128)
     clave_actual: SecretStr = Field(min_length=1, max_length=128)
     model_config = ConfigDict(extra="forbid")
+
+
+class SolicitarVerificacionCorreo(BaseModel):
+    correo: EmailStr
+    model_config = ConfigDict(extra="forbid")
+
+
+class ConfirmarVerificacionCorreo(SolicitarVerificacionCorreo):
+    codigo: SecretStr = Field(min_length=40, max_length=128)

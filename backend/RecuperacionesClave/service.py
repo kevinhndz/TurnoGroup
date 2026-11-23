@@ -71,6 +71,9 @@ class RecuperacionClaveService:
             json.nueva_clave.get_secret_value()
         )
         repo.invalidar_codigos(db, usuario.id, ahora)
+        from backend.Usuarios.repository import UsuarioRepository
+
+        UsuarioRepository.invalidar_cambios_correo(db, usuario.id, ahora)
         repo_sesion.revocar_sesiones(db, usuario.id, ahora)
         db.commit()
         return {"detail": "Clave restablecida. Ya puedes iniciar sesion"}

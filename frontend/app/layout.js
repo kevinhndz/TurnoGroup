@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import './globals.css';
 import './sistema.css';
 import { ProveedorSesion } from '../components/sistema/Sesion';
@@ -38,7 +39,8 @@ export const viewport = {
   themeColor: '#fcf9f4',
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  await connection();
   return (
     <html lang="es" data-scroll-behavior="smooth">
       <body>

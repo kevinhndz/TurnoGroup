@@ -28,10 +28,15 @@ class SesionService:
         if not look_up or not look_up.clave_protegida or not correcta:
             raise HTTPException(401, "Correo o clave incorrectos")
 
-        from utils.mfa import verificar_mfa
+        from utils.mfa import verificar_segundo_factor
 
         codigo = json.codigo_mfa.get_secret_value() if json.codigo_mfa else None
-        verificar_mfa(look_up, codigo)
+        respaldo = (
+            json.codigo_recuperacion_mfa.get_secret_value()
+            if json.codigo_recuperacion_mfa
+            else None
+        )
+        verificar_segundo_factor(look_up, codigo, respaldo, db)
 
         if not look_up.estado:
             if not look_up.fecha_desactivacion_voluntaria:

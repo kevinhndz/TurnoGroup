@@ -5,6 +5,9 @@ from backend.Usuarios.schema import NuevoUsuarioRespuesta
 
 class Revisar_Json_Iniciar_Sesion(BaseModel):
     reactivar: bool = False
+    codigo_recuperacion_mfa: SecretStr | None = Field(
+        default=None, min_length=24, max_length=24
+    )
     codigo_mfa: SecretStr | None = Field(default=None, max_length=6)
     correo: EmailStr
     clave: SecretStr = Field(min_length=1, max_length=128)

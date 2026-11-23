@@ -55,9 +55,11 @@ def test_rutas_no_se_repiten():
     assert repetidas == []
 
 
-def test_registro_guarda_token_solo_en_cookie(client, db):
+def test_registro_guarda_token_solo_en_cookie(client, db, verificar_correo_registro):
     client.cookies.clear()
-    respuesta = client.post("/usuarios/registro-negocio", json=datos_registro())
+    respuesta = client.post(
+        "/usuarios/registro-negocio", json=verificar_correo_registro(datos_registro())
+    )
     assert respuesta.status_code == 201
     datos = respuesta.json()
     assert isinstance(datos, dict)
@@ -78,7 +80,9 @@ def test_registro_guarda_token_solo_en_cookie(client, db):
 
 
 @pytest.mark.parametrize("segura", [False, True])
-def test_cookie_registro_respeta_https(client, monkeypatch, segura):
+def test_cookie_registro_respeta_https(
+    client, monkeypatch, segura, verificar_correo_registro
+):
     client.cookies.clear()
     monkeypatch.setattr(revision, "COOKIE_SEGURA", segura)
     monkeypatch.setattr(revision, "BACKEND_PROXY_SECRET", "clave-de-prueba")
@@ -91,7 +95,7 @@ def test_cookie_registro_respeta_https(client, monkeypatch, segura):
         }
     respuesta = client.post(
         "http://testserver/usuarios/registro-negocio",
-        json=datos_registro(),
+        json=verificar_correo_registro(datos_registro()),
         headers=cabeceras,
     )
     assert respuesta.status_code == 201

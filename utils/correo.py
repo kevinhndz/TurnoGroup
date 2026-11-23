@@ -95,3 +95,13 @@ def enviar_mensaje(correo: str, asunto: str, texto: str) -> bool:
 
 def enviar_aviso_correo(correo: str, texto: str) -> bool:
     return enviar_mensaje(correo, "Cambio de correo en Turno Group", texto)
+
+
+def enviar_verificacion(correo: str, codigo: str) -> bool:
+    return enviar_mensaje(
+        correo,
+        "Verifica tu correo de Turno Group",
+        "Copia este codigo para continuar el registro: "
+        + codigo
+        + "\nVence en 15 minutos. Si no lo solicitaste, ignora este mensaje.",
+    )

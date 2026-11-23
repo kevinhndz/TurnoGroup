@@ -129,3 +129,26 @@ def confirmar_cambio_correo(
     resultado = SeguridadUsuarioService.confirmar(json, id, db, tareas)
     quitar_cookie(response)
     return resultado
+
+
+from backend.Usuarios.schema import (
+    SolicitarVerificacionCorreo,
+    ConfirmarVerificacionCorreo,
+)
+from backend.Usuarios.verificacion import VerificacionCorreoService
+
+
+@router.post("/verificacion/solicitar", status_code=202)
+def solicitar_verificacion(
+    json: SolicitarVerificacionCorreo,
+    tareas: BackgroundTasks,
+    db: Session = Depends(abrir_puerta_bd),
+):
+    return VerificacionCorreoService.solicitar(json, db, tareas)
+
+
+@router.post("/verificacion/confirmar")
+def confirmar_verificacion(
+    json: ConfirmarVerificacionCorreo, db: Session = Depends(abrir_puerta_bd)
+):
+    return VerificacionCorreoService.confirmar(json, db)

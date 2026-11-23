@@ -194,14 +194,16 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
         ) : !filas.length ? (
           <Vacio
             titulo={
-              busqueda
-                ? 'No hay coincidencias en esta página'
+              filtros.busqueda.trim()
+                ? 'No hay coincidencias para esta búsqueda'
                 : `Todavía no hay ${config.titulo.toLocaleLowerCase('es')}`
             }
             detalle={
-              editable
-                ? `Puedes crear tu primer registro con el botón de arriba.`
-                : 'Los registros aparecerán cuando tu gerente los agregue.'
+              filtros.busqueda.trim()
+                ? 'Prueba otro nombre o borra la búsqueda para ver los registros.'
+                : editable
+                  ? 'Puedes crear tu primer registro con el botón de arriba.'
+                  : 'Los registros aparecerán cuando tu gerente los agregue.'
             }
             icono={config.icono}
           />

@@ -1,12 +1,13 @@
 from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
     Column,
     ForeignKey,
     Integer,
     String,
     UniqueConstraint,
-    Boolean,
-    CheckConstraint,
 )
+
 from database.almacen import miclaseBase
 from database.base import PoderAuditor
 

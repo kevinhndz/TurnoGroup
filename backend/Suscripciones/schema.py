@@ -1,5 +1,7 @@
-from pydantic import BaseModel, ConfigDict, Field, model_validator, SecretStr
 from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
+
 from core.operaciones import ahora
 
 
@@ -18,8 +20,10 @@ class Revisar_Json_Tarjeta_Suscripcion(BaseModel):
     @model_validator(mode="after")
     def revisar_vencimiento(self):
         fecha = ahora()
+
         if (self.anio, self.mes) < (fecha.year, fecha.month):
             raise ValueError("La tarjeta esta vencida")
+
         return self
 
 

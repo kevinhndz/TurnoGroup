@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
+
 from backend.MetodosPago.tabla import MetodosPago
 
 
 class MetodoPagoRepository:
-
     @staticmethod
     def listar_metodos_pago(db: Session, pagina_actual: int, limite: int):
         salto = (pagina_actual - 1) * limite
@@ -16,6 +16,7 @@ class MetodoPagoRepository:
             .limit(limite)
             .all()
         )
+
         return total, lista_metodos_pago
 
     @staticmethod

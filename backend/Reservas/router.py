@@ -1,12 +1,13 @@
-from typing import Literal
-from core.listados import filtros_listado
-from fastapi import APIRouter, Depends, Query, Path
-from typing import Annotated
+from typing import Annotated, Literal
+
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
-from utils.autorizacion import obtener_contexto
+
 from backend.Reservas.schema import Revisar_Json_Crear_Reserva
 from backend.Reservas.service import ReservaService as service
+from core.listados import filtros_listado
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_contexto
 
 router = APIRouter(prefix="/reservas", tags=["Reservas"])
 

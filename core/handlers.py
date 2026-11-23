@@ -1,17 +1,18 @@
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
-from sqlalchemy.exc import OperationalError, IntegrityError
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError, OperationalError
+
 from core.exceptions import (
-    RecursoNoEncontradoError,
-    RecursoDuplicadoError,
-    CredencialesInvalidasError,
     AccesoProhibidoError,
+    CredencialesInvalidasError,
+    RecursoDuplicadoError,
+    RecursoNoEncontradoError,
+    SolicitudError,
 )
 
 
 class ExcepcionesGlobales:
-
     @staticmethod
     def base_datos_no_disponible(request: Request, exc: OperationalError):
         return JSONResponse(
@@ -46,10 +47,13 @@ class ExcepcionesGlobales:
     @staticmethod
     def datos_invalidos(request: Request, exc: RequestValidationError):
         errores = []
+
         for error in exc.errors():
             mensaje = "Valor no valido para este campo"
+
             if error["type"] == "missing":
                 mensaje = "Campo requerido"
+
             if error["type"] == "extra_forbidden":
                 mensaje = "Campo no permitido"
             errores.append(
@@ -58,6 +62,7 @@ class ExcepcionesGlobales:
                     "mensaje": mensaje,
                 }
             )
+
         return JSONResponse(
             status_code=422,
             content={"detail": "Los datos enviados no son validos", "errores": errores},
@@ -67,6 +72,7 @@ class ExcepcionesGlobales:
     def restriccion_base_datos(request: Request, exc: IntegrityError):
         codigo = getattr(exc.orig, "sqlstate", None)
         nombre = getattr(exc.orig, "sqlite_errorname", "")
+
         if codigo == "23505" or nombre in (
             "SQLITE_CONSTRAINT_UNIQUE",
             "SQLITE_CONSTRAINT_PRIMARYKEY",
@@ -75,6 +81,7 @@ class ExcepcionesGlobales:
                 status_code=409,
                 content={"detail": "Ya existe un registro con esos datos"},
             )
+
         if codigo in ("23502", "23503", "23514") or nombre in (
             "SQLITE_CONSTRAINT_NOTNULL",
             "SQLITE_CONSTRAINT_FOREIGNKEY",
@@ -83,12 +90,22 @@ class ExcepcionesGlobales:
             return JSONResponse(
                 status_code=422, content={"detail": "Los datos enviados no son validos"}
             )
+
         return JSONResponse(
             status_code=500, content={"detail": "No se pudo guardar el registro"}
         )
 
+    @staticmethod
+    def solicitud_rechazada(request: Request, exc: SolicitudError):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+            headers=exc.headers,
+        )
+
     @classmethod
     def directorio(cls, app: FastAPI) -> None:
+        app.add_exception_handler(SolicitudError, cls.solicitud_rechazada)
         app.add_exception_handler(OperationalError, cls.base_datos_no_disponible)
         app.add_exception_handler(RequestValidationError, cls.datos_invalidos)
         app.add_exception_handler(IntegrityError, cls.restriccion_base_datos)

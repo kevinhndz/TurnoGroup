@@ -1,6 +1,7 @@
 from decimal import Decimal
+from typing import Literal, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional, Literal
 
 
 class Revisar_Json_Nuevo_Producto(BaseModel):

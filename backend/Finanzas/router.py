@@ -1,10 +1,12 @@
 from datetime import date
 from typing import Literal
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+
+from backend.Finanzas.service import FinanzasService as service
 from database.almacen import abrir_puerta_bd
 from utils.autorizacion import obtener_contexto
-from backend.Finanzas.service import FinanzasService as service
 
 router = APIRouter(prefix="/finanzas", tags=["Finanzas"])
 

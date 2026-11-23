@@ -1,7 +1,10 @@
 from decimal import Decimal
+
+from sqlalchemy.exc import SQLAlchemyError
+
 from backend.Cajas.repository import CajaRepository as repo
 from backend.Cajas.tabla import Cajas
-from core.operaciones import ahora, moneda, exigir, alcance, paginar
+from core.operaciones import ahora, alcance, exigir, moneda, paginar
 
 
 class CajaService:
@@ -13,9 +16,15 @@ class CajaService:
             "tarjeta": Decimal("0"),
         }
         pagos = repo.pagos(db, caja.id)
+
         for pedido, metodo in pagos:
             totales[metodo] += pedido.total
         esperado = moneda(caja.monto_inicial + totales["efectivo"])
+        campos = {}
+
+        for k_actual, v_actual in totales.items():
+            campos[k_actual] = str(v_actual)
+
         return {
             "id": caja.id,
             "id_usuario": caja.id_usuario,
@@ -33,66 +42,88 @@ class CajaService:
             "diferencia": str(caja.diferencia) if caja.diferencia is not None else None,
             "cobros": len(pagos),
             "total_cobrado": str(sum(totales.values())),
-            "pagos_por_metodo": {k: str(v) for k, v in totales.items()},
+            "pagos_por_metodo": campos,
             "nota": caja.nota,
         }
 
     @staticmethod
     def abrir_service(json, db, contexto):
-        empresa, sucursal = alcance(contexto)
-        exigir(
-            repo.bloquear_sucursal(db, empresa, sucursal),
-            "No se encontro la sucursal",
-            404,
-        )
-        exigir(
-            repo.buscar_abierta(db, empresa, sucursal) is None,
-            "Ya hay una caja abierta en esta sucursal",
-            409,
-        )
-        nueva_caja = Cajas(
-            id_empresa=empresa,
-            id_sucursal=sucursal,
-            id_usuario=contexto["usuario"].id,
-            fecha_apertura=ahora(),
-            monto_inicial=json.monto_inicial,
-        )
-        db.add(nueva_caja)
-        db.flush()
-        respuesta = CajaService.respuesta(db, nueva_caja)
-        db.commit()
-        return respuesta
+        try:
+            empresa, sucursal = alcance(contexto)
+            exigir(
+                repo.bloquear_sucursal(db, empresa, sucursal),
+                "No se encontro la sucursal",
+                404,
+            )
+            exigir(
+                repo.buscar_abierta(db, empresa, sucursal) is None,
+                "Ya hay una caja abierta en esta sucursal",
+                409,
+            )
+            nueva_caja = Cajas(
+                id_empresa=empresa,
+                id_sucursal=sucursal,
+                id_usuario=contexto["usuario"].id,
+                fecha_apertura=ahora(),
+                monto_inicial=json.monto_inicial,
+            )
+            repo.agregar(db, nueva_caja)
+            repo.guardar_cambios(db)
+            respuesta = CajaService.respuesta(db, nueva_caja)
+            repo.guardar_cambios(db)
+            db.commit()
+
+            return respuesta
+        except SQLAlchemyError:
+            db.rollback()
+            raise
+        except Exception:
+            db.rollback()
+            raise
 
     @staticmethod
     def cerrar_service(id, json, db, contexto):
-        empresa, sucursal = alcance(contexto)
-        look_up = repo.buscar_caja(db, id, empresa, sucursal)
-        exigir(look_up is not None, "No se encontro la caja", 404)
-        exigir(
-            look_up.id_usuario == contexto["usuario"].id,
-            "Solo el cajero que abrio la caja puede cerrarla",
-            403,
-        )
-        exigir(look_up.fecha_cierre is None, "La caja ya esta cerrada", 409)
-        resumen = CajaService.respuesta(db, look_up)
-        look_up.efectivo_esperado = Decimal(resumen["efectivo_esperado"])
-        look_up.efectivo_contado = json.efectivo_contado
-        look_up.diferencia = moneda(json.efectivo_contado - look_up.efectivo_esperado)
-        look_up.nota = json.nota
-        look_up.fecha_cierre = ahora()
-        respuesta = CajaService.respuesta(db, look_up)
-        db.commit()
-        return respuesta
+        try:
+            empresa, sucursal = alcance(contexto)
+            look_up = repo.buscar_caja(db, id, empresa, sucursal)
+            exigir(look_up is not None, "No se encontro la caja", 404)
+            exigir(
+                look_up.id_usuario == contexto["usuario"].id,
+                "Solo el cajero que abrio la caja puede cerrarla",
+                403,
+            )
+            exigir(look_up.fecha_cierre is None, "La caja ya esta cerrada", 409)
+            resumen = CajaService.respuesta(db, look_up)
+            look_up.efectivo_esperado = Decimal(resumen["efectivo_esperado"])
+            look_up.efectivo_contado = json.efectivo_contado
+            look_up.diferencia = moneda(
+                json.efectivo_contado - look_up.efectivo_esperado
+            )
+            look_up.nota = json.nota
+            look_up.fecha_cierre = ahora()
+            respuesta = CajaService.respuesta(db, look_up)
+            repo.guardar_cambios(db)
+            db.commit()
+
+            return respuesta
+        except SQLAlchemyError:
+            db.rollback()
+            raise
+        except Exception:
+            db.rollback()
+            raise
 
     @staticmethod
     def actual_service(db, contexto):
         empresa, sucursal = alcance(contexto)
         look_up = repo.buscar_abierta(db, empresa, sucursal)
+
         return CajaService.respuesta(db, look_up) if look_up else None
 
     @staticmethod
     def listar_service(db, contexto, pagina, limite):
         empresa, sucursal = alcance(contexto)
+
         return paginar(
             repo.listar(db, empresa, sucursal),
             pagina,

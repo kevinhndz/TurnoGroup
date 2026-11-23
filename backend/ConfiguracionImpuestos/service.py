@@ -1,5 +1,6 @@
-from fastapi import HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
 from backend.ConfiguracionImpuestos.repository import (
     ConfiguracionImpuestosRepository as repo,
 )
@@ -9,35 +10,51 @@ from backend.ConfiguracionImpuestos.schema import (
 )
 from backend.ConfiguracionImpuestos.tabla import ConfiguracionImpuestos
 from backend.Empresas.repository import EmpresaRepository as repo_empresa
-from core.exceptions import RecursoDuplicadoError, RecursoNoEncontradoError
+from core.exceptions import (
+    RecursoDuplicadoError,
+    RecursoNoEncontradoError,
+    SolicitudError,
+)
 
 
 class ConfiguracionImpuestosService:
-
     @staticmethod
     def crear_configuracion_impuestos_service(
         json: Revisar_Json_Crear_Configuracion_Impuestos, db: Session, id_empresa: int
     ):
-        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        try:
+            empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
-        if empresa is None:
-            raise RecursoNoEncontradoError("No se encontro la empresa")
+            if empresa is None:
+                raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_configuracion_impuestos_por_empresa(db, id_empresa)
-        if look_up is not None:
-            raise RecursoDuplicadoError(
-                "La empresa ya tiene una configuracion de impuestos"
+            look_up = repo.buscar_configuracion_impuestos_por_empresa(db, id_empresa)
+
+            if look_up is not None:
+                raise RecursoDuplicadoError(
+                    "La empresa ya tiene una configuracion de impuestos"
+                )
+
+            nueva_configuracion_impuestos = ConfiguracionImpuestos(
+                id_empresa=id_empresa,
+                nombre=json.nombre,
+                porcentaje=json.porcentaje,
+                precios_incluyen_impuesto=json.precios_incluyen_impuesto,
             )
+            resultado = repo.guardar_nueva_configuracion_impuestos(
+                db, nueva_configuracion_impuestos
+            )
+            repo.guardar_cambios(db)
+            db.commit()
+            repo.actualizar(db, resultado)
 
-        nueva_configuracion_impuestos = ConfiguracionImpuestos(
-            id_empresa=id_empresa,
-            nombre=json.nombre,
-            porcentaje=json.porcentaje,
-            precios_incluyen_impuesto=json.precios_incluyen_impuesto,
-        )
-        return repo.guardar_nueva_configuracion_impuestos(
-            db, nueva_configuracion_impuestos
-        )
+            return resultado
+        except SQLAlchemyError:
+            db.rollback()
+            raise
+        except Exception:
+            db.rollback()
+            raise
 
     @staticmethod
     def listar_configuracion_impuestos_service(
@@ -69,6 +86,7 @@ class ConfiguracionImpuestosService:
             raise RecursoNoEncontradoError("No se encontro la empresa")
 
         look_up = repo.buscar_configuracion_impuestos_por_id(db, id, id_empresa)
+
         if look_up is None:
             raise RecursoNoEncontradoError(
                 "No se encontro la configuracion de impuestos"
@@ -83,52 +101,74 @@ class ConfiguracionImpuestosService:
         id_empresa: int,
         db: Session,
     ):
-        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        try:
+            empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
-        if empresa is None:
-            raise RecursoNoEncontradoError("No se encontro la empresa")
+            if empresa is None:
+                raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_configuracion_impuestos_por_id(db, id, id_empresa)
-        if look_up is None:
-            raise RecursoNoEncontradoError(
-                "No se encontro la configuracion de impuestos"
-            )
+            look_up = repo.buscar_configuracion_impuestos_por_id(db, id, id_empresa)
 
-        cambios = json.model_dump(exclude_unset=True)
-        if not cambios:
-            raise HTTPException(
-                status_code=422, detail="Debes enviar al menos un campo para editar"
-            )
-        for campo, valor in cambios.items():
-            if valor is None and campo not in ("nombre",):
-                raise HTTPException(
-                    status_code=422, detail="El campo " + campo + " no acepta null"
+            if look_up is None:
+                raise RecursoNoEncontradoError(
+                    "No se encontro la configuracion de impuestos"
                 )
 
-        for campo, valor in cambios.items():
-            if valor is not None or campo == "nombre":
-                setattr(look_up, campo, valor)
+            cambios = json.model_dump(exclude_unset=True)
 
-        db.commit()
-        db.refresh(look_up)
-        return look_up
+            if not cambios:
+                raise SolicitudError(
+                    status_code=422, detail="Debes enviar al menos un campo para editar"
+                )
+
+            for campo, valor in cambios.items():
+                if valor is None and campo not in ("nombre",):
+                    raise SolicitudError(
+                        status_code=422, detail="El campo " + campo + " no acepta null"
+                    )
+
+            for campo, valor in cambios.items():
+                if valor is not None or campo == "nombre":
+                    setattr(look_up, campo, valor)
+
+            repo.guardar_cambios(db)
+            db.commit()
+            repo.actualizar(db, look_up)
+
+            return look_up
+        except SQLAlchemyError:
+            db.rollback()
+            raise
+        except Exception:
+            db.rollback()
+            raise
 
     @staticmethod
     def desactivar_configuracion_impuestos_service(
         id: int, id_empresa: int, db: Session
     ):
-        empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
+        try:
+            empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
-        if empresa is None:
-            raise RecursoNoEncontradoError("No se encontro la empresa")
+            if empresa is None:
+                raise RecursoNoEncontradoError("No se encontro la empresa")
 
-        look_up = repo.buscar_configuracion_impuestos_por_id(db, id, id_empresa)
-        if look_up is None:
-            raise RecursoNoEncontradoError(
-                "No se encontro la configuracion de impuestos"
-            )
+            look_up = repo.buscar_configuracion_impuestos_por_id(db, id, id_empresa)
 
-        look_up.activo = False
-        db.commit()
-        db.refresh(look_up)
-        return look_up
+            if look_up is None:
+                raise RecursoNoEncontradoError(
+                    "No se encontro la configuracion de impuestos"
+                )
+
+            look_up.activo = False
+            repo.guardar_cambios(db)
+            db.commit()
+            repo.actualizar(db, look_up)
+
+            return look_up
+        except SQLAlchemyError:
+            db.rollback()
+            raise
+        except Exception:
+            db.rollback()
+            raise

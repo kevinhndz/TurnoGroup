@@ -1,20 +1,23 @@
-from core.listados import filtros_listado
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, Query, HTTPException, Response
-from utils.autorizacion import obtener_sesion, revisar_solicitud_sesion
+
+from fastapi import APIRouter, Depends, Path, Query, Response
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
+
+from backend.Sesiones.router import poner_cookie
+from backend.Sesiones.schema import RespuestaSesion
 from backend.Usuarios.schema import (
     NuevoUsuarioRespuesta,
-    Revisar_Json_Rol_Plataforma,
     Revisar_Json_Editar_Usuario,
     Revisar_Json_Nuevo_Usuario,
     Revisar_Json_Registro_Negocio,
+    Revisar_Json_Rol_Plataforma,
 )
 from backend.Usuarios.service import UsuarioService as service
-from backend.Usuarios.codigos_mfa import CodigosRecuperacionMfa
-from backend.Sesiones.schema import RespuestaSesion
+from core.exceptions import SolicitudError
+from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_sesion, revisar_solicitud_sesion
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
@@ -54,12 +57,14 @@ def editar_usuario(
     sesion=Depends(obtener_sesion),
 ):
     if sesion[1].id != id and sesion[1].rol_plataforma != "Superadministrador":
-        raise HTTPException(403, "Solo puedes editar tu propio perfil")
+        raise SolicitudError(403, "Solo puedes editar tu propio perfil")
+
     if (
         "estado" in json.model_fields_set
         and sesion[1].rol_plataforma != "Superadministrador"
     ):
-        raise HTTPException(403, "El estado requiere permisos de administracion")
+        raise SolicitudError(403, "El estado requiere permisos de administracion")
+
     return service.editar_usuario_service(json, id, db)
 
 
@@ -70,7 +75,8 @@ def desactivar_usuario(
     sesion=Depends(obtener_sesion),
 ):
     if sesion[1].id != id and sesion[1].rol_plataforma != "Superadministrador":
-        raise HTTPException(403, "Solo puedes desactivar tu propio perfil")
+        raise SolicitudError(403, "Solo puedes desactivar tu propio perfil")
+
     return service.desactivar_usuario_service(id, db)
 
 
@@ -89,18 +95,18 @@ def completar_registro_negocio(
     response: Response,
     db: Session = Depends(abrir_puerta_bd),
 ):
-    from backend.Sesiones.router import poner_cookie
-
     respuesta, token, vencimiento = service.registrar_negocio_service(json, db)
     # Guardo el token solo en la cookie para que JavaScript no pueda leerlo.
     poner_cookie(response, token, vencimiento)
+
     return respuesta
 
 
 from fastapi import BackgroundTasks
-from backend.Usuarios.schema import SolicitarCambioCorreo, ConfirmarCambioCorreo
-from backend.Usuarios.seguridad import SeguridadUsuarioService
+
 from backend.Sesiones.router import quitar_cookie
+from backend.Usuarios.schema import ConfirmarCambioCorreo, SolicitarCambioCorreo
+from backend.Usuarios.seguridad import SeguridadUsuarioService
 
 
 @router.post("/{id}/correo/solicitar", status_code=202)
@@ -112,7 +118,8 @@ def solicitar_cambio_correo(
     db: Session = Depends(abrir_puerta_bd),
 ):
     if sesion[1].id != id:
-        raise HTTPException(403, "Solo puedes cambiar tu propio correo")
+        raise SolicitudError(403, "Solo puedes cambiar tu propio correo")
+
     return SeguridadUsuarioService.solicitar(json, id, db, tareas)
 
 
@@ -126,15 +133,16 @@ def confirmar_cambio_correo(
     db: Session = Depends(abrir_puerta_bd),
 ):
     if sesion[1].id != id:
-        raise HTTPException(403, "Solo puedes cambiar tu propio correo")
+        raise SolicitudError(403, "Solo puedes cambiar tu propio correo")
     resultado = SeguridadUsuarioService.confirmar(json, id, db, tareas)
     quitar_cookie(response)
+
     return resultado
 
 
 from backend.Usuarios.schema import (
-    SolicitarVerificacionCorreo,
     ConfirmarVerificacionCorreo,
+    SolicitarVerificacionCorreo,
 )
 from backend.Usuarios.verificacion import VerificacionCorreoService
 

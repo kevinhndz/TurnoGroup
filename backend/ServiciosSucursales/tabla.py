@@ -1,4 +1,5 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, CheckConstraint
+from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, Integer
+
 from database.almacen import miclaseBase
 
 

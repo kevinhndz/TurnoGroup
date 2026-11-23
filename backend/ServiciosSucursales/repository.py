@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
+
 from backend.ServiciosSucursales.tabla import ServiciosSucursales
 from backend.TiposServicio.tabla import TiposServicio
 
 
 class ServicioSucursalRepository:
-
     @staticmethod
     def buscar_servicio_sucursal(
         db: Session, id_sucursal: int, id_tipo_servicio: int
@@ -23,8 +23,8 @@ class ServicioSucursalRepository:
         db: Session, nuevo_servicio_sucursal: ServiciosSucursales
     ) -> ServiciosSucursales:
         db.add(nuevo_servicio_sucursal)
-        db.commit()
-        db.refresh(nuevo_servicio_sucursal)
+        db.flush()
+
         return nuevo_servicio_sucursal
 
     @staticmethod
@@ -43,6 +43,7 @@ class ServicioSucursalRepository:
             )
             .filter(ServiciosSucursales.id_sucursal == id_sucursal)
         )
+
         if solo_habilitados:
             consulta = consulta.filter(
                 ServiciosSucursales.habilitado.is_(True), TiposServicio.activo.is_(True)
@@ -54,4 +55,15 @@ class ServicioSucursalRepository:
             .limit(limite)
             .all()
         )
+
         return total, lista_servicios_sucursales
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro

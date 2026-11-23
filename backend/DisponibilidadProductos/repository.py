@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
+
 from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
 from backend.Productos.tabla import Productos
 
 
 class DisponibilidadProductoRepository:
-
     @staticmethod
     def buscar_disponibilidad_producto(db: Session, id_producto: int, id_sucursal: int):
         return (
@@ -21,8 +21,8 @@ class DisponibilidadProductoRepository:
         db: Session, nueva_disponibilidad_producto: DisponibilidadProductos
     ):
         db.add(nueva_disponibilidad_producto)
-        db.commit()
-        db.refresh(nueva_disponibilidad_producto)
+        db.flush()
+
         return nueva_disponibilidad_producto
 
     @staticmethod
@@ -45,9 +45,20 @@ class DisponibilidadProductoRepository:
             .limit(limite)
             .all()
         )
+
         return total, lista_disponibilidad_productos
 
     @staticmethod
     def retirar_disponibilidad_producto(db: Session, look_up: DisponibilidadProductos):
         db.delete(look_up)
-        db.commit()
+        db.flush()
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro

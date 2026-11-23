@@ -1,15 +1,17 @@
-from core.listados import pagina_listado
 from sqlalchemy.orm import Session
+
+from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
 from backend.Productos.tabla import Productos
+from backend.Sucursales.tabla import Sucursales
+from core.listados import pagina_listado
 
 
 class ProductoRepository:
-
     @staticmethod
     def guardar_nuevo_producto(db: Session, nuevo_producto: Productos) -> Productos:
         db.add(nuevo_producto)
-        db.commit()
-        db.refresh(nuevo_producto)
+        db.flush()
+
         return nuevo_producto
 
     @staticmethod
@@ -32,6 +34,7 @@ class ProductoRepository:
         filtros=None,
     ):
         consulta = ProductoRepository.consulta_catalogo(db, id_empresa, id_sucursal)
+
         return pagina_listado(consulta, Productos, pagina_actual, limite, filtros)
 
     @staticmethod
@@ -46,10 +49,8 @@ class ProductoRepository:
 
     @staticmethod
     def consulta_catalogo(db, id_empresa, id_sucursal=None):
-        from backend.DisponibilidadProductos.tabla import DisponibilidadProductos
-        from backend.Productos.tabla import Productos
-
         consulta = db.query(Productos).filter(Productos.id_empresa == id_empresa)
+
         if id_sucursal is not None:
             consulta = consulta.join(
                 DisponibilidadProductos,
@@ -59,4 +60,37 @@ class ProductoRepository:
                 DisponibilidadProductos.disponible.is_(True),
                 Productos.disponible.is_(True),
             )
+
         return consulta
+
+    @staticmethod
+    def agregar_varios(db, registros):
+        db.add_all(registros)
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def actualizar(db, registro):
+        db.refresh(registro)
+
+        return registro
+
+    @staticmethod
+    def listar_nombres_para_importacion(db, id_empresa):
+        return (
+            db.query(Productos.nombre).filter(Productos.id_empresa == id_empresa).all()
+        )
+
+    @staticmethod
+    def buscar_sucursal_activa(db, id_sucursal, id_empresa):
+        return (
+            db.query(Sucursales)
+            .filter(
+                Sucursales.id == id_sucursal,
+                Sucursales.id_empresa == id_empresa,
+                Sucursales.activo.is_(True),
+            )
+            .first()
+        )

@@ -1,8 +1,8 @@
-from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
+
 from backend.CategoriasGastos.schema import (
     RespuestaCategoriaGasto,
     Revisar_Json_Crear_Categoria_Gasto,
@@ -10,6 +10,8 @@ from backend.CategoriasGastos.schema import (
 )
 from backend.CategoriasGastos.service import CategoriaGastoService as service
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_empresa
 
 router = APIRouter(prefix="/categorias-gastos", tags=["Categorias de gastos"])
 

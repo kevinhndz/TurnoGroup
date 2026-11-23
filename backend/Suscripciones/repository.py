@@ -1,9 +1,12 @@
+from backend.Empresas.tabla import Empresas
+from backend.Sucursales.tabla import Sucursales
 from backend.Suscripciones.tabla import (
+    ComprobantesSuscripcion,
     Suscripciones,
     TarjetasSuscripcion,
-    ComprobantesSuscripcion,
 )
-from backend.Sucursales.tabla import Sucursales
+from backend.Usuarios.tabla import Usuarios
+from backend.VinculosLaborales.tabla import VinculosLaborales
 
 
 class SuscripcionRepository:
@@ -48,6 +51,7 @@ class SuscripcionRepository:
         consulta = db.query(Suscripciones).filter(
             Suscripciones.id_empresa == id_empresa
         )
+
         return (consulta.with_for_update() if bloquear else consulta).first()
 
     @staticmethod
@@ -57,3 +61,34 @@ class SuscripcionRepository:
             .filter(Sucursales.id_empresa == id_empresa, Sucursales.activo.is_(True))
             .count()
         )
+
+    @staticmethod
+    def agregar(db, registro):
+        db.add(registro)
+
+        return registro
+
+    @staticmethod
+    def guardar_cambios(db):
+        db.flush()
+
+    @staticmethod
+    def buscar_usuario_para_desactivar(db, contexto):
+        return (
+            db.query(Usuarios)
+            .filter_by(id=contexto["usuario"].id)
+            .with_for_update()
+            .one()
+        )
+
+    @staticmethod
+    def listar_empresas_del_gerente(db, usuario):
+        return (
+            db.query(VinculosLaborales)
+            .filter_by(id_usuario=usuario.id, rol="Gerente", activo=True)
+            .all()
+        )
+
+    @staticmethod
+    def buscar_empresa(db, id_empresa):
+        return db.get(Empresas, id_empresa)

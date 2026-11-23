@@ -1,10 +1,10 @@
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
+
 from database.almacen import miclaseBase
 from database.base import PoderAuditor
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
 
 
 class Sucursales(miclaseBase, PoderAuditor):
-
     __tablename__ = "sucursales"
     __table_args__ = (
         UniqueConstraint(

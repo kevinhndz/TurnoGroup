@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, Query, Path
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
-from utils.autorizacion import obtener_contexto
+
 from backend.Cajas.schema import Revisar_Json_Abrir_Caja, Revisar_Json_Cerrar_Caja
 from backend.Cajas.service import CajaService as service
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_contexto
 
 router = APIRouter(prefix="/cajas", tags=["Cajas"])
 

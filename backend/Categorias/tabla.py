@@ -1,6 +1,7 @@
-from database.base import PoderAuditor
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
+
 from database.almacen import miclaseBase
-from sqlalchemy import UniqueConstraint, Boolean, Column, ForeignKey, Integer, String
+from database.base import PoderAuditor
 
 
 class Categorias(miclaseBase, PoderAuditor):

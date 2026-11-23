@@ -1,16 +1,18 @@
-from core.listados import filtros_listado
-from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
-from typing import Annotated
-from database.almacen import abrir_puerta_bd
+
 from backend.Categorias.schema import (
     NuevaCategoriaRespuesta,
     Revisar_Json_Editar_Categoria,
     Revisar_Json_Nueva_Categoria,
 )
 from backend.Categorias.service import CategoriaService as service
+from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_empresa, obtener_sucursal_catalogo
 
 router = APIRouter(prefix="/categorias", tags=["Categorias"])
 

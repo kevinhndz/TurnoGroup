@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, Query
-from core.listados import filtros_listado
 from sqlalchemy.orm import Session
+
+from backend.Bitacora.schema import RespuestaBitacora
+from backend.Bitacora.service import BitacoraService as service
+from core.listados import filtros_listado
+from core.schema import RespuestaPaginada
 from database.almacen import abrir_puerta_bd
 from utils.autorizacion import obtener_contexto
-from backend.Bitacora.service import BitacoraService as service
-from backend.Bitacora.schema import RespuestaBitacora
-from core.schema import RespuestaPaginada
 
 router = APIRouter(prefix="/bitacora", tags=["Bitacora"])
 

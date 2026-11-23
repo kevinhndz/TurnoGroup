@@ -1,11 +1,12 @@
-from database.base import PoderAuditor
-from database.almacen import miclaseBase
-from sqlalchemy import Integer, String, Column, DateTime
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Integer, String
+
+from database.almacen import miclaseBase
+from database.base import PoderAuditor
 
 
 class Empresas(miclaseBase, PoderAuditor):
-
     __tablename__ = "empresas"
 
     id = Column(Integer, primary_key=True)

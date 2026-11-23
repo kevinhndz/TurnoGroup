@@ -1,19 +1,20 @@
-from uuid import UUID
 from datetime import date
-from core.listados import filtros_listado
-from typing import Literal
-from fastapi import APIRouter, Depends, Query, Path
-from typing import Annotated
+from typing import Annotated, Literal
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
-from utils.autorizacion import obtener_contexto
+
 from backend.Pedidos.schema import (
-    Revisar_Json_Pedido,
-    Revisar_Json_Crear_Pedido,
-    Revisar_Json_Cobrar_Pedido,
     Revisar_Json_Cancelar_Pedido,
+    Revisar_Json_Cobrar_Pedido,
+    Revisar_Json_Crear_Pedido,
+    Revisar_Json_Pedido,
 )
 from backend.Pedidos.service import PedidoService as service
+from core.listados import filtros_listado
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_contexto
 
 router = APIRouter(prefix="/pedidos", tags=["Pedidos"])
 
@@ -35,6 +36,7 @@ def disponibilidad_mesas(
 ):
     if id_pedido:
         service.ver_service(id_pedido, db, contexto)
+
     return service.mesas_service(db, contexto, id_pedido)
 
 
@@ -54,6 +56,7 @@ def cotizar(
 ):
     if id_pedido is not None:
         service.ver_service(id_pedido, db, contexto)
+
     return service.calcular_service(json, db, contexto, id_pedido)
 
 
@@ -79,6 +82,7 @@ def listar(
     db: Session = Depends(abrir_puerta_bd),
 ):
     filtros.update({"entrega": entrega, "pago": pago, "fecha": fecha})
+
     return service.listar_service(db, contexto, pagina_actual, limite, estado, filtros)
 
 

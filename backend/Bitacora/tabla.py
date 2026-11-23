@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, Index
-from database.almacen import miclaseBase
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, String
+
 from core.operaciones import ahora
+from database.almacen import miclaseBase
 
 
 class Bitacora(miclaseBase):

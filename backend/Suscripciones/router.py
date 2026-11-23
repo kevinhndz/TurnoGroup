@@ -1,15 +1,21 @@
-from fastapi import APIRouter, Depends, Response, Path
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, Path, Response
 from sqlalchemy.orm import Session
-from database.almacen import abrir_puerta_bd
-from utils.autorizacion import obtener_empresa, obtener_contexto
-from backend.Suscripciones.schema import Revisar_Json_Desactivar_Cuenta
+
+from backend.Sesiones.router import quitar_cookie
+from backend.Suscripciones import comprobantes
+from backend.Suscripciones.repository import SuscripcionRepository as repo
 from backend.Suscripciones.schema import (
+    Revisar_Json_Desactivar_Cuenta,
     Revisar_Json_Plan,
-    Revisar_Json_Tarjeta_Suscripcion,
     Revisar_Json_Renovacion,
+    Revisar_Json_Tarjeta_Suscripcion,
 )
 from backend.Suscripciones.service import SuscripcionService as service
+from core.operaciones import exigir
+from database.almacen import abrir_puerta_bd
+from utils.autorizacion import obtener_contexto, obtener_empresa
 
 router = APIRouter(prefix="/suscripciones", tags=["Suscripciones"])
 
@@ -20,11 +26,10 @@ def desactivar_cuenta(
     contexto=Depends(obtener_contexto),
     db: Session = Depends(abrir_puerta_bd),
 ):
-    from backend.Sesiones.router import quitar_cookie
-
     service.desactivar_cuenta_service(json, db, contexto)
     respuesta = Response(status_code=204)
     quitar_cookie(respuesta)
+
     return respuesta
 
 
@@ -100,11 +105,8 @@ def comprobante_registro(
 def exportar_excel(
     id_empresa=Depends(obtener_empresa), db: Session = Depends(abrir_puerta_bd)
 ):
-    from backend.Suscripciones.repository import SuscripcionRepository as repo
-    from backend.Suscripciones.comprobantes import crear_excel
-
     return Response(
-        crear_excel(repo.comprobantes(db, id_empresa)),
+        comprobantes.crear_excel(repo.comprobantes(db, id_empresa)),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={
             "Content-Disposition": 'attachment; filename="comprobantes-prueba.xlsx"'
@@ -116,11 +118,8 @@ def exportar_excel(
 def exportar_historial_pdf(
     id_empresa=Depends(obtener_empresa), db: Session = Depends(abrir_puerta_bd)
 ):
-    from backend.Suscripciones.repository import SuscripcionRepository as repo
-    from backend.Suscripciones.comprobantes import crear_historial_pdf
-
     return Response(
-        crear_historial_pdf(repo.comprobantes(db, id_empresa)),
+        comprobantes.crear_historial_pdf(repo.comprobantes(db, id_empresa)),
         media_type="application/pdf",
         headers={"Content-Disposition": 'inline; filename="historial-facturacion.pdf"'},
     )
@@ -132,14 +131,11 @@ def exportar_pdf(
     id_empresa=Depends(obtener_empresa),
     db: Session = Depends(abrir_puerta_bd),
 ):
-    from backend.Suscripciones.repository import SuscripcionRepository as repo
-    from backend.Suscripciones.comprobantes import crear_pdf
-    from core.operaciones import exigir
-
     look_up = repo.buscar_comprobante(db, id_empresa, id)
     exigir(look_up is not None, "No se encontro el comprobante", 404)
+
     return Response(
-        crear_pdf(look_up),
+        comprobantes.crear_pdf(look_up),
         media_type="application/pdf",
         headers={
             "Content-Disposition": f'inline; filename="comprobante-prueba-{id}.pdf"'
@@ -153,14 +149,11 @@ def exportar_comprobante_excel(
     id_empresa=Depends(obtener_empresa),
     db: Session = Depends(abrir_puerta_bd),
 ):
-    from backend.Suscripciones.repository import SuscripcionRepository as repo
-    from backend.Suscripciones.comprobantes import crear_excel
-    from core.operaciones import exigir
-
     look_up = repo.buscar_comprobante(db, id_empresa, id)
     exigir(look_up is not None, "No se encontro el comprobante", 404)
+
     return Response(
-        crear_excel([look_up]),
+        comprobantes.crear_excel([look_up]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={
             "Content-Disposition": f'attachment; filename="comprobante-prueba-{id}.xlsx"'

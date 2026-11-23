@@ -8,11 +8,7 @@ from backend.Sesiones.repository import SesionRepository
 from backend.Usuarios.cambios_correo import CambiosCorreo
 from backend.Usuarios.repository import UsuarioRepository as repo
 from core.config import revision
-from core.exceptions import (
-    CredencialesInvalidasError,
-    RecursoDuplicadoError,
-    SolicitudError,
-)
+from core.exceptions import SolicitudError
 from utils.hash import verificar_contrasena
 from utils.token import crear_token_sesion, proteger_token_sesion
 
@@ -28,7 +24,7 @@ class SeguridadUsuarioService:
             or not usuario.clave_protegida
             or not verificar_contrasena(clave, usuario.clave_protegida or "")
         ):
-            raise CredencialesInvalidasError("Verifica tu contrasena actual")
+            raise SolicitudError(401, "Verifica tu contrasena actual")
 
         return usuario
 
@@ -44,7 +40,7 @@ class SeguridadUsuarioService:
                 raise SolicitudError(422, "Indica un correo diferente")
 
             if repo.buscar_correo_nuevo(db, nuevo):
-                raise RecursoDuplicadoError("No se puede utilizar ese correo")
+                raise SolicitudError(409, "No se puede utilizar ese correo")
 
             if not all(
                 (
@@ -113,7 +109,7 @@ class SeguridadUsuarioService:
                 db.commit()
             except IntegrityError:
                 db.rollback()
-                raise RecursoDuplicadoError("No se puede utilizar ese correo") from None
+                raise SolicitudError(409, "No se puede utilizar ese correo") from None
             tareas.add_task(procesar_correo, db, aviso)
 
             return {"detail": "Correo confirmado. Inicia sesion con tu nuevo correo."}

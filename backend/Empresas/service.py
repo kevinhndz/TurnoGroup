@@ -27,7 +27,7 @@ class EmpresaService:
                 usuario.rol_plataforma != "Superadministrador"
                 and InvitacionLaboralRepository.buscar_otra_empresa(db, usuario.id)
             ):
-                raise RecursoDuplicadoError("El usuario ya pertenece a una empresa")
+                raise SolicitudError(409, "El usuario ya pertenece a una empresa")
             look_up = repo.buscar_empresa(db, json.nombre)
 
             if look_up is not None:

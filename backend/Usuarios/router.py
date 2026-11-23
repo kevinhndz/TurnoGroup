@@ -13,7 +13,7 @@ from backend.Usuarios.schema import (
     Revisar_Json_Rol_Plataforma,
 )
 from backend.Usuarios.service import UsuarioService as service
-from core.exceptions import AccesoProhibidoError
+from core.exceptions import SolicitudError
 from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
 from database.almacen import abrir_puerta_bd
@@ -57,13 +57,13 @@ def editar_usuario(
     sesion=Depends(obtener_sesion),
 ):
     if sesion[1].id != id and sesion[1].rol_plataforma != "Superadministrador":
-        raise AccesoProhibidoError("Solo puedes editar tu propio perfil")
+        raise SolicitudError(403, "Solo puedes editar tu propio perfil")
 
     if (
         "estado" in json.model_fields_set
         and sesion[1].rol_plataforma != "Superadministrador"
     ):
-        raise AccesoProhibidoError("El estado requiere permisos de administracion")
+        raise SolicitudError(403, "El estado requiere permisos de administracion")
 
     return service.editar_usuario_service(json, id, db)
 
@@ -75,7 +75,7 @@ def desactivar_usuario(
     sesion=Depends(obtener_sesion),
 ):
     if sesion[1].id != id and sesion[1].rol_plataforma != "Superadministrador":
-        raise AccesoProhibidoError("Solo puedes desactivar tu propio perfil")
+        raise SolicitudError(403, "Solo puedes desactivar tu propio perfil")
 
     return service.desactivar_usuario_service(id, db)
 
@@ -118,7 +118,7 @@ def solicitar_cambio_correo(
     db: Session = Depends(abrir_puerta_bd),
 ):
     if sesion[1].id != id:
-        raise AccesoProhibidoError("Solo puedes cambiar tu propio correo")
+        raise SolicitudError(403, "Solo puedes cambiar tu propio correo")
 
     return SeguridadUsuarioService.solicitar(json, id, db, tareas)
 
@@ -133,7 +133,7 @@ def confirmar_cambio_correo(
     db: Session = Depends(abrir_puerta_bd),
 ):
     if sesion[1].id != id:
-        raise AccesoProhibidoError("Solo puedes cambiar tu propio correo")
+        raise SolicitudError(403, "Solo puedes cambiar tu propio correo")
     resultado = SeguridadUsuarioService.confirmar(json, id, db, tareas)
     quitar_cookie(response)
 

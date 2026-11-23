@@ -14,11 +14,7 @@ from backend.Sesiones.tabla import Sesiones
 from backend.Usuarios.tabla import Usuarios
 from backend.VinculosLaborales.tabla import VinculosLaborales
 from core.config import revision
-from core.exceptions import (
-    RecursoDuplicadoError,
-    RecursoNoEncontradoError,
-    SolicitudError,
-)
+from core.exceptions import SolicitudError
 from utils.correo import enviar_invitacion
 from utils.hash import encriptar_contrasena
 from utils.token import crear_token_sesion, proteger_token_sesion
@@ -65,18 +61,18 @@ class InvitacionLaboralService:
 
             for id_sucursal in ids:
                 if not repo.buscar_sucursal(db, id_sucursal, empresa.id):
-                    raise RecursoNoEncontradoError("No se encontro la sucursal")
+                    raise SolicitudError(404, "No se encontro la sucursal")
             correo = str(json.correo).lower()
             usuario = repo.buscar_usuario(db, correo)
 
             if usuario and repo.buscar_otra_empresa(db, usuario.id, empresa.id):
-                raise RecursoDuplicadoError("El usuario ya pertenece a otra empresa")
+                raise SolicitudError(409, "El usuario ya pertenece a otra empresa")
             existente = (
                 repo.buscar_vinculo(db, usuario.id, empresa.id) if usuario else None
             )
 
             if existente and existente.activo:
-                raise RecursoDuplicadoError("El usuario ya tiene un vinculo activo")
+                raise SolicitudError(409, "El usuario ya tiene un vinculo activo")
 
             if not all(
                 (
@@ -151,7 +147,7 @@ class InvitacionLaboralService:
         look_up = repo.buscar_invitacion(db, id, id_empresa)
 
         if not look_up:
-            raise RecursoNoEncontradoError("No se encontro la invitacion")
+            raise SolicitudError(404, "No se encontro la invitacion")
 
         return InvitacionLaboralService.respuesta_invitacion(look_up, db)
 
@@ -162,10 +158,10 @@ class InvitacionLaboralService:
             look_up = repo.buscar_invitacion(db, id, id_empresa)
 
             if not look_up:
-                raise RecursoNoEncontradoError("No se encontro la invitacion")
+                raise SolicitudError(404, "No se encontro la invitacion")
 
             if look_up.fecha_aceptacion:
-                raise RecursoDuplicadoError("La invitacion ya fue aceptada")
+                raise SolicitudError(409, "La invitacion ya fue aceptada")
             look_up.fecha_revocacion = datetime.now(timezone.utc).replace(tzinfo=None)
             repo.guardar_cambios(db)
             db.commit()
@@ -213,7 +209,7 @@ class InvitacionLaboralService:
                 )
 
             if repo.buscar_otra_empresa(db, usuario.id, empresa.id):
-                raise RecursoDuplicadoError("El usuario ya pertenece a otra empresa")
+                raise SolicitudError(409, "El usuario ya pertenece a otra empresa")
 
             for id_sucursal in sucursales:
                 if not repo.buscar_sucursal(db, id_sucursal, empresa.id):
@@ -221,8 +217,8 @@ class InvitacionLaboralService:
             vinculo = repo.buscar_vinculo(db, usuario.id, empresa.id)
 
             if vinculo and vinculo.activo:
-                raise RecursoDuplicadoError(
-                    "Ya tienes un vinculo activo con esta empresa"
+                raise SolicitudError(
+                    409, "Ya tienes un vinculo activo con esta empresa"
                 )
 
             if not vinculo:
@@ -268,8 +264,9 @@ class InvitacionLaboralService:
                 raise SolicitudError(400, "La invitacion no es valida")
 
             if repo.buscar_usuario(db, invitacion.correo):
-                raise RecursoDuplicadoError(
-                    "Ya tienes una cuenta. Inicia sesion para aceptar la invitacion"
+                raise SolicitudError(
+                    409,
+                    "Ya tienes una cuenta. Inicia sesion para aceptar la invitacion",
                 )
 
             try:

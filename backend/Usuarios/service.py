@@ -29,7 +29,6 @@ from backend.Usuarios.verificacion import VerificacionCorreoService
 from backend.VinculosLaborales.tabla import VinculosLaborales
 from core.config import revision
 from core.exceptions import (
-    AccesoProhibidoError,
     RecursoDuplicadoError,
     RecursoNoEncontradoError,
     SolicitudError,
@@ -117,8 +116,8 @@ class UsuarioService:
                 cambios["correo"] = str(cambios["correo"]).lower()
 
                 if cambios["correo"] != look_up.correo:
-                    raise AccesoProhibidoError(
-                        "Confirma el correo nuevo desde Mi cuenta"
+                    raise SolicitudError(
+                        403, "Confirma el correo nuevo desde Mi cuenta"
                     )
 
             if cambios.get("estado") is False:
@@ -204,8 +203,8 @@ class UsuarioService:
             and usuario.rol_plataforma == "Superadministrador"
             and len(administradores) <= 1
         ):
-            raise RecursoDuplicadoError(
-                "La plataforma debe conservar un superadministrador activo"
+            raise SolicitudError(
+                409, "La plataforma debe conservar un superadministrador activo"
             )
 
     @staticmethod
@@ -308,13 +307,14 @@ class UsuarioService:
             look_up = repo.buscar_id_por_correo(db, correo)
 
             if look_up:
-                raise RecursoDuplicadoError(
-                    "Este correo ya tiene una cuenta. Inicia sesion con ella o usa otro correo"
+                raise SolicitudError(
+                    409,
+                    "Este correo ya tiene una cuenta. Inicia sesion con ella o usa otro correo",
                 )
             look_up = repo.buscar_empresa_para_registro(db, json)
 
             if look_up:
-                raise RecursoDuplicadoError("Ya existe una empresa con ese nombre")
+                raise SolicitudError(409, "Ya existe una empresa con ese nombre")
             tipos = {}
 
             for item_actual in repo.listar_tipos_servicio_activos(db):

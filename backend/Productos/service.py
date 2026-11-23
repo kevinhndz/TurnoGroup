@@ -222,8 +222,8 @@ class ProductoService:
                 )
 
             if fila["nombre"].casefold() in nombres:
-                raise RecursoDuplicadoError(
-                    f"El producto de la fila {numero} esta repetido en el archivo"
+                raise SolicitudError(
+                    409, f"El producto de la fila {numero} esta repetido en el archivo"
                 )
             nombres.add(fila["nombre"].casefold())
             productos.append(
@@ -253,8 +253,8 @@ class ProductoService:
                 )
 
                 if categoria is None or not categoria.activo:
-                    raise RecursoNoEncontradoError(
-                        "No se encontro la categoria de esta empresa"
+                    raise SolicitudError(
+                        404, "No se encontro la categoria de esta empresa"
                     )
 
             look_up = repo.buscar_producto_por_nombre(db, id_empresa, json.nombre)
@@ -369,8 +369,8 @@ class ProductoService:
                 )
 
                 if categoria is None or not categoria.activo:
-                    raise RecursoNoEncontradoError(
-                        "No se encontro la categoria de esta empresa"
+                    raise SolicitudError(
+                        404, "No se encontro la categoria de esta empresa"
                     )
 
             # Recorre el diccionario y actualiza cada campo enviado.
@@ -427,7 +427,7 @@ class ProductoService:
                 nombres.append(item_actual_4.nombre.casefold())
 
             if len(set(nombres)) != len(nombres):
-                raise RecursoDuplicadoError("Hay productos repetidos en el archivo")
+                raise SolicitudError(409, "Hay productos repetidos en el archivo")
             existentes = set()
 
             for (nombre_actual,) in repo.listar_nombres_para_importacion(
@@ -436,8 +436,8 @@ class ProductoService:
                 existentes.add(nombre_actual.casefold())
 
             if existentes.intersection(nombres):
-                raise RecursoDuplicadoError(
-                    "Un producto del archivo ya existe en tu catalogo"
+                raise SolicitudError(
+                    409, "Un producto del archivo ya existe en tu catalogo"
                 )
 
             for item in json.productos:
@@ -447,15 +447,15 @@ class ProductoService:
                     )
 
                     if not categoria or not categoria.activo:
-                        raise RecursoNoEncontradoError(
-                            "No se encontro la categoria de esta empresa"
+                        raise SolicitudError(
+                            404, "No se encontro la categoria de esta empresa"
                         )
 
             if json.asignar_sucursal:
                 sucursal = repo.buscar_sucursal_activa(db, id_sucursal, id_empresa)
 
                 if not sucursal:
-                    raise RecursoNoEncontradoError("No se encontro la sucursal")
+                    raise SolicitudError(404, "No se encontro la sucursal")
             elementos = []
 
             for item_actual_2 in json.productos:

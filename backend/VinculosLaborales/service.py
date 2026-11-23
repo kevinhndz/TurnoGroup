@@ -9,7 +9,6 @@ from backend.VinculosLaborales.repository import VinculoLaboralRepository as rep
 from backend.VinculosLaborales.schema import Revisar_Json_Crear_Vinculo_Laboral
 from backend.VinculosLaborales.tabla import AsignacionesSucursales, VinculosLaborales
 from core.exceptions import (
-    AccesoProhibidoError,
     RecursoDuplicadoError,
     RecursoNoEncontradoError,
     SolicitudError,
@@ -26,13 +25,11 @@ class VinculoLaboralService:
             InvitacionLaboralRepository.bloquear_empresa(db, id_empresa)
 
             if json.rol != "Gerente":
-                raise AccesoProhibidoError(
-                    "La plataforma solo asigna el primer gerente"
-                )
+                raise SolicitudError(403, "La plataforma solo asigna el primer gerente")
             gerente = repo.buscar_gerente_activo(db, id_empresa)
 
             if gerente:
-                raise RecursoDuplicadoError("La empresa ya tiene gerente")
+                raise SolicitudError(409, "La empresa ya tiene gerente")
             usuario = repo_usuario.buscar_usuario_por_id(db, json.id_usuario)
 
             if usuario is None:
@@ -41,7 +38,7 @@ class VinculoLaboralService:
             if InvitacionLaboralRepository.buscar_otra_empresa(
                 db, usuario.id, id_empresa
             ):
-                raise RecursoDuplicadoError("El usuario ya pertenece a otra empresa")
+                raise SolicitudError(409, "El usuario ya pertenece a otra empresa")
 
             empresa = repo_empresa.buscar_empresa_por_id(db, id_empresa)
 
@@ -176,8 +173,9 @@ class VinculoLaboralService:
             if look_up.rol != "Gerente" and repo.listar_asignaciones_sucursales(
                 db, look_up.id
             ):
-                raise RecursoDuplicadoError(
-                    "Este rol solo puede tener una sucursal. Retira la anterior antes de asignar otra"
+                raise SolicitudError(
+                    409,
+                    "Este rol solo puede tener una sucursal. Retira la anterior antes de asignar otra",
                 )
 
             nueva_asignacion = AsignacionesSucursales(
@@ -257,8 +255,8 @@ class VinculoLaboralService:
                 cambios.get("rol", look_up.rol) != "Gerente"
                 and len(repo.listar_asignaciones_sucursales(db, look_up.id)) > 1
             ):
-                raise RecursoDuplicadoError(
-                    "Deja una sola sucursal antes de asignar este rol"
+                raise SolicitudError(
+                    409, "Deja una sola sucursal antes de asignar este rol"
                 )
             condicion_verificada = not cambios
 
@@ -285,8 +283,8 @@ class VinculoLaboralService:
                 otros = repo.contar_otros_gerentes(db, id_empresa, id)
 
                 if not otros:
-                    raise RecursoDuplicadoError(
-                        "La empresa debe conservar al menos un gerente"
+                    raise SolicitudError(
+                        409, "La empresa debe conservar al menos un gerente"
                     )
 
             for campo, valor in cambios.items():

@@ -138,6 +138,8 @@ async function comunicar(request, { params }) {
     });
 
     const salida = new Headers({ 'Cache-Control': 'no-store' });
+    const idSolicitud = respuesta.headers.get('x-request-id');
+    if (idSolicitud) salida.set('x-request-id', idSolicitud);
     const tipo = respuesta.headers.get('content-type');
     if (tipo) salida.set('content-type', tipo);
     const espera = respuesta.headers.get('retry-after');

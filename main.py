@@ -53,6 +53,9 @@ app.add_middleware(LimitarSolicitudes)
 
 from utils.auditoria_seguridad import AuditoriaSeguridad
 
+from utils.registro_seguridad import configurar_auditoria
+
+configurar_auditoria()
 app.add_middleware(AuditoriaSeguridad)
 
 app.include_router(routerbitacora)

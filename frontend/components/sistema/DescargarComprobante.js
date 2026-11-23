@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Mensaje, Modal } from './Controles';
+import { dinero, fechaLocal } from '../../lib/api';
 
 export default function DescargarComprobante({ comprobantes, individual = false }) {
   const [abierto, setAbierto] = useState(false);
@@ -87,11 +88,43 @@ function VistaPrevia({ formato, comprobantes, individual }) {
         <>
           <p className="tg-muted">Documento de prueba · Sin validez fiscal</p>
           {formato === 'pdf' ? (
-            <iframe
-              className="tg-document-preview"
-              src={documento.url}
-              title="Vista previa del PDF"
-            />
+            <div className="tg-document-preview" aria-label="Contenido del comprobante">
+              {comprobantes.map((item) => (
+                <article className="tg-receipt-preview" key={item.id}>
+                  <header>
+                    <h2>Turno Group</h2>
+                    <strong>COMPROBANTE DE PRUEBA</strong>
+                    <p>TG-PRUEBA-{String(item.id).padStart(6, '0')}</p>
+                  </header>
+                  <dl>
+                    <div>
+                      <dt>Fecha</dt>
+                      <dd>{fechaLocal(item.fecha)}</dd>
+                    </div>
+                    <div>
+                      <dt>Concepto</dt>
+                      <dd>{item.concepto}</dd>
+                    </div>
+                    <div>
+                      <dt>Periodo</dt>
+                      <dd>
+                        {fechaLocal(item.periodo_inicio)} al{' '}
+                        {fechaLocal(item.periodo_fin)}
+                      </dd>
+                    </div>
+                  </dl>
+                  <p className="tg-receipt-detail">{item.detalle}</p>
+                  <div className="tg-receipt-total">
+                    <span>Total</span>
+                    <strong>{dinero(item.importe, item.moneda || 'USD')}</strong>
+                  </div>
+                  <p className="tg-muted">
+                    Sin validez fiscal. No acredita pagos reales.
+                  </p>
+                </article>
+              ))}
+              <p className="tg-muted">Descarga el PDF para guardarlo o imprimirlo.</p>
+            </div>
           ) : (
             <div className="tg-table-scroll">
               <table className="tg-table">

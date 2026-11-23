@@ -24,3 +24,12 @@ class UsuarioRepository:
     @staticmethod
     def buscar_usuario_por_id(db: Session, id: int) -> Usuarios | None:
         return db.query(Usuarios).filter(Usuarios.id == id).first()
+
+    @staticmethod
+    def invalidar_cambios_correo(db, id_usuario, ahora):
+        from backend.Usuarios.cambios_correo import CambiosCorreo
+
+        db.query(CambiosCorreo).filter(
+            CambiosCorreo.id_usuario == id_usuario,
+            CambiosCorreo.fecha_uso.is_(None),
+        ).update({"fecha_uso": ahora}, synchronize_session="fetch")

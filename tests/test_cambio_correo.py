@@ -88,3 +88,69 @@ def test_no_permite_saltar_verificacion_con_patch(db, usuario):
             Revisar_Json_Editar_Usuario(correo="nuevo@example.com"), usuario.id, db
         )
     assert error.value.status_code == 403
+
+
+def crear_recuperacion(db, usuario):
+    from backend.RecuperacionesClave.tabla import RecuperacionesClave
+    from utils.token import proteger_token_sesion
+
+    codigo = "r" * 43
+    recuperacion = RecuperacionesClave(
+        id_usuario=usuario.id,
+        codigo_protegido=proteger_token_sesion(codigo),
+        fecha_inicio=datetime.utcnow(),
+        vencimiento=datetime.utcnow() + timedelta(minutes=15),
+    )
+    db.add(recuperacion)
+    db.commit()
+    return codigo
+
+
+def test_correo_nuevo_invalida_recuperacion_del_correo_anterior(db, usuario):
+    from backend.RecuperacionesClave.service import RecuperacionClaveService
+    from backend.RecuperacionesClave.schema import Revisar_Json_Recuperar_Clave
+
+    recuperacion = crear_recuperacion(db, usuario)
+    codigo = solicitar(db, usuario)
+    servicio.confirmar(
+        ConfirmarCambioCorreo(codigo=codigo, clave_actual="Prueba-segura123"),
+        usuario.id,
+        db,
+        BackgroundTasks(),
+    )
+    with pytest.raises(HTTPException) as error:
+        RecuperacionClaveService.recuperar_clave_service(
+            Revisar_Json_Recuperar_Clave(
+                codigo=recuperacion, nueva_clave="Otra-clave-segura123"
+            ),
+            db,
+        )
+    assert error.value.status_code == 400
+
+
+def test_recuperar_clave_invalida_cambio_de_correo_pendiente(db, usuario):
+    from backend.RecuperacionesClave.service import RecuperacionClaveService
+    from backend.RecuperacionesClave.schema import Revisar_Json_Recuperar_Clave
+
+    codigo = solicitar(db, usuario)
+    recuperacion = crear_recuperacion(db, usuario)
+    RecuperacionClaveService.recuperar_clave_service(
+        Revisar_Json_Recuperar_Clave(
+            codigo=recuperacion, nueva_clave="Otra-clave-segura123"
+        ),
+        db,
+    )
+    with pytest.raises(HTTPException):
+        servicio.confirmar(
+            ConfirmarCambioCorreo(codigo=codigo, clave_actual="Otra-clave-segura123"),
+            usuario.id,
+            db,
+            BackgroundTasks(),
+        )
+    assert usuario.correo == "anterior@example.com"
+
+
+def test_desactivar_invalida_cambio_de_correo_pendiente(db, usuario):
+    solicitar(db, usuario)
+    UsuarioService.desactivar_usuario_service(usuario.id, db)
+    assert db.query(CambiosCorreo).one().fecha_uso is not None

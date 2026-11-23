@@ -153,6 +153,7 @@ class UsuarioService:
         ahora = datetime.now(timezone.utc).replace(tzinfo=None)
         SesionRepository.revocar_sesiones(db, id, ahora)
         RecuperacionClaveRepository.invalidar_codigos(db, id, ahora)
+        repo.invalidar_cambios_correo(db, id, ahora)
 
     @staticmethod
     def registrar_negocio_service(json, db):

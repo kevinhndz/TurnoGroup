@@ -10,6 +10,8 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
 # Rutas conocidas por la capa de autorizacion.
 RUTAS_CON_PERMISO = {
+    ("POST", "/usuarios/verificacion/solicitar"),
+    ("POST", "/usuarios/verificacion/confirmar"),
     ("POST", "/usuarios/{id}/correo/solicitar"),
     ("POST", "/usuarios/{id}/correo/confirmar"),
     ("GET", "/finanzas/dashboard"),
@@ -250,6 +252,11 @@ def autorizar_ruta(request: Request, db: Session = Depends(abrir_puerta_bd)):
         raise HTTPException(403, "Esta ruta no tiene permisos definidos")
     if ruta == "/salud" and metodo == "GET":
         return
+    if ruta.startswith("/usuarios/verificacion/") and metodo == "POST":
+        if not revision.ALTA_PUBLICA_HABILITADA:
+            raise HTTPException(403, "El registro publico esta desactivado")
+        revisar_solicitud_sesion(request)
+        return
     if (ruta, metodo) in {
         ("/sesiones/iniciar", "POST"),
         ("/invitaciones-laborales/registrar", "POST"),
@@ -408,6 +415,9 @@ def aplicar_rate_limit(request: Request, ruta: str, metodo: str) -> None:
         return
 
     ventana = revision.VENTANA_RATE_LIMIT_SEGUNDOS
+    if ruta.startswith("/usuarios/verificacion/"):
+        limitar_por_ip(request, "verificacion_correo", 5, ventana)
+        return
     if ruta in ("/usuarios/{id}/correo/solicitar", "/usuarios/{id}/correo/confirmar"):
         limitar_por_ip(request, "cambio_correo", 5, ventana)
     elif ruta == "/usuarios/registro-negocio":

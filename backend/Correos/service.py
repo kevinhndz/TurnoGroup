@@ -63,9 +63,11 @@ def procesar_correo(db, id, enviar=None):
                 enviar_invitacion,
                 enviar_cambio_correo,
                 enviar_aviso_correo,
+                enviar_verificacion,
             )
 
             enviar = {
+                "verificacion": enviar_verificacion,
                 "recuperacion": enviar_recuperacion,
                 "invitacion": enviar_invitacion,
                 "cambio_correo": enviar_cambio_correo,

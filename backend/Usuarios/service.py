@@ -269,6 +269,11 @@ class UsuarioService:
                 "Faltan opciones del sistema. Revisa los catalogos de servicios y pagos",
             )
 
+        from backend.Usuarios.verificacion import VerificacionCorreoService
+
+        VerificacionCorreoService.consumir(
+            json.cuenta.correo, json.comprobante_correo.get_secret_value(), db
+        )
         usuario = Usuarios(
             nombre=json.cuenta.nombre,
             correo=correo,

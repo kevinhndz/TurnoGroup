@@ -1,8 +1,7 @@
 #!/bin/bash
-if [ -d frontend ]; then
-    echo "Compilando..."
-    cd frontend
-    npm run dev
-else
-    echo "No encontre la carpeta frontend"
-fi
+set -e
+
+cd "$(dirname "$0")/frontend"
+
+echo "Ejecutando frontend en http://localhost:3000"
+exec npm run dev -- --port 3000

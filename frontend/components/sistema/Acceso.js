@@ -45,6 +45,7 @@ export default function Acceso({ modo = 'login' }) {
   const [terminado, setTerminado] = useState(false);
   const [codigo, setCodigo] = useState('');
   const [reactivacion, setReactivacion] = useState(false);
+  const [correoEnviado, setCorreoEnviado] = useState('');
   const formulario = useRef(null);
   const confirmarReactivacion = useRef(false);
   useEffect(() => {
@@ -80,7 +81,24 @@ export default function Acceso({ modo = 'login' }) {
         setTerminado(true);
       } else {
         if (modo === 'registro') {
+          const correo = String(datos.get('correo')).trim().toLowerCase();
+          if (correoEnviado !== correo) {
+            await api('/usuarios/verificacion/solicitar', {
+              method: 'POST',
+              body: { correo },
+            });
+            setCorreoEnviado(correo);
+            setAviso(
+              'Revisa tu correo y copia el código recibido. Si ya tienes cuenta, inicia sesión.',
+            );
+            return;
+          }
+          const verificacion = await api('/usuarios/verificacion/confirmar', {
+            method: 'POST',
+            body: { correo, codigo: datos.get('codigo_verificacion') },
+          });
           setRegistro({
+            comprobante_correo: verificacion.comprobante_correo,
             cuenta: {
               nombre: datos.get('nombre'),
               correo: datos.get('correo'),
@@ -205,12 +223,34 @@ export default function Acceso({ modo = 'login' }) {
                 <Campo label="Correo electrónico">
                   <input
                     name="correo"
+                    onChange={() => setCorreoEnviado('')}
                     type="email"
                     autoComplete="email"
                     maxLength={254}
                     required
                     placeholder="tu@negocio.com"
                   />
+                </Campo>
+              )}
+              {modo === 'registro' && correoEnviado && (
+                <Campo label="Código de verificación del correo">
+                  <input
+                    name="codigo_verificacion"
+                    required
+                    minLength={40}
+                    maxLength={128}
+                    autoComplete="off"
+                  />
+                  <button
+                    type="button"
+                    className="tg-link"
+                    onClick={() => {
+                      setCorreoEnviado('');
+                      setAviso('Pulsa continuar para solicitar otro código.');
+                    }}
+                  >
+                    Solicitar otro código
+                  </button>
                 </Campo>
               )}
               {modo === 'restablecer' && (

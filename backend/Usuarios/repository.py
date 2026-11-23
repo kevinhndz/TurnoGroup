@@ -33,3 +33,29 @@ class UsuarioRepository:
             CambiosCorreo.id_usuario == id_usuario,
             CambiosCorreo.fecha_uso.is_(None),
         ).update({"fecha_uso": ahora}, synchronize_session="fetch")
+
+    @staticmethod
+    def reemplazar_codigos_mfa(db, id_usuario, hashes):
+        from backend.Usuarios.codigos_mfa import CodigosRecuperacionMfa
+
+        db.query(CodigosRecuperacionMfa).filter_by(id_usuario=id_usuario).delete()
+        db.add_all(
+            [
+                CodigosRecuperacionMfa(id_usuario=id_usuario, codigo_protegido=valor)
+                for valor in hashes
+            ]
+        )
+
+    @staticmethod
+    def consumir_codigo_mfa(db, id_usuario, codigo_protegido, ahora):
+        from backend.Usuarios.codigos_mfa import CodigosRecuperacionMfa
+
+        return (
+            db.query(CodigosRecuperacionMfa)
+            .filter(
+                CodigosRecuperacionMfa.id_usuario == id_usuario,
+                CodigosRecuperacionMfa.codigo_protegido == codigo_protegido,
+                CodigosRecuperacionMfa.fecha_uso.is_(None),
+            )
+            .update({"fecha_uso": ahora}, synchronize_session="fetch")
+        )

@@ -31,3 +31,32 @@ def verificar_mfa(usuario, codigo):
         raise HTTPException(401, "Espera un codigo nuevo del autenticador")
     # El servicio de login bloquea la fila hasta guardar la sesion y este contador.
     usuario.mfa_ultimo_contador = contador
+
+
+def generar_codigos_respaldo(db, usuario):
+    from secrets import token_urlsafe
+    from backend.Usuarios.repository import UsuarioRepository
+    from utils.token import proteger_token_sesion
+
+    codigos = [token_urlsafe(18) for _ in range(10)]
+    UsuarioRepository.reemplazar_codigos_mfa(
+        db, usuario.id, [proteger_token_sesion(codigo) for codigo in codigos]
+    )
+    return codigos
+
+
+def verificar_segundo_factor(usuario, codigo, respaldo, db):
+    if not respaldo:
+        verificar_mfa(usuario, codigo)
+        return
+    from datetime import datetime
+    from backend.Usuarios.repository import UsuarioRepository
+    from utils.token import proteger_token_sesion
+
+    if codigo or not usuario.mfa_secreto_cifrado:
+        raise HTTPException(401, "Usa el autenticador o un codigo de respaldo")
+    usados = UsuarioRepository.consumir_codigo_mfa(
+        db, usuario.id, proteger_token_sesion(respaldo), datetime.utcnow()
+    )
+    if usados != 1:
+        raise HTTPException(401, "El codigo de respaldo no es valido o ya fue usado")

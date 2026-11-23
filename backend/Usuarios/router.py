@@ -12,6 +12,7 @@ from backend.Usuarios.schema import (
     Revisar_Json_Registro_Negocio,
 )
 from backend.Usuarios.service import UsuarioService as service
+from backend.Usuarios.codigos_mfa import CodigosRecuperacionMfa
 from backend.Sesiones.schema import RespuestaSesion
 from core.schema import RespuestaPaginada
 

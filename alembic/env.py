@@ -18,6 +18,7 @@ from backend.Productos.tabla import Productos
 from backend.Usuarios.tabla import Usuarios
 from backend.Usuarios.cambios_correo import CambiosCorreo
 from backend.Usuarios.verificaciones_correo import VerificacionesCorreo
+from backend.Usuarios.codigos_mfa import CodigosRecuperacionMfa
 from backend.Correos.tabla import CorreosPendientes
 from backend.Sucursales.tabla import Sucursales
 from backend.VinculosLaborales.tabla import VinculosLaborales, AsignacionesSucursales

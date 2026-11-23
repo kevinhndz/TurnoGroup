@@ -1,3 +1,6 @@
+from fastapi import HTTPException
+
+
 class DominioError(Exception):
 
     # Constructor
@@ -25,5 +28,11 @@ class CredencialesInvalidasError(DominioError):
 
 class AccesoProhibidoError(DominioError):
     """Representa HTTP 403 - Permisos insuficientes o token expirado/inválido."""
+
+    pass
+
+
+class SolicitudError(HTTPException):
+    """Rechazo de una solicitud con su codigo y detalle originales."""
 
     pass

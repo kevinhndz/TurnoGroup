@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
-from decimal import Decimal, ROUND_HALF_UP
-from fastapi import HTTPException
+from decimal import ROUND_HALF_UP, Decimal
+
+from core.exceptions import SolicitudError
 
 
 def ahora():
@@ -13,7 +14,7 @@ def moneda(valor):
 
 def exigir(condicion, mensaje, estado=422):
     if not condicion:
-        raise HTTPException(estado, mensaje)
+        raise SolicitudError(estado, mensaje)
 
 
 def alcance(contexto):
@@ -22,12 +23,14 @@ def alcance(contexto):
         "Selecciona una sucursal autorizada",
         403,
     )
+
     return contexto["id_empresa"], contexto["id_sucursal"]
 
 
 def paginar(consulta, pagina, limite, convertir):
     total = consulta.count()
     filas = consulta.offset((pagina - 1) * limite).limit(limite).all()
+
     return {
         "total": total,
         "pagina_actual": pagina,

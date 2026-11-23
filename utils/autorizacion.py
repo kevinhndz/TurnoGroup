@@ -22,6 +22,7 @@ RUTAS_CON_PERMISO = {
     ("POST", "/suscripciones/tarjetas/{id}/secundaria"),
     ("DELETE", "/suscripciones/tarjetas/{id}"),
     ("PATCH", "/suscripciones/renovacion"),
+    ("POST", "/suscripciones/renovar-prueba"),
     ("POST", "/suscripciones/comprobantes/registro"),
     ("GET", "/suscripciones/comprobantes/excel"),
     ("GET", "/suscripciones/comprobantes/pdf"),

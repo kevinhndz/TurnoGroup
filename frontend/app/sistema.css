@@ -3514,11 +3514,46 @@
 }
 .tg-document-preview {
   width: 100%;
-  height: min(62dvh, 650px);
+  max-height: min(62dvh, 650px);
+  overflow-y: auto;
   border: 1px solid var(--tg-border);
   margin-bottom: 16px;
   border-radius: 8px;
   background: white;
+  padding: clamp(12px, 3vw, 28px);
+}
+.tg-receipt-preview {
+  overflow-wrap: anywhere;
+}
+.tg-receipt-preview + .tg-receipt-preview {
+  border-top: 1px solid var(--tg-border);
+  margin-top: 28px;
+  padding-top: 28px;
+}
+.tg-receipt-preview header h2 {
+  color: var(--tg-primary, #a84026);
+}
+.tg-receipt-preview dl > div {
+  display: grid;
+  grid-template-columns: minmax(65px, 1fr) minmax(0, 3fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.tg-receipt-preview dd {
+  margin: 0;
+}
+.tg-receipt-detail {
+  white-space: pre-wrap;
+}
+.tg-receipt-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-block: 1px solid var(--tg-border);
+  padding: 16px 0;
+}
+.tg-trial-extension {
+  margin: 16px 0;
 }
 .tg-modal:has(.tg-document-preview),
 .tg-modal:has(.tg-table-scroll) {

@@ -86,10 +86,31 @@ export default function Suscripcion() {
                 </div>
                 <p>Fin del primer mes gratuito: {fechaLocal(d.fin_prueba)}</p>
                 <p>
-                  {d.renovacion_automatica ? 'Próximo ciclo' : 'Acceso hasta'}:{' '}
-                  {fechaLocal(d.proximo_cobro || d.fin_prueba)}
+                  {d.simulacion_local
+                    ? 'Periodo simulado hasta'
+                    : d.renovacion_automatica
+                      ? 'Próximo ciclo'
+                      : 'Acceso hasta'}
+                  : {fechaLocal(d.proximo_cobro || d.fin_prueba)}
                 </p>
-                <span className="tg-badge">Prueba de interfaz · Sin cargos reales</span>
+                {d.modo === 'simulado' && (
+                  <span className="tg-badge">Simulación · Sin cargos reales</span>
+                )}
+                {d.simulacion_local && (
+                  <div className="tg-trial-extension">
+                    <p>
+                      No tienes que pagar. Puedes ampliar el periodo para seguir probando
+                      el sistema sin cargos ni tarjetas reales.
+                    </p>
+                    <button
+                      className="tg-button tg-secondary"
+                      disabled={ocupado}
+                      onClick={() => setConfirmacion({ ampliarPrueba: true })}
+                    >
+                      Ampliar prueba 30 días
+                    </button>
+                  </div>
+                )}
                 <label className="tg-check">
                   <input
                     type="checkbox"
@@ -241,9 +262,11 @@ export default function Suscripcion() {
           titulo={
             confirmacion.tarjeta
               ? '¿Retirar esta tarjeta?'
-              : confirmacion.renovacion
-                ? '¿Activar la renovación?'
-                : '¿Cancelar la renovación?'
+              : confirmacion.ampliarPrueba
+                ? '¿Ampliar la prueba 30 días?'
+                : confirmacion.renovacion
+                  ? '¿Activar la renovación?'
+                  : '¿Cancelar la renovación?'
           }
           cerrar={() => {
             if (!ocupado) setConfirmacion(null);
@@ -253,9 +276,11 @@ export default function Suscripcion() {
           <p>
             {confirmacion.tarjeta
               ? `Se retirará la tarjeta terminada en ${confirmacion.tarjeta.ultimos_cuatro}. Si era principal, se elegirá otra tarjeta vigente.`
-              : confirmacion.renovacion
-                ? 'Se necesita una tarjeta principal vigente. Esta versión no realiza cargos.'
-                : 'Conservarás el acceso hasta terminar el periodo actual. No se renovará después.'}
+              : confirmacion.ampliarPrueba
+                ? 'Se añadirán 30 días al periodo vigente, o desde hoy si ya venció. No se cobrará dinero ni se registrará un pago real.'
+                : confirmacion.renovacion
+                  ? 'Se necesita una tarjeta principal vigente. Esta versión no realiza cargos.'
+                  : 'Conservarás el acceso hasta terminar el periodo actual. No se renovará después.'}
           </p>
           <div className="tg-form-actions">
             <button
@@ -268,22 +293,33 @@ export default function Suscripcion() {
             <button
               className="tg-button tg-primary"
               disabled={ocupado}
-              onClick={() =>
-                confirmacion.tarjeta
-                  ? ejecutar(
-                      `/suscripciones/tarjetas/${confirmacion.tarjeta.id}`,
-                      { method: 'DELETE' },
-                      'Tarjeta retirada.',
-                    )
-                  : ejecutar(
-                      '/suscripciones/renovacion',
-                      {
-                        method: 'PATCH',
-                        body: { renovacion_automatica: confirmacion.renovacion },
-                      },
-                      'Renovación actualizada.',
-                    )
-              }
+              onClick={async () => {
+                if (confirmacion.ampliarPrueba) {
+                  const correcto = await ejecutar(
+                    '/suscripciones/renovar-prueba',
+                    { method: 'POST' },
+                    'Periodo ampliado 30 días. No se realizó ningún cobro.',
+                  );
+                  if (correcto) await actualizar();
+                  return;
+                }
+                if (confirmacion.tarjeta) {
+                  await ejecutar(
+                    `/suscripciones/tarjetas/${confirmacion.tarjeta.id}`,
+                    { method: 'DELETE' },
+                    'Tarjeta retirada.',
+                  );
+                } else {
+                  await ejecutar(
+                    '/suscripciones/renovacion',
+                    {
+                      method: 'PATCH',
+                      body: { renovacion_automatica: confirmacion.renovacion },
+                    },
+                    'Renovación actualizada.',
+                  );
+                }
+              }}
             >
               {ocupado ? 'Guardando…' : 'Confirmar'}
             </button>

@@ -155,7 +155,7 @@ def test_bitacora_se_revierte_si_falla_commit(
     assert db.query(Pedidos).count() == 0
 
 
-def test_alta_prepara_mesas_por_sucursal(client, db):
+def test_alta_prepara_mesas_por_sucursal(client, db, verificar_correo_registro):
     cuerpo = {
         "cuenta": {
             "nombre": "Gerente con mesas",
@@ -189,7 +189,9 @@ def test_alta_prepara_mesas_por_sucursal(client, db):
         "mes": 12,
         "anio": 2099,
     }
-    respuesta = client.post("/usuarios/registro-negocio", json=cuerpo)
+    respuesta = client.post(
+        "/usuarios/registro-negocio", json=verificar_correo_registro(cuerpo)
+    )
     assert respuesta.status_code == 201, respuesta.text
     assert (
         db.query(Mesas).filter_by(id_sucursal=respuesta.json()["id_sucursal"]).count()

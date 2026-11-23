@@ -209,3 +209,28 @@ def datos(db):
         "otro_producto": productos[1].id,
         "usuario": usuario.id,
     }
+
+
+@pytest.fixture
+def verificar_correo_registro(db):
+    from datetime import datetime, timedelta
+    from secrets import token_urlsafe
+    from backend.Usuarios.verificaciones_correo import VerificacionesCorreo
+    from utils.token import proteger_token_sesion
+
+    def verificar(cuerpo):
+        comprobante = token_urlsafe(32)
+        db.add(
+            VerificacionesCorreo(
+                correo=cuerpo["cuenta"]["correo"].lower(),
+                codigo_protegido=proteger_token_sesion(token_urlsafe(32)),
+                comprobante_protegido=proteger_token_sesion(comprobante),
+                vencimiento=datetime.utcnow() + timedelta(hours=2),
+                fecha_confirmacion=datetime.utcnow(),
+            )
+        )
+        db.commit()
+        cuerpo["comprobante_correo"] = comprobante
+        return cuerpo
+
+    return verificar

@@ -794,7 +794,7 @@ def test_administrador_no_asigna_ni_retira_productos(client, db, datos):
     )
 
 
-def test_alta_final_crea_cuenta_empresa_y_contexto(client):
+def test_alta_final_crea_cuenta_empresa_y_contexto(client, verificar_correo_registro):
     client.cookies.clear()
     cuenta = {
         "correo": "propietario-nuevo@example.com",
@@ -834,7 +834,9 @@ def test_alta_final_crea_cuenta_empresa_y_contexto(client):
         "mes": 12,
         "anio": 2099,
     }
-    creada = client.post("/usuarios/registro-negocio", json=registro)
+    creada = client.post(
+        "/usuarios/registro-negocio", json=verificar_correo_registro(registro)
+    )
     assert creada.status_code == 201, creada.text
     assert creada.json()["rol_empresa"] == "Gerente"
     assert client.get("/productos/").status_code == 200

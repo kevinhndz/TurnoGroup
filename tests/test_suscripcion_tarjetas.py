@@ -224,6 +224,17 @@ def test_cuenta_pagada_se_desactiva_y_reactiva_con_confirmacion(client, db, dato
             detalle="Pago simulado para comprobar la desactivacion",
         )
     )
+    from backend.Usuarios.cambios_correo import CambiosCorreo
+    from utils.token import proteger_token_sesion
+
+    cambio = CambiosCorreo(
+        id_usuario=datos["usuario_autorizado"],
+        correo_anterior="gerente@example.com",
+        correo_nuevo="otro-correo@example.com",
+        codigo_protegido=proteger_token_sesion("c" * 43),
+        vencimiento=ahora() + timedelta(minutes=15),
+    )
+    db.add(cambio)
     db.commit()
     assert (
         client.post(
@@ -234,6 +245,7 @@ def test_cuenta_pagada_se_desactiva_y_reactiva_con_confirmacion(client, db, dato
     assert (
         client.post("/suscripciones/desactivar-cuenta", json=cuerpo).status_code == 204
     )
+    assert cambio.fecha_uso is not None
     assert not db.get(Usuarios, datos["usuario_autorizado"]).estado
     assert (
         not db.query(Suscripciones)

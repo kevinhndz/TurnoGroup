@@ -153,3 +153,86 @@ def test_dos_solicitudes_no_duplican_operaciones(base_concurrente, operacion):
         assert resultados == [1, 1]
     else:
         assert sorted(resultados) == [1, 409]
+
+
+def test_dos_logins_no_reutilizan_un_respaldo_mfa(base_concurrente):
+    from backend.Sesiones.service import SesionService
+    from backend.Sesiones.schema import Revisar_Json_Iniciar_Sesion
+    from backend.Sesiones.tabla import Sesiones
+    from utils.hash import encriptar_contrasena
+    from utils.mfa import generar_codigos_respaldo
+    from backend.Correos.service import cifrador
+    import pyotp
+
+    motor, ids = base_concurrente
+    with Session(motor) as db:
+        usuario = db.get(Usuarios, ids["usuario"])
+        usuario.clave_protegida = encriptar_contrasena("Clave-concurrente123!")
+        usuario.mfa_secreto_cifrado = (
+            cifrador().encrypt(pyotp.random_base32().encode()).decode()
+        )
+        codigo = generar_codigos_respaldo(db, usuario)[0]
+        correo = usuario.correo
+        db.commit()
+    barrera = Barrier(2)
+
+    def iniciar():
+        with Session(motor) as db:
+            barrera.wait(timeout=10)
+            try:
+                SesionService.iniciar_sesion_service(
+                    Revisar_Json_Iniciar_Sesion(
+                        correo=correo,
+                        clave="Clave-concurrente123!",
+                        codigo_recuperacion_mfa=codigo,
+                    ),
+                    db,
+                )
+                return 200
+            except HTTPException as error:
+                db.rollback()
+                return error.status_code
+
+    with ThreadPoolExecutor(max_workers=2) as grupo:
+        resultados = list(grupo.map(lambda _: iniciar(), range(2)))
+    assert sorted(resultados) == [200, 401]
+    with Session(motor) as db:
+        assert db.query(Sesiones).filter_by(id_usuario=ids["usuario"]).count() == 1
+
+
+def test_dos_registros_no_consumen_el_mismo_comprobante(base_concurrente):
+    from backend.Usuarios.verificacion import VerificacionCorreoService
+    from backend.Usuarios.verificaciones_correo import VerificacionesCorreo
+    from utils.token import crear_token_sesion, proteger_token_sesion
+
+    motor, ids = base_concurrente
+    comprobante = crear_token_sesion()
+    with Session(motor) as db:
+        db.add(
+            VerificacionesCorreo(
+                correo="confirmado@example.com",
+                codigo_protegido=proteger_token_sesion(crear_token_sesion()),
+                comprobante_protegido=proteger_token_sesion(comprobante),
+                fecha_confirmacion=datetime.utcnow(),
+                vencimiento=datetime.utcnow() + timedelta(hours=1),
+            )
+        )
+        db.commit()
+    barrera = Barrier(2)
+
+    def consumir():
+        with Session(motor) as db:
+            barrera.wait(timeout=10)
+            try:
+                VerificacionCorreoService.consumir(
+                    "confirmado@example.com", comprobante, db
+                )
+                db.commit()
+                return 200
+            except HTTPException as error:
+                db.rollback()
+                return error.status_code
+
+    with ThreadPoolExecutor(max_workers=2) as grupo:
+        resultados = list(grupo.map(lambda _: consumir(), range(2)))
+    assert sorted(resultados) == [200, 400]

@@ -593,12 +593,6 @@ export default function AltaInicial() {
                   maxLength: 100,
                 },
                 {
-                  clave: 'correo',
-                  label: 'Correo electrónico',
-                  type: 'email',
-                  required: true,
-                },
-                {
                   clave: 'clave',
                   label: 'Contraseña',
                   type: 'password',
@@ -609,7 +603,7 @@ export default function AltaInicial() {
               ]}
               inicial={registro.cuenta}
               guardar={async (cuenta) => {
-                actualizar('cuenta', cuenta);
+                actualizar('cuenta', { ...registro.cuenta, ...cuenta });
                 setEditarCuenta(false);
               }}
             />

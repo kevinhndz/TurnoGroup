@@ -143,6 +143,21 @@ jobs:
         run: npm run test:proxy
       - name: Compilar frontend de produccion
         run: npm run build
+      # El navegador usa una API y una base SQLite desechables, nunca Supabase.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Instalar API para las pruebas completas
+        run: python -m pip install -r ../requirements-dev.txt
+      # Chromium visita la compilacion de produccion a traves de HTTPS local.
+      - name: Instalar navegador de pruebas
+        run: npx playwright install --with-deps chromium
+      - name: Probar registro acceso permisos y pedidos en navegador
+        env:
+          PYTHON_E2E: python
+        run: npm run test:e2e
 
   seguridad:
     runs-on: ubuntu-latest

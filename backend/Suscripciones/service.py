@@ -313,4 +313,7 @@ class SuscripcionService:
         usuario.fecha_desactivacion_voluntaria = ahora()
         SesionRepository.revocar_sesiones(db, usuario.id, ahora())
         RecuperacionClaveRepository.invalidar_codigos(db, usuario.id, ahora())
+        from backend.Usuarios.repository import UsuarioRepository
+
+        UsuarioRepository.invalidar_cambios_correo(db, usuario.id, ahora())
         db.commit()

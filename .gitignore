@@ -21,3 +21,7 @@ frontend/.env*
 
 # Credenciales de migracion y otros entornos locales
 .env.*
+
+# Resultados locales del navegador
+frontend/test-results/
+frontend/playwright-report/

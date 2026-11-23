@@ -5,6 +5,7 @@ from backend.Usuarios.tabla import Usuarios
 from backend.Usuarios.cambios_correo import CambiosCorreo
 from backend.Correos.service import encolar_correo, procesar_correo
 from backend.Sesiones.repository import SesionRepository
+from backend.RecuperacionesClave.repository import RecuperacionClaveRepository
 from utils.hash import verificar_contrasena
 from utils.token import crear_token_sesion, proteger_token_sesion
 from core.config import revision
@@ -92,6 +93,7 @@ class SeguridadUsuarioService:
         usuario.correo = cambio.correo_nuevo
         cambio.fecha_uso = ahora
         SesionRepository.revocar_sesiones(db, usuario.id, ahora)
+        RecuperacionClaveRepository.invalidar_codigos(db, usuario.id, ahora)
         aviso = encolar_correo(
             db,
             "aviso_correo",

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -9,6 +10,7 @@ from backend.Suscripciones.repository import SuscripcionRepository as repo
 from backend.Suscripciones.tabla import ComprobantesSuscripcion, TarjetasSuscripcion
 from backend.Usuarios.repository import UsuarioRepository
 from core.operaciones import ahora, exigir
+from core.config import revision
 from utils.hash import verificar_contrasena
 
 
@@ -66,11 +68,52 @@ class SuscripcionService:
             ),
             "proveedor": "Paddle",
             "modo": "simulado" if not look_up.id_suscripcion_paddle else "paddle",
+            "simulacion_local": (
+                revision.ENTORNO in ("desarrollo", "pruebas")
+                and revision.FACTURACION_MODO == "simulado"
+                and not look_up.id_suscripcion_paddle
+            ),
             "mensualidad_pagada": cumple_condicion,
             "renovacion_automatica": look_up.renovacion_automatica,
             "tarjetas": elementos,
             "comprobantes": elementos_2,
         }
+
+    @staticmethod
+    def renovar_prueba_service(db, id_empresa):
+        try:
+            exigir(
+                revision.ENTORNO in ("desarrollo", "pruebas"),
+                "Esta opcion solo esta disponible en desarrollo y pruebas",
+                403,
+            )
+            suscripcion = SuscripcionService.bloquear_simulado(db, id_empresa)
+            exigir(
+                suscripcion.estado in ("Prueba", "Activa"),
+                "Esta suscripcion no permite ampliar el periodo de prueba",
+                409,
+            )
+            instante = ahora()
+
+            if suscripcion.estado == "Prueba":
+                fin_actual = suscripcion.fin_prueba or instante
+                suscripcion.fin_prueba = max(fin_actual, instante) + timedelta(days=30)
+            else:
+                fin_actual = suscripcion.proximo_cobro or instante
+                suscripcion.proximo_cobro = max(fin_actual, instante) + timedelta(
+                    days=30
+                )
+
+            repo.guardar_cambios(db)
+            db.commit()
+
+            return SuscripcionService.consultar_service(db, id_empresa)
+        except SQLAlchemyError:
+            db.rollback()
+            raise
+        except Exception:
+            db.rollback()
+            raise
 
     @staticmethod
     def cambiar_plan_service(json, db, id_empresa):

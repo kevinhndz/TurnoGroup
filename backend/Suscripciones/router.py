@@ -49,6 +49,13 @@ def cambiar_plan(
     return service.cambiar_plan_service(json, db, id_empresa)
 
 
+@router.post("/renovar-prueba")
+def renovar_prueba(
+    id_empresa=Depends(obtener_empresa), db: Session = Depends(abrir_puerta_bd)
+):
+    return service.renovar_prueba_service(db, id_empresa)
+
+
 @router.post("/tarjetas", status_code=201)
 def agregar_tarjeta(
     json: Revisar_Json_Tarjeta_Suscripcion,

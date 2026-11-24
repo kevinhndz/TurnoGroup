@@ -1,0 +1,42 @@
+name: turnogroup-local
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    # Docker inyecta las variables; el archivo no se copia a la imagen.
+    env_file:
+      - .env
+    environment:
+      ENTORNO: desarrollo
+      COOKIE_SEGURA: "false"
+      URL_FRONTEND: http://localhost:3010
+      ORIGENES_PERMITIDOS: '["http://localhost:3010"]'
+      REDIS_URL: ""
+    volumes:
+      # Conserva imagenes y registros aunque se recree el contenedor.
+      - archivos:/app/.archivos
+    # Disponible solamente desde esta computadora.
+    ports:
+      - "127.0.0.1:8010:8000"
+    init: true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+      # Dentro de Docker se usa el nombre del servicio, no localhost.
+      BACKEND_URL: http://backend:8000
+      PUBLIC_ORIGIN: http://localhost:3010
+      TRUST_REVERSE_PROXY: "false"
+    ports:
+      - "127.0.0.1:3010:3000"
+    depends_on:
+      - backend
+    init: true
+
+volumes:
+  archivos:

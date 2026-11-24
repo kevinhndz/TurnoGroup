@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+venv
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.archivos
+frontend
+node_modules
+*.md
+tests
+*.pdf
+*.xlsx

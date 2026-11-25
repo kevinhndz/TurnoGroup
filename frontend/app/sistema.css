@@ -1079,8 +1079,9 @@
 .tg-context select {
   padding: 6px 24px 6px 8px;
   min-height: 32px;
-  width: 170px;
-  font-size: 10px;
+  width: clamp(200px, 20vw, 300px);
+  max-width: 100%;
+  font-size: 12px;
   background: #faf7f2;
 }
 .tg-context > small {
@@ -1922,7 +1923,7 @@
     max-width: 100px;
   }
   .tg-context select {
-    width: 145px;
+    width: clamp(200px, 24vw, 280px);
   }
   .tg-main {
     padding-inline: 24px;

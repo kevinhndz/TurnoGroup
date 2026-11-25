@@ -78,6 +78,13 @@ export default function Pedidos() {
     }
   }
   const filas = d?.lista.data || [];
+  const hayFiltros = Boolean(estado || fecha || filtros.busqueda.trim());
+  function limpiarFiltros() {
+    setEstado('');
+    setFecha('');
+    filtros.setBusqueda('');
+    setPagina(1);
+  }
   const tipo = (id) => d?.tipos.find((item) => item.id === id)?.nombre_visible || '—';
   const metodo = (id) => d?.metodos.find((item) => item.id === id)?.nombre_visible || '—';
   return (
@@ -176,9 +183,19 @@ export default function Pedidos() {
           </p>
         ) : !filas.length ? (
           <Vacio
-            titulo="No hay pedidos para mostrar"
-            detalle="Registra un pedido para comenzar la operación de esta sucursal."
-          />
+            titulo={hayFiltros ? 'No hay pedidos con estos filtros' : 'Todavía no hay pedidos'}
+            detalle={
+              hayFiltros
+                ? 'Prueba con otro estado, fecha o búsqueda.'
+                : 'Registra un pedido para comenzar la operación de esta sucursal.'
+            }
+          >
+            {hayFiltros && (
+              <button className="tg-button tg-secondary" onClick={limpiarFiltros}>
+                Limpiar filtros
+              </button>
+            )}
+          </Vacio>
         ) : (
           <div className="tg-table-scroll">
             <table className="tg-table">

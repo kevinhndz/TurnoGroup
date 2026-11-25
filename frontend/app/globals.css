@@ -549,6 +549,43 @@ svg {
   margin: 0 12px;
   color: #beb3a6;
 }
+.product-preview {
+  padding-block: 84px;
+  background: var(--paper);
+}
+.product-preview .section-intro {
+  margin-bottom: 28px;
+}
+.product-preview-frame {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 22px 55px #48372916;
+}
+.product-preview-frame img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.product-preview-frame figcaption {
+  margin: 12px 4px 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+@media (max-width: 800px) {
+  .product-preview {
+    padding-block: 56px;
+  }
+  .product-preview-frame {
+    overflow-x: auto;
+  }
+  .product-preview-frame img {
+    max-width: none;
+    width: 760px;
+  }
+}
 .features {
   background: var(--linen);
   border-block: 1px solid var(--line);

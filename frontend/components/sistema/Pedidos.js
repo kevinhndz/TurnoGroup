@@ -183,7 +183,9 @@ export default function Pedidos() {
           </p>
         ) : !filas.length ? (
           <Vacio
-            titulo={hayFiltros ? 'No hay pedidos con estos filtros' : 'Todavía no hay pedidos'}
+            titulo={
+              hayFiltros ? 'No hay pedidos con estos filtros' : 'Todavía no hay pedidos'
+            }
             detalle={
               hayFiltros
                 ? 'Prueba con otro estado, fecha o búsqueda.'

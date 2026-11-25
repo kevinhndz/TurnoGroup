@@ -961,6 +961,7 @@
 .tg-auth-switch a {
   color: #954229;
   font-weight: 600;
+  margin-left: 0.35em;
 }
 .tg-auth-form > footer {
   color: #978a7c;

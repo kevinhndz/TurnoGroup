@@ -1,5 +1,6 @@
 import Header from '../components/Header';
 import Hero from '../components/Hero';
+import ProductPreview from '../components/ProductPreview';
 import Features from '../components/Features';
 import Pricing from '../components/Pricing';
 import CallToAction from '../components/CallToAction';
@@ -11,6 +12,7 @@ export default function Home() {
       <div id="inicio" />
       <main id="contenido" tabIndex={-1}>
         <Hero />
+        <ProductPreview />
         <Features />
         <Pricing />
         <CallToAction />

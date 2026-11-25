@@ -191,7 +191,9 @@ export default function Finanzas() {
                 </div>
                 <HorasPedidos horas={d.horas} />
               </section>
-              <section className={`tg-finance-card tg-finance-categories ${!d.categorias.length ? 'is-empty' : ''}`}>
+              <section
+                className={`tg-finance-card tg-finance-categories ${!d.categorias.length ? 'is-empty' : ''}`}
+              >
                 <header>
                   <h2>Ventas por categoría</h2>
                   <span className="tg-muted">
@@ -258,26 +260,30 @@ export default function Finanzas() {
                   />
                 )}
                 <h3>Resultados por sucursal</h3>
-                {d.sucursales.length ? <div className="tg-table-scroll">
-                  <table className="tg-table">
-                    <thead>
-                      <tr>
-                        <th>Sucursal</th>
-                        <th>Pedidos cobrados</th>
-                        <th>Ingresos</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {d.sucursales.map((item) => (
-                        <tr key={item.id_sucursal}>
-                          <td>{etiquetaSucursal({ ...item, id: item.id_sucursal })}</td>
-                          <td>{item.pedidos}</td>
-                          <td>{dinero(item.ventas, d.moneda)}</td>
+                {d.sucursales.length ? (
+                  <div className="tg-table-scroll">
+                    <table className="tg-table">
+                      <thead>
+                        <tr>
+                          <th>Sucursal</th>
+                          <th>Pedidos cobrados</th>
+                          <th>Ingresos</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div> : <p className="tg-muted">No hay cobros por sucursal en este periodo.</p>}
+                      </thead>
+                      <tbody>
+                        {d.sucursales.map((item) => (
+                          <tr key={item.id_sucursal}>
+                            <td>{etiquetaSucursal({ ...item, id: item.id_sucursal })}</td>
+                            <td>{item.pedidos}</td>
+                            <td>{dinero(item.ventas, d.moneda)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="tg-muted">No hay cobros por sucursal en este periodo.</p>
+                )}
               </section>
               <section className="tg-finance-card tg-finance-year">
                 <header>

@@ -933,6 +933,20 @@
   color: #91462e;
   margin-top: -10px;
 }
+.tg-auth-recovery {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: #91462e;
+  font: 600 12px/1.5 var(--sans);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.tg-auth-recovery:hover {
+  color: #6f321f;
+}
 .tg-auth .tg-primary {
   min-height: 49px;
 }

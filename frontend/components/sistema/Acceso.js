@@ -245,7 +245,7 @@ export default function Acceso({ modo = 'login' }) {
                   />
                   <button
                     type="button"
-                    className="tg-link"
+                    className="tg-auth-recovery"
                     onClick={() => {
                       setCorreoEnviado('');
                       setAviso('Pulsa continuar para solicitar otro código.');

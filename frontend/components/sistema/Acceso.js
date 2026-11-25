@@ -47,6 +47,7 @@ export default function Acceso({ modo = 'login' }) {
   const [reactivacion, setReactivacion] = useState(false);
   const [correoEnviado, setCorreoEnviado] = useState('');
   const [usarRespaldo, setUsarRespaldo] = useState(false);
+  const [pedirSegundoFactor, setPedirSegundoFactor] = useState(false);
   const formulario = useRef(null);
   const confirmarReactivacion = useRef(false);
   useEffect(() => {
@@ -136,7 +137,12 @@ export default function Acceso({ modo = 'login' }) {
         );
       }
     } catch (fallo) {
-      setError(fallo.message);
+      if (modo === 'login' && fallo.message === 'Codigo de autenticador incorrecto') {
+        setPedirSegundoFactor(true);
+        setError('Ingresa el código de tu autenticador para continuar.');
+      } else {
+        setError(fallo.message);
+      }
       if (fallo.codigo === 'CUENTA_DESACTIVADA') setReactivacion(true);
     } finally {
       setEnviando(false);
@@ -298,7 +304,7 @@ export default function Acceso({ modo = 'login' }) {
                   </span>
                 </Campo>
               )}
-              {modo === 'login' && (
+              {modo === 'login' && pedirSegundoFactor && (
                 <>
                   <Campo
                     label={

@@ -245,6 +245,8 @@ test('respaldo MFA permite entrar una vez y no acepta reutilizacion', async ({
   await page.goto('/login');
   await page.locator('input[name=correo]').fill('plataforma@example.com');
   await page.locator('input[name=clave]').fill(clave);
+  await page.getByRole('button', { name: 'Entrar a mi negocio' }).click();
+  await expect(page.locator('input[name=codigo_mfa]')).toBeVisible();
   await page.getByRole('button', { name: /Perdí mi autenticador/ }).click();
   await page.locator('input[name=codigo_recuperacion_mfa]').fill(codigo);
   await page.getByRole('button', { name: 'Entrar a mi negocio' }).click();

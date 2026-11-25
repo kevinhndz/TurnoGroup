@@ -2108,17 +2108,17 @@
     padding: 0;
   }
   .tg-auth-story {
-    min-height: 200px;
-    padding: 26px;
+    min-height: 130px;
+    padding: 18px 24px;
     border-radius: 0;
     background-position: center 40%;
   }
   .tg-auth-quote {
     padding-top: 0;
-    margin-top: 28px;
+    margin-top: 12px;
   }
   .tg-auth-quote h2 {
-    font-size: 29px;
+    font-size: 23px;
     margin-top: 0;
   }
   .tg-auth-quote h2 br {
@@ -2136,7 +2136,7 @@
     flex: 1;
   }
   .tg-auth-inner {
-    padding-block: 35px 45px;
+    padding-block: 16px 32px;
   }
 }
 @media (max-width: 480px) {

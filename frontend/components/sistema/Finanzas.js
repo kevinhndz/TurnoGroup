@@ -191,7 +191,7 @@ export default function Finanzas() {
                 </div>
                 <HorasPedidos horas={d.horas} />
               </section>
-              <section className="tg-finance-card tg-finance-categories">
+              <section className={`tg-finance-card tg-finance-categories ${!d.categorias.length ? 'is-empty' : ''}`}>
                 <header>
                   <h2>Ventas por categoría</h2>
                   <span className="tg-muted">
@@ -258,7 +258,7 @@ export default function Finanzas() {
                   />
                 )}
                 <h3>Resultados por sucursal</h3>
-                <div className="tg-table-scroll">
+                {d.sucursales.length ? <div className="tg-table-scroll">
                   <table className="tg-table">
                     <thead>
                       <tr>
@@ -277,7 +277,7 @@ export default function Finanzas() {
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </div> : <p className="tg-muted">No hay cobros por sucursal en este periodo.</p>}
               </section>
               <section className="tg-finance-card tg-finance-year">
                 <header>

@@ -206,6 +206,12 @@
 .tg-finance-categories {
   grid-column: span 7;
 }
+.tg-finance-categories.is-empty {
+  align-self: start;
+}
+.tg-finance-categories.is-empty .tg-empty {
+  padding-block: 22px;
+}
 .tg-finance-year {
   grid-column: span 5;
 }

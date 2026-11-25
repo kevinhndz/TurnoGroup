@@ -104,8 +104,8 @@
   align-items: center;
   gap: 12px 22px;
   margin-bottom: 22px;
-  color: #897d6e;
-  font-size: 10px;
+  color: #665d52;
+  font-size: 12px;
 }
 .tg-finance-live span:first-child {
   color: #55724e;
@@ -167,15 +167,15 @@
   overflow-wrap: anywhere;
 }
 .tg-finance-top p {
-  font-size: 10px;
-  color: #8b8072;
+  font-size: 12px;
+  color: #665d52;
 }
 .tg-finance-top p b {
   color: #51493e;
 }
 .tg-finance-delta {
   display: block;
-  font-size: 10px;
+  font-size: 12px;
   color: #28815b;
 }
 .tg-finance-delta.is-negative {
@@ -193,8 +193,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  font-size: 10px;
-  color: #8b8072;
+  font-size: 12px;
+  color: #665d52;
 }
 .tg-finance-legend i {
   display: inline-block;
@@ -205,6 +205,12 @@
 }
 .tg-finance-categories {
   grid-column: span 7;
+}
+.tg-finance-categories.is-empty {
+  align-self: start;
+}
+.tg-finance-categories.is-empty .tg-empty {
+  padding-block: 22px;
 }
 .tg-finance-year {
   grid-column: span 5;
@@ -241,8 +247,8 @@
   margin-block: 6px;
 }
 .tg-finance-periods small {
-  font-size: 9px;
-  color: #9b8b75;
+  font-size: 11px;
+  color: #665d52;
 }
 .tg-finance-map {
   display: block;
@@ -289,8 +295,8 @@
   overflow: auto;
 }
 .tg-finance-note {
-  color: #8b8072;
-  font-size: 10px;
+  color: #665d52;
+  font-size: 12px;
   margin-top: 18px;
 }
 .tg-finance-skeleton {
@@ -927,6 +933,20 @@
   color: #91462e;
   margin-top: -10px;
 }
+.tg-auth-recovery {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: #91462e;
+  font: 600 12px/1.5 var(--sans);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.tg-auth-recovery:hover {
+  color: #6f321f;
+}
 .tg-auth .tg-primary {
   min-height: 49px;
 }
@@ -941,6 +961,7 @@
 .tg-auth-switch a {
   color: #954229;
   font-weight: 600;
+  margin-left: 0.35em;
 }
 .tg-auth-form > footer {
   color: #978a7c;
@@ -1073,8 +1094,9 @@
 .tg-context select {
   padding: 6px 24px 6px 8px;
   min-height: 32px;
-  width: 170px;
-  font-size: 10px;
+  width: clamp(200px, 20vw, 300px);
+  max-width: 100%;
+  font-size: 12px;
   background: #faf7f2;
 }
 .tg-context > small {
@@ -1916,7 +1938,7 @@
     max-width: 100px;
   }
   .tg-context select {
-    width: 145px;
+    width: clamp(200px, 24vw, 280px);
   }
   .tg-main {
     padding-inline: 24px;
@@ -2087,17 +2109,17 @@
     padding: 0;
   }
   .tg-auth-story {
-    min-height: 200px;
-    padding: 26px;
+    min-height: 130px;
+    padding: 18px 24px;
     border-radius: 0;
     background-position: center 40%;
   }
   .tg-auth-quote {
     padding-top: 0;
-    margin-top: 28px;
+    margin-top: 12px;
   }
   .tg-auth-quote h2 {
-    font-size: 29px;
+    font-size: 23px;
     margin-top: 0;
   }
   .tg-auth-quote h2 br {
@@ -2115,7 +2137,7 @@
     flex: 1;
   }
   .tg-auth-inner {
-    padding-block: 35px 45px;
+    padding-block: 16px 32px;
   }
 }
 @media (max-width: 480px) {
@@ -3598,8 +3620,22 @@
 }
 .tg-order-period {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  gap: 12px 16px;
+  align-items: end;
   flex-wrap: wrap;
-  padding: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid #eee7df;
+}
+.tg-order-average {
+  flex-basis: 100%;
+  color: #665d52;
+}
+.tg-order-date input {
+  min-height: 42px;
+  min-width: 175px;
+  background: #faf8f3;
+}
+.tg-order-period .tg-button,
+.tg-order-period .tg-link-button {
+  min-height: 42px;
 }

@@ -78,6 +78,13 @@ export default function Pedidos() {
     }
   }
   const filas = d?.lista.data || [];
+  const hayFiltros = Boolean(estado || fecha || filtros.busqueda.trim());
+  function limpiarFiltros() {
+    setEstado('');
+    setFecha('');
+    filtros.setBusqueda('');
+    setPagina(1);
+  }
   const tipo = (id) => d?.tipos.find((item) => item.id === id)?.nombre_visible || '—';
   const metodo = (id) => d?.metodos.find((item) => item.id === id)?.nombre_visible || '—';
   return (
@@ -117,7 +124,7 @@ export default function Pedidos() {
           ))}
         </nav>
         <div className="tg-order-period">
-          <span>
+          <span className="tg-order-average">
             Promedio de registro a entrega:{' '}
             <strong>
               {d?.lista.promedio_entrega_minutos == null
@@ -125,8 +132,8 @@ export default function Pedidos() {
                 : `${d.lista.promedio_entrega_minutos} min`}
             </strong>
           </span>
-          <label>
-            Fecha del pedido (Honduras)
+          <label className="tg-field tg-order-date">
+            <span>Fecha del pedido (Honduras)</span>
             <input
               type="date"
               value={fecha}
@@ -176,9 +183,21 @@ export default function Pedidos() {
           </p>
         ) : !filas.length ? (
           <Vacio
-            titulo="No hay pedidos para mostrar"
-            detalle="Registra un pedido para comenzar la operación de esta sucursal."
-          />
+            titulo={
+              hayFiltros ? 'No hay pedidos con estos filtros' : 'Todavía no hay pedidos'
+            }
+            detalle={
+              hayFiltros
+                ? 'Prueba con otro estado, fecha o búsqueda.'
+                : 'Registra un pedido para comenzar la operación de esta sucursal.'
+            }
+          >
+            {hayFiltros && (
+              <button className="tg-button tg-secondary" onClick={limpiarFiltros}>
+                Limpiar filtros
+              </button>
+            )}
+          </Vacio>
         ) : (
           <div className="tg-table-scroll">
             <table className="tg-table">

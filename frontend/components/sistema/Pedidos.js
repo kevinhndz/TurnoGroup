@@ -117,7 +117,7 @@ export default function Pedidos() {
           ))}
         </nav>
         <div className="tg-order-period">
-          <span>
+          <span className="tg-order-average">
             Promedio de registro a entrega:{' '}
             <strong>
               {d?.lista.promedio_entrega_minutos == null
@@ -125,8 +125,8 @@ export default function Pedidos() {
                 : `${d.lista.promedio_entrega_minutos} min`}
             </strong>
           </span>
-          <label>
-            Fecha del pedido (Honduras)
+          <label className="tg-field tg-order-date">
+            <span>Fecha del pedido (Honduras)</span>
             <input
               type="date"
               value={fecha}

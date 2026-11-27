@@ -3,6 +3,12 @@ import { randomBytes } from 'node:crypto';
 import { politicaContenido } from './lib/politica-contenido.mjs';
 
 export function proxy(request) {
+  const destino = new URL(request.url);
+  if (destino.pathname === '/login' && destino.searchParams.has('clave')) {
+    destino.searchParams.delete('correo');
+    destino.searchParams.delete('clave');
+    return NextResponse.redirect(destino);
+  }
   const nonce = randomBytes(32).toString('base64');
   const politica = politicaContenido(nonce, process.env.NODE_ENV === 'development');
   const headers = new Headers(request.headers);

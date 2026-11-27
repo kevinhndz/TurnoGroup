@@ -15,7 +15,9 @@ test('produccion exige nonce y no permite eval ni manejadores inline', () => {
 });
 
 test('cada respuesta reemplaza cabeceras del cliente con un nonce distinto', () => {
-  const request = { headers: new Headers({ 'x-nonce': 'controlado-por-cliente' }) };
+  const request = new Request('http://localhost:3000/login', {
+    headers: { 'x-nonce': 'controlado-por-cliente' },
+  });
   const primera = proxy(request);
   const segunda = proxy(request);
   const politica = primera.headers.get('content-security-policy');
@@ -26,4 +28,11 @@ test('cada respuesta reemplaza cabeceras del cliente con un nonce distinto', () 
     politica,
   );
   assert.match(primera.headers.get('cache-control'), /no-store/);
+});
+
+test('el acceso limpia credenciales de una URL anterior', () => {
+  const respuesta = proxy(
+    new Request('http://localhost:3000/login?correo=prueba&clave=prueba'),
+  );
+  assert.equal(respuesta.headers.get('location'), 'http://localhost:3000/login');
 });

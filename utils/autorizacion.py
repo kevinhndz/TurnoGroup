@@ -10,6 +10,9 @@ ROLES_EMPRESA = ("Gerente", "Administrador", "Mesero")
 
 # Rutas conocidas por la capa de autorizacion.
 RUTAS_CON_PERMISO = {
+    ("POST", "/productos/menu-inteligente/preparar"),
+    ("POST", "/productos/menu-inteligente/revisar"),
+    ("POST", "/productos/menu-inteligente/confirmar"),
     ("POST", "/usuarios/verificacion/solicitar"),
     ("POST", "/usuarios/verificacion/confirmar"),
     ("POST", "/usuarios/{id}/correo/solicitar"),
@@ -435,5 +438,8 @@ def aplicar_rate_limit(request: Request, ruta: str, metodo: str) -> None:
         "/invitaciones-laborales/aceptar",
     ):
         limitar_por_ip(request, "invitacion", revision.LIMITE_INVITACION, ventana)
-    elif ruta in ("/productos/revisar-archivo", "/productos/importar"):
+    elif ruta.startswith("/productos/menu-inteligente/") or ruta in (
+        "/productos/revisar-archivo",
+        "/productos/importar",
+    ):
         limitar_por_ip(request, "importacion", revision.LIMITE_IMPORTACION, ventana)

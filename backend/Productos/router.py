@@ -13,6 +13,12 @@ from backend.Productos.schema import (
     Revisar_Json_Nuevo_Producto,
 )
 from backend.Productos.service import ProductoService as service
+from backend.Productos.menu_schema import (
+    SolicitudMenuIA,
+    RevisionMenu,
+    ConfirmacionMenu,
+)
+from backend.Productos.menu_service import MenuService
 from core.listados import filtros_listado
 from core.schema import RespuestaPaginada
 from database.almacen import abrir_puerta_bd
@@ -51,6 +57,34 @@ def ver_productos(
 @router.post("/revisar-archivo")
 def revisar_archivo_productos(json: Revisar_Json_Archivo_Productos):
     return service.revisar_archivo_service(json)
+
+
+@router.post("/menu-inteligente/preparar")
+def preparar_menu_inteligente(
+    json: SolicitudMenuIA,
+    db: Session = Depends(abrir_puerta_bd),
+    id_empresa: int = Depends(obtener_empresa),
+):
+    return MenuService.preparar(json, db, id_empresa)
+
+
+@router.post("/menu-inteligente/revisar")
+def revisar_menu_inteligente(
+    json: RevisionMenu,
+    db: Session = Depends(abrir_puerta_bd),
+    id_empresa: int = Depends(obtener_empresa),
+):
+    return MenuService.revisar(json.productos, db, id_empresa)
+
+
+@router.post("/menu-inteligente/confirmar", status_code=201)
+def confirmar_menu_inteligente(
+    json: ConfirmacionMenu,
+    db: Session = Depends(abrir_puerta_bd),
+    id_empresa: int = Depends(obtener_empresa),
+    id_sucursal: int = Depends(obtener_sucursal),
+):
+    return MenuService.confirmar(json, db, id_empresa, id_sucursal)
 
 
 @router.post("/importar", status_code=201)

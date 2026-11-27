@@ -5,6 +5,8 @@ from starlette.responses import JSONResponse
 
 
 def limite_cuerpo(ruta):
+    if ruta == "/productos/menu-inteligente/preparar":
+        return 4_100_000
     if ruta.startswith("/productos/") and ruta.endswith("/imagen"):
         return 7_100_000
     if ruta == "/productos/revisar-archivo":

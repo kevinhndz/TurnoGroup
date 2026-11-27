@@ -116,11 +116,13 @@ async function comunicar(request, { params }) {
     let body;
     if (escritura) {
       const limite =
-        ruta[0] === 'productos' && ruta.at(-1) === 'imagen'
-          ? 7_100_000
-          : ruta[0] === 'productos' && ruta.at(-1) === 'revisar-archivo'
-            ? 1_400_000
-            : 1_000_000;
+        ruta.join('/') === 'productos/menu-inteligente/preparar'
+          ? 4_100_000
+          : ruta[0] === 'productos' && ruta.at(-1) === 'imagen'
+            ? 7_100_000
+            : ruta[0] === 'productos' && ruta.at(-1) === 'revisar-archivo'
+              ? 1_400_000
+              : 1_000_000;
       const lectura = await leerCuerpo(request, limite);
       if (lectura.error)
         return Response.json({ detail: lectura.error }, { status: lectura.status });
@@ -134,7 +136,9 @@ async function comunicar(request, { params }) {
       body: body || undefined,
       cache: 'no-store',
       redirect: 'manual',
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(
+        ruta.join('/') === 'productos/menu-inteligente/preparar' ? 45000 : 20000,
+      ),
     });
 
     const salida = new Headers({ 'Cache-Control': 'no-store' });

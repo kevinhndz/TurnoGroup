@@ -31,7 +31,7 @@ os.environ.update(
         "LIMITE_LOGIN": "100",
         "LIMITE_INVITACION": "100",
         "LIMITE_RECUPERACION": "100",
-        "OPENAI_API_KEY": "",
+        "GEMINI_API_KEY": "",
     }
 )
 

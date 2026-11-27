@@ -25,8 +25,10 @@ class GuardiaSeguridad(BaseSettings):
     LIMITE_RECUPERACION: int = Field(default=3, ge=1, le=100)
     LIMITE_INVITACION: int = Field(default=10, ge=1, le=100)
     LIMITE_IMPORTACION: int = Field(default=10, ge=1, le=100)
-    OPENAI_API_KEY: SecretStr = SecretStr("")
-    OPENAI_MODELO_CATALOGO: str = "gpt-4.1-mini-2025-04-14"
+    GEMINI_API_KEY: SecretStr = SecretStr("")
+    GEMINI_MODELO_CATALOGO: str = Field(
+        default="gemini-3.5-flash-lite", pattern=r"^gemini-[a-z0-9.-]+$"
+    )
     LIMITE_MENU_IA: int = Field(default=3, ge=1, le=20)
     LIMITE_MENU_IA_DIARIO: int = Field(default=50, ge=1, le=1000)
     VENTANA_RATE_LIMIT_SEGUNDOS: int = Field(default=60, ge=10, le=3600)

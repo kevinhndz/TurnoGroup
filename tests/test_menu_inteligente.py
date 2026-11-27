@@ -214,25 +214,25 @@ def test_limite_de_costo_por_empresa(client, lector, monkeypatch):
 
 @pytest.fixture
 def proveedor(monkeypatch):
-    monkeypatch.setattr(revision, "OPENAI_API_KEY", SecretStr("clave-ficticia-no-real"))
+    monkeypatch.setattr(revision, "GEMINI_API_KEY", SecretStr("clave-ficticia-no-real"))
     estado = {
         "codigo": 200,
         "datos": {
-            "status": "completed",
-            "output": [
+            "candidates": [
                 {
-                    "type": "message",
-                    "content": [
-                        {
-                            "type": "output_text",
-                            "text": ExtraccionMenu(
-                                productos=[extraido()], advertencias=[]
-                            ).model_dump_json(),
-                        }
-                    ],
+                    "finishReason": "STOP",
+                    "content": {
+                        "parts": [
+                            {
+                                "text": ExtraccionMenu(
+                                    productos=[extraido()], advertencias=[]
+                                ).model_dump_json()
+                            }
+                        ]
+                    },
                 }
             ],
-            "usage": {"input_tokens": 20, "output_tokens": 30},
+            "usageMetadata": {"promptTokenCount": 20, "candidatesTokenCount": 30},
         },
         "llamadas": [],
     }
@@ -259,10 +259,19 @@ def test_api_envia_contrato_estricto_sin_catalogo_ni_herramientas(client, provee
     assert respuesta.status_code == 200
     url, opciones = proveedor["llamadas"][0]
     cuerpo = opciones["json"]
-    assert url == "https://api.openai.com/v1/responses"
-    assert cuerpo["store"] is False
+    assert (
+        url
+        == "https://generativelanguage.googleapis.com/v1beta/models/"
+        + revision.GEMINI_MODELO_CATALOGO
+        + ":generateContent"
+    )
+    assert "Authorization" not in opciones["headers"]
+    assert opciones["headers"]["x-goog-api-key"] == "clave-ficticia-no-real"
     assert "tools" not in cuerpo
-    assert cuerpo["text"]["format"]["strict"] is True
+    assert (
+        cuerpo["generationConfig"]["responseJsonSchema"]["additionalProperties"]
+        is False
+    )
     assert "Producto 0" not in str(cuerpo)
     assert opciones["allow_redirects"] is False
 
@@ -274,8 +283,9 @@ def test_foto_se_decodifica_y_reenvia_sin_metadatos(client, proveedor):
         RUTA + "preparar", json={"imagen": base64.b64encode(foto.getvalue()).decode()}
     )
     assert respuesta.status_code == 200
-    contenido = proveedor["llamadas"][0][1]["json"]["input"][0]["content"]
-    assert contenido[1]["image_url"].startswith("data:image/jpeg;base64,")
+    contenido = proveedor["llamadas"][0][1]["json"]["contents"][0]["parts"]
+    assert contenido[1]["inlineData"]["mimeType"] == "image/jpeg"
+    assert contenido[1]["inlineData"]["data"]
 
 
 def test_foto_invalida_no_llega_al_proveedor(client, proveedor):
@@ -290,7 +300,7 @@ def test_foto_invalida_no_llega_al_proveedor(client, proveedor):
 def test_errores_del_proveedor_no_exponen_secretos(client, proveedor, codigo):
     proveedor["codigo"] = codigo
     respuesta = client.post(RUTA + "preparar", json={"texto": "Cafe"})
-    assert respuesta.status_code == 503
+    assert respuesta.status_code == (429 if codigo == 429 else 503)
     assert "clave-ficticia" not in respuesta.text
 
 
@@ -303,21 +313,23 @@ def test_timeout_no_guarda_productos(client, db, proveedor):
 @pytest.mark.parametrize(
     "respuesta_proveedor",
     [
-        {"status": "incomplete", "output": []},
-        {"status": "completed", "output": []},
+        {"candidates": [{"finishReason": "MAX_TOKENS", "content": {"parts": []}}]},
+        {"candidates": []},
         {
-            "status": "completed",
-            "output": [
+            "candidates": [
                 {
-                    "content": [
-                        {
-                            "type": "output_text",
-                            "text": '{"productos": [{"nombre": "Agua", "precio": "-2"}], "advertencias": []}',
-                        }
-                    ]
+                    "finishReason": "STOP",
+                    "content": {
+                        "parts": [
+                            {
+                                "text": '{"productos": [{"nombre": "Agua", "precio": "-2"}], "advertencias": []}'
+                            }
+                        ]
+                    },
                 }
-            ],
+            ]
         },
+        None,
     ],
 )
 def test_respuestas_incompletas_o_invalidas_no_se_aceptan(
@@ -328,7 +340,7 @@ def test_respuestas_incompletas_o_invalidas_no_se_aceptan(
 
 
 def test_sin_clave_informa_configuracion_pendiente(client, monkeypatch):
-    monkeypatch.setattr(revision, "OPENAI_API_KEY", SecretStr(""))
+    monkeypatch.setattr(revision, "GEMINI_API_KEY", SecretStr(""))
     respuesta = client.post(RUTA + "preparar", json={"texto": "Cafe"})
     assert respuesta.status_code == 503
     assert "no esta configurada" in respuesta.json()["detail"]

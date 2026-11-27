@@ -40,7 +40,7 @@ class MenuService:
         evento = {
             "evento": "extraccion_menu_ia",
             "id_empresa": id_empresa,
-            "modelo": revision.OPENAI_MODELO_CATALOGO,
+            "modelo": revision.GEMINI_MODELO_CATALOGO,
             "entrada": "imagen" if solicitud.imagen else "texto",
         }
         try:

@@ -24,6 +24,78 @@ async function entrar(page, correo, contrasena = clave) {
   await expect(page).toHaveURL(/\/panel/);
 }
 
+test('menu inteligente revisa precios y guarda productos y categorias al confirmar', async ({
+  page,
+  context,
+}) => {
+  await entrar(page, 'gerente1@example.com');
+  await page.goto('/panel/productos');
+  await page.getByRole('button', { name: 'Importar con IA', exact: true }).click();
+  const modal = page.getByRole('dialog', { name: 'Importar catálogo con IA' });
+  await modal
+    .getByLabel('Lista de productos')
+    .fill('Cafe E2E 1 a 50, pan sin precio y galleta a 8');
+  await modal.getByRole('button', { name: 'Preparar catálogo', exact: true }).click();
+  await expect(modal.getByLabel('Importar fila 1', { exact: true })).not.toBeChecked();
+  await expect(modal.getByLabel('Precio fila 2', { exact: true })).toHaveValue('');
+  const antes = await api(context, '/productos/?limite=100');
+  expect((await antes.json()).data.some((p) => p.nombre === 'Pan inteligente')).toBe(
+    false,
+  );
+  await modal.getByLabel('Precio fila 2', { exact: true }).fill('12.50');
+  await expect(
+    modal.getByRole('button', { name: 'Confirmar importación', exact: true }),
+  ).toBeDisabled();
+  await modal.getByRole('button', { name: 'Revisar cambios', exact: true }).click();
+  await expect(
+    modal.getByText('2 productos nuevos · 0 existentes seleccionados.'),
+  ).toBeVisible();
+  await modal
+    .getByRole('checkbox', { name: 'Revisé los productos seleccionados y sus precios.' })
+    .check();
+  const confirmacion = page.waitForResponse((r) =>
+    r.url().endsWith('/menu-inteligente/confirmar'),
+  );
+  await modal.getByRole('button', { name: 'Confirmar importación', exact: true }).click();
+  expect((await confirmacion).status()).toBe(201);
+  await expect(modal).not.toBeVisible();
+  await expect(
+    page.getByText(
+      'Catálogo actualizado: 2 productos creados, 1 categorías nuevas y 0 productos existentes utilizados.',
+    ),
+  ).toBeVisible();
+  const despues = await api(context, '/productos/?limite=100');
+  const productos = (await despues.json()).data;
+  expect(productos.find((p) => p.nombre === 'Pan inteligente').precio).toBe('12.50');
+  expect(productos.find((p) => p.nombre === 'Cafe E2E 1').precio).toBe('50.00');
+});
+
+test('menu inteligente acepta foto y cancelar no crea productos', async ({
+  page,
+  context,
+}) => {
+  await entrar(page, 'gerente2@example.com');
+  await page.goto('/panel/productos');
+  await page.getByRole('button', { name: 'Importar con IA', exact: true }).click();
+  const modal = page.getByRole('dialog', { name: 'Importar catálogo con IA' });
+  await modal.getByLabel('Origen del catálogo').selectOption('foto');
+  await modal.locator('input[type=file]').setInputFiles({
+    name: 'menu.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=',
+      'base64',
+    ),
+  });
+  await modal.getByRole('button', { name: 'Preparar catálogo', exact: true }).click();
+  await expect(modal.getByLabel('Nombre fila 2', { exact: true })).toHaveValue(
+    'Pan inteligente',
+  );
+  await modal.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  const productos = (await (await api(context, '/productos/?limite=100')).json()).data;
+  expect(productos.some((p) => p.nombre === 'Pan inteligente')).toBe(false);
+});
+
 // Se recorre el formulario completo: confirmar correo no crea una cuenta ni sesion.
 test('registro confirma correo y guarda el negocio solo al terminar los ocho pasos', async ({
   page,

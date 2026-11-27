@@ -25,11 +25,15 @@ def limitar_por_ip(
 ) -> None:
     """Permite `limite` intentos dentro de `ventana` segundos por IP."""
     ip = obtener_ip(request)
+    limitar_identidad(nombre, ip, limite, ventana)
+
+
+def limitar_identidad(nombre, identidad, limite, ventana):
     if revision.REDIS_URL:
-        limitar_compartido(nombre, ip, limite, ventana)
+        limitar_compartido(nombre, identidad, limite, ventana)
         return
     ahora = monotonic()
-    clave = (nombre, ip)
+    clave = (nombre, identidad)
 
     with _candado:
         intentos = _intentos[clave]

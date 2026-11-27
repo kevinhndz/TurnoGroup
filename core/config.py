@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from typing import Literal
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +25,12 @@ class GuardiaSeguridad(BaseSettings):
     LIMITE_RECUPERACION: int = Field(default=3, ge=1, le=100)
     LIMITE_INVITACION: int = Field(default=10, ge=1, le=100)
     LIMITE_IMPORTACION: int = Field(default=10, ge=1, le=100)
+    GEMINI_API_KEY: SecretStr = SecretStr("")
+    GEMINI_MODELO_CATALOGO: str = Field(
+        default="gemini-3.5-flash-lite", pattern=r"^gemini-[a-z0-9.-]+$"
+    )
+    LIMITE_MENU_IA: int = Field(default=3, ge=1, le=20)
+    LIMITE_MENU_IA_DIARIO: int = Field(default=50, ge=1, le=1000)
     VENTANA_RATE_LIMIT_SEGUNDOS: int = Field(default=60, ge=10, le=3600)
     ORIGENES_PERMITIDOS: list[str] = ["http://localhost:3000"]
     URL_FRONTEND: str = "http://localhost:3000"

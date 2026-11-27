@@ -236,3 +236,42 @@ def test_dos_registros_no_consumen_el_mismo_comprobante(base_concurrente):
     with ThreadPoolExecutor(max_workers=2) as grupo:
         resultados = list(grupo.map(lambda _: consumir(), range(2)))
     assert sorted(resultados) == [200, 400]
+
+
+def test_dos_importaciones_ia_no_duplican_producto_ni_categoria(base_concurrente):
+    from backend.Productos.menu_schema import ConfirmacionMenu
+    from backend.Productos.menu_service import MenuService
+
+    motor, ids = base_concurrente
+    barrera = Barrier(2)
+
+    def importar():
+        with Session(motor) as db:
+            barrera.wait(timeout=10)
+            try:
+                MenuService.confirmar(
+                    ConfirmacionMenu(
+                        productos=[
+                            {
+                                "nombre": "Pan concurrente",
+                                "precio": "12",
+                                "categoria": "Panaderia concurrente",
+                            }
+                        ]
+                    ),
+                    db,
+                    ids["empresa"],
+                    ids["sucursal"],
+                )
+                return 201
+            except HTTPException as error:
+                return error.status_code
+
+    with ThreadPoolExecutor(max_workers=2) as grupo:
+        resultados = list(grupo.map(lambda _: importar(), range(2)))
+    assert sorted(resultados) == [201, 409]
+    with Session(motor) as db:
+        assert db.query(Productos).filter_by(nombre="Pan concurrente").count() == 1
+        assert (
+            db.query(Categorias).filter_by(nombre="Panaderia concurrente").count() == 1
+        )

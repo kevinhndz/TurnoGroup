@@ -10,12 +10,15 @@ import Formulario from './Formulario';
 import Icon from '../Icon';
 import PrepararMesas from './PrepararMesas';
 import ImportarProductos, { ImagenProducto } from './ImportarProductos';
+import MenuInteligente from './MenuInteligente';
 import FiltrosListado, { useFiltrosListado } from './FiltrosListado';
 
 export default function Crud({ modulo, compacto = false, alGuardar, configuracion }) {
   const config = configuracion || modulos[modulo];
   const { sesion } = usarSesion();
   const [importando, setImportando] = useState(false);
+  const [menuInteligente, setMenuInteligente] = useState(false);
+  const [menuOcupado, setMenuOcupado] = useState(false);
   const [pagina, setPagina] = useState(1);
   const filtros = useFiltrosListado();
   const [edicion, setEdicion] = useState(null);
@@ -160,6 +163,12 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
       {modulo === 'mesas' && editable && <PrepararMesas guardar={datos.recargar} />}
       {modulo === 'productos' && editable && (
         <div className="tg-form-actions">
+          <button
+            className="tg-button tg-primary"
+            onClick={() => setMenuInteligente(true)}
+          >
+            Importar con IA
+          </button>
           <button className="tg-button tg-secondary" onClick={() => setImportando(true)}>
             Importar productos
           </button>
@@ -174,6 +183,30 @@ export default function Crud({ modulo, compacto = false, alGuardar, configuracio
               setImportando(false);
               datos.recargar();
               setAviso('Productos importados.');
+            }}
+          />
+        </Modal>
+      )}
+      {menuInteligente && (
+        <Modal
+          titulo="Importar catálogo con IA"
+          cerrar={() => {
+            if (!menuOcupado) setMenuInteligente(false);
+          }}
+        >
+          <MenuInteligente
+            key={`${sesion.id_empresa}:${sesion.id_sucursal}`}
+            categorias={datos.datos?.categorias || []}
+            sucursal={sesion.id_sucursal}
+            alOcupar={setMenuOcupado}
+            cancelar={() => setMenuInteligente(false)}
+            guardar={(resultado) => {
+              setMenuInteligente(false);
+              datos.recargar();
+              window.dispatchEvent(new Event('turno-datos'));
+              setAviso(
+                `Catálogo actualizado: ${resultado.creados} productos creados, ${resultado.categorias_creadas} categorías nuevas y ${resultado.reutilizados} productos existentes utilizados.`,
+              );
             }}
           />
         </Modal>

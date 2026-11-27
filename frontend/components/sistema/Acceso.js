@@ -215,7 +215,7 @@ export default function Acceso({ modo = 'login' }) {
           <p className="tg-muted">{detalle}</p>
           <Mensaje error={error} aviso={aviso} />
           {!terminado && (
-            <form ref={formulario} onSubmit={enviar} className="tg-form">
+            <form ref={formulario} method="post" onSubmit={enviar} className="tg-form">
               {modo === 'registro' && (
                 <Campo label="Tu nombre">
                   <input

@@ -3639,3 +3639,38 @@
 .tg-order-period .tg-link-button {
   min-height: 42px;
 }
+.tg-menu-table {
+  min-width: 960px;
+}
+
+.tg-menu-table caption {
+  padding: 12px 0;
+  text-align: left;
+}
+
+.tg-menu-table input:not([type='checkbox']),
+.tg-menu-table select {
+  width: 100%;
+  min-width: 110px;
+  padding: 9px;
+  border: 1px solid #d9d0c5;
+  border-radius: 6px;
+  background: var(--tg-paper, #fffdf9);
+  color: inherit;
+  font: inherit;
+}
+
+.tg-menu-table small {
+  display: block;
+  max-width: 260px;
+  margin-top: 7px;
+  white-space: normal;
+}
+
+.tg-menu-warning {
+  color: #963d28;
+}
+
+.tg-menu-summary {
+  font-weight: 600;
+}

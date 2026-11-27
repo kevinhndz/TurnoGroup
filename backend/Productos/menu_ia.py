@@ -18,6 +18,8 @@ en el documento. No tienes herramientas ni acceso a otros datos del negocio.
 Extrae hasta 100 productos. Conserva nombres y precios explicitos, sin inventar
 productos, precios, descuentos ni conversiones de moneda. El precio debe ser un
 string decimal sin simbolos, con hasta dos decimales, o null si falta o es ilegible.
+Si el documento indica otra moneda distinta a la del negocio, usa precio null y
+explica la diferencia en advertencia; no asignes ese importe a la moneda local.
 Sugiere categorias breves solo cuando sean razonables; de lo contrario usa null.
 No inventes descripciones. En evidencia copia un fragmento breve del documento.
 Marca ambiguedades, moneda diferente, variantes o unidades confusas en advertencia;

@@ -31,6 +31,7 @@ os.environ.update(
         "LIMITE_LOGIN": "100",
         "LIMITE_INVITACION": "100",
         "LIMITE_RECUPERACION": "100",
+        "OPENAI_API_KEY": "",
     }
 )
 
@@ -166,6 +167,35 @@ def preparar():
     utils.correo.enviar_recuperacion = lambda correo, codigo: False
     utils.correo.enviar_cambio_correo = lambda correo, codigo: False
     utils.correo.enviar_aviso_correo = lambda correo, codigo: False
+    # Simulo solo el proveedor externo; conciliacion y guardado usan la API real.
+    from backend.Productos import menu_ia
+    from backend.Productos.menu_schema import ExtraccionMenu
+
+    def leer_menu_prueba(solicitud, moneda):
+        if solicitud.imagen:
+            menu_ia.preparar_imagen(solicitud.imagen)
+        productos = []
+        for nombre, precio, categoria in (
+            ("Cafe E2E 1", "50.00", "Bebidas"),
+            ("Pan inteligente", None, "Panaderia IA"),
+            ("Galleta inteligente", "8.00", "Panaderia IA"),
+        ):
+            productos.append(
+                {
+                    "nombre": nombre,
+                    "precio": precio,
+                    "categoria": categoria,
+                    "descripcion": None,
+                    "evidencia": nombre,
+                    "advertencia": "Completa el precio" if precio is None else None,
+                }
+            )
+        return ExtraccionMenu(productos=productos, advertencias=[]), {
+            "tokens_in": 0,
+            "tokens_out": 0,
+        }
+
+    menu_ia.extraer_menu = leer_menu_prueba
     return main.app
 
 

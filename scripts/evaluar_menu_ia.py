@@ -56,7 +56,7 @@ def main():
     parser.add_argument(
         "--en-vivo",
         action="store_true",
-        help="Enviar los 15 casos a OpenAI; consume saldo",
+        help="Enviar los 15 casos a Gemini; consume cuota del proyecto",
     )
     args = parser.parse_args()
     if not args.en_vivo:
@@ -74,8 +74,8 @@ def main():
     from core.config import revision
     from core.exceptions import SolicitudError
 
-    if not revision.OPENAI_API_KEY.get_secret_value():
-        parser.error("Falta OPENAI_API_KEY en el entorno del backend")
+    if not revision.GEMINI_API_KEY.get_secret_value():
+        parser.error("Falta GEMINI_API_KEY en el entorno del backend")
     aprobados = tokens_in = tokens_out = 0
     inicio = monotonic()
     for nombre, texto, esperado in CASOS:

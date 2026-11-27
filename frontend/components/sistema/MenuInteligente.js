@@ -202,8 +202,8 @@ export default function MenuInteligente({
           )}
           {modo === 'foto' && foto && <small>Foto seleccionada: {foto.nombre}</small>}
           <small className="tg-muted">
-            Al preparar, el texto o la foto se envía a OpenAI para su lectura. Revisa los
-            nombres y precios antes de guardar.
+            Al preparar, el texto o la foto se envía a Google Gemini para su lectura.
+            Revisa los nombres y precios antes de guardar.
           </small>
           <button
             type="button"

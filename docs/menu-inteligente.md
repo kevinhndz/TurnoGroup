@@ -1,7 +1,7 @@
 # Importacion inteligente del catalogo
 
 El gerente abre **Productos > Importar con IA**, pega una lista o sube una foto
-JPG/PNG. FastAPI solicita una extraccion a OpenAI y compara la propuesta con el
+JPG/PNG. FastAPI solicita una extraccion a Google Gemini y compara la propuesta con el
 catalogo de la empresa autenticada. Preparar y revisar no guardan productos.
 
 La tabla permite corregir nombres, categorias y precios; desmarcar filas; y elegir
@@ -18,19 +18,28 @@ Desde `/home/kevstpg/Documents/Personal Projects/TurnoGroup`, agrega en
 `.env.pruebas` para el arranque local con `./iniciar.sh`:
 
 ```dotenv
-OPENAI_API_KEY=tu_clave_de_api
-OPENAI_MODELO_CATALOGO=gpt-4.1-mini-2025-04-14
+GEMINI_API_KEY=tu_clave_de_api
+GEMINI_MODELO_CATALOGO=gemini-3.5-flash-lite
 LIMITE_MENU_IA=3
 LIMITE_MENU_IA_DIARIO=50
 ```
 
-No guardes una clave real en Git ni en variables `NEXT_PUBLIC_*`. La clave de API
-requiere acceso al modelo y facturacion/saldo en la plataforma de OpenAI. La
-suscripcion de ChatGPT/Codex no sustituye la autenticacion de esta llamada.
-El modelo es configurable; el elegido debe admitir imagenes, Responses API y
-Structured Outputs con este esquema. Reinicia la API despues de editar el entorno:
-detenla con Ctrl+C en su terminal y ejecuta `./iniciar.sh`. El frontend se inicia
-en otra terminal, desde la misma carpeta, con `./start.sh`.
+No guardes una clave real en Git ni en variables `NEXT_PUBLIC_*`. Utiliza un
+proyecto **Free** de Google AI Studio sin cuenta de facturacion vinculada. No es
+necesario comprar creditos ni activar pagos. Las cuotas dependen del proyecto y
+pueden cambiar: cuando se agotan, la funcion informa el limite sin pasar a otro
+proveedor ni activar facturacion. La aplicacion no puede verificar el estado de
+facturacion de Google; si el usuario vincula una cuenta de pago, regiran las tarifas
+de ese proyecto. El codigo no utiliza OpenAI, aunque quede una clave antigua en el
+archivo de entorno. Las claves de Google que empiezan por AQ. se envian mediante
+x-goog-api-key, sin Authorization Bearer ni claves en la URL.
+
+El modelo debe admitir imagenes y salidas JSON estructuradas. Pydantic aplica todos
+los limites de productos y campos despues de la generacion; el esquema enviado a
+Gemini conserva la estructura sin los limites de longitud que saturan su
+decodificador. Reinicia la API despues de editar el entorno: detenla con Ctrl+C en
+su terminal y ejecuta `./iniciar.sh`. El frontend se inicia en otra terminal, desde
+la misma carpeta, con `./start.sh`.
 
 Docker utiliza el `.env` de la raiz como indica el Compose existente; configura
 alli las variables si ese es tu entorno. No cambies la base de datos para activar
@@ -45,7 +54,7 @@ en la aplicacion para disimular una configuracion incompleta.
 - `POST /productos/menu-inteligente/preparar`: texto de hasta 12000 caracteres o
   una foto de hasta 3 MB y 12 megapixeles. Hasta 100 productos por propuesta.
 - `POST /productos/menu-inteligente/revisar`: vuelve a comprobar coincidencias
-  despues de editar, sin llamar a OpenAI.
+  despues de editar, sin llamar a Google Gemini.
 - `POST /productos/menu-inteligente/confirmar`: valida otra vez y guarda lo
   confirmado. Requiere seleccionar una sucursal autorizada.
 
@@ -56,9 +65,9 @@ ni afirma que exista RLS. El modelo no recibe el catalogo existente, credenciale
 herramientas ni acceso SQL. Solo recibe el documento y la moneda del negocio.
 
 La imagen se valida, orienta y convierte a JPEG sin metadatos antes de enviarla.
-No se persiste en el servidor. `store=false` evita almacenar la respuesta como un
-recurso recuperable de Responses; no equivale a una garantia de retencion cero del
-proveedor. La interfaz informa al usuario antes de enviar el documento.
+No se persiste en el servidor. La interfaz informa al usuario antes de enviar
+el documento a Google. El nivel gratuito puede usar entradas y respuestas para
+mejorar productos de Google: utiliza menus ficticios o publicos en la demo.
 
 Las coincidencias exactas normalizan acentos, espacios y mayusculas. Las
 aproximadas usan similitud textual y requieren decision del gerente. No se fusionan
@@ -98,7 +107,7 @@ venv/bin/python -m scripts.evaluar_menu_ia
 La primera prueba usa un proveedor simulado y una base aislada. Verifica permisos,
 aislamiento, ausencia de escrituras en vista previa, errores del proveedor,
 rollback y confirmacion. La segunda orden solamente describe la evaluacion;
-no llama a OpenAI ni consume saldo.
+no llama a Google Gemini ni consume cuota.
 
 Para evaluar realmente los quince textos sinteticos, una vez configurada la clave:
 
@@ -106,7 +115,7 @@ Para evaluar realmente los quince textos sinteticos, una vez configurada la clav
 TURNO_ENV=.env.pruebas venv/bin/python -m scripts.evaluar_menu_ia --en-vivo
 ```
 
-Esta orden consume saldo, no guarda productos y devuelve un codigo distinto de
+Esta orden consume cuota del proyecto, no guarda productos y devuelve un codigo distinto de
 cero si hay discrepancias. Compara nombres y precios contra resultados esperados;
 no es un benchmark completo y puede marcar nombres equivalentes para revision.
 No mide OCR de fotos: hay que preparar un conjunto de menus etiquetados, con permiso
@@ -125,6 +134,6 @@ el guardado usan la API y una base desechable reales. Las pruebas de concurrenci
 en `tests/test_concurrencia_postgres.py` requieren `TEST_DATABASE_URL` apuntando a
 un PostgreSQL local de pruebas terminado en `_pytest`. CI ya ejecuta ese recorrido.
 
-Referencias: [Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create),
-[Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs),
-[imagenes](https://developers.openai.com/api/docs/guides/images-vision).
+Referencias: [Gemini API](https://ai.google.dev/api/generate-content),
+[Structured Outputs](https://ai.google.dev/gemini-api/docs/structured-output),
+[nivel gratuito](https://ai.google.dev/gemini-api/docs/billing).
